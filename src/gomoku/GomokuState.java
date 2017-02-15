@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An object representing the state of a Gomoku game at any point.
+ * A class representing the state of a Gomoku game at any point.
  * @author Hassan
  */
 public class GomokuState {

@@ -1,39 +1,76 @@
 package gomoku;
 
+import gui.GomokuBoardListener;
+import gui.GomokuBoardPanel;
 import java.awt.Color;
 import players.GomokuPlayer;
+import players.HumanPlayer;
+import players.RandomPlayer;
 
 /**
- * This class manages the game between two players, calling getMove() on
+ * This class manages a game between two players, calling getMove() on
  * each player until the game ends.
  * @author Hassan
  */
-public class GomokuGame {
+public class GomokuGame implements Runnable {
     
     private GomokuState gameState;
     private final GomokuPlayer[] players;
     private final Color[] playerColours;
-    private final GomokuBoard gamePanel;
+    private final GomokuBoardPanel gamePanel;
     
-    public GomokuGame(GomokuBoard gamePanel, int intersections,
-            GomokuPlayer[] players, Color[] playerColours) {
+    public GomokuGame(GomokuBoardPanel gamePanel, int intersections,
+            String[] players, Color[] playerColours) {
         this.gameState = new GomokuState(intersections, players.length);
         this.gamePanel = gamePanel;
-        this.players = players;
+        this.players = new GomokuPlayer[players.length];
         this.playerColours = playerColours;
+        for(int i = 0; i < players.length; i++) {
+            this.players[i] = createPlayer(players[i], i+1);
+        }
     }
     
+    @Override
     public void run() {
-        // Call getMove() on the the current player
+        gamePanel.reset();
+        
+        // Continuously grab the move from each player
         while(!gameOver()) {
             GomokuLocation move = getPlayer(gameState.getCurrentPlayerIndex())
                     .getMove(gameState);
             this.gameState = gameState.makeMove(move);
-            // Update the state
-            gamePanel.drawState(gameState.board, playerColours);
+            gamePanel.drawState(gameState.board, playerColours, false);
         }
         
-        // Highlight the winning move
+        // TODO: Highlight the winning move
+    }
+    
+    /**
+     * Create a new instance of a player, given a string
+     * @param name The name of the player, corresponding to [name]Player.class
+     * @param index The index to assign to this player
+     * @return
+     */
+    private GomokuPlayer createPlayer(String name, int index) {
+        switch(name) {
+            case "Random":
+                return new RandomPlayer(index);
+            case "Human":
+                return new HumanPlayer(index, this);
+            default:
+                return null;
+        }
+    }
+    
+    /**
+     * 
+     * @param player
+     */
+    public void addListener(HumanPlayer player) {
+        GomokuBoardListener listener = new GomokuBoardListener(gamePanel, 
+                player, gameState.getLegalMoves());
+        this.gamePanel.addMouseListener(listener);
+        this.gamePanel.addMouseMotionListener(listener);
     }
     
     /**
@@ -58,6 +95,5 @@ public class GomokuGame {
         }
         return null;
     }
-    
     
 }
