@@ -12,17 +12,14 @@ public class GomokuState {
     protected final int[][] board;
     private final int playerIndex;
     private final int intersections;
-    private final int players;
     
     /**
      * Create a new GomokuState instance
      * @param intersections Number of intersections on the board
-     * @param players Number of players
      */
-    public GomokuState(int intersections, int players) {
+    public GomokuState(int intersections) {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
-        this.players = players;
         this.playerIndex = 1;
     }    
     
@@ -34,7 +31,6 @@ public class GomokuState {
     private GomokuState(GomokuState previousState, GomokuLocation move) {
         this.intersections = previousState.intersections;
         this.board = new int[intersections][intersections];
-        this.players = previousState.players;
         // Copy the previous state
         for(int i = 0; i < intersections; i++) {
             System.arraycopy(previousState.board[i], 0, this.board[i], 0, 
@@ -42,11 +38,7 @@ public class GomokuState {
         }
         // Apply the move and update the current player
         this.board[move.row][move.col] = previousState.playerIndex;
-        
-        // The next player is (previousState + 1) mod (players + 1)
-        // If this is 0, we start at player 1 again
-        this.playerIndex = (previousState.playerIndex + 1) % (players + 1) != 0 
-                ? (previousState.playerIndex + 1) % (players + 1) : 1;
+        this.playerIndex = previousState.playerIndex == 1 ? 2 : 1;
     }
     
     /**

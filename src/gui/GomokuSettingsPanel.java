@@ -66,6 +66,7 @@ public class GomokuSettingsPanel extends JPanel {
             "15", 
             "19"
         });
+        
         intersections.addActionListener((ActionEvent e) -> {
             frame.handleIntersectionsChange(getIntersections());
         });
@@ -93,9 +94,11 @@ public class GomokuSettingsPanel extends JPanel {
             "15",
             "20"
         });
+        
         time.addActionListener((ActionEvent e) -> {
             frame.handleTimeChange(getTime());
         });
+        
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.weightx = 1;

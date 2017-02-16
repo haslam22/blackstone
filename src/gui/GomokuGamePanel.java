@@ -1,6 +1,6 @@
 package gui;
 
-import java.awt.Color;
+import gui.GomokuStone.StoneColor;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -53,7 +53,7 @@ public class GomokuGamePanel extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.FIRST_LINE_START;
         
-        this.playerPanels[0] = new GomokuPlayerPanel(1, Color.BLACK);
+        this.playerPanels[0] = new GomokuPlayerPanel(1, StoneColor.BLACK);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1;
@@ -61,7 +61,7 @@ public class GomokuGamePanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(playerPanels[0], gbc);
         
-        this.playerPanels[1] = new GomokuPlayerPanel(2, Color.WHITE);
+        this.playerPanels[1] = new GomokuPlayerPanel(2, StoneColor.WHITE);
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.weightx = 1;

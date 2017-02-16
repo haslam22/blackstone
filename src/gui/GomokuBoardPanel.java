@@ -1,12 +1,12 @@
 package gui;
 
+import gui.GomokuStone.StoneColor;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Ellipse2D;
 import javax.swing.JPanel;
 
 /**
@@ -15,23 +15,21 @@ import javax.swing.JPanel;
  */
 public class GomokuBoardPanel extends JPanel {
     
-    
-    // Board properties, calculated dynamically
+    // Board properties, calculated dynamically based on the available space,
+    // used to map from row/col to x/y on the board
     private int startX;
     private int startY;
     private int cellsize;
-    private int piecesize;
     private int padding;
-    private int boardsize;
     
     private int intersections;
-    private Color[][] stones;
+    private GomokuStone[][] stones;
     
     protected GomokuBoardPanel(int intersections) {
         this.intersections = intersections;
-        this.stones = new Color[intersections][intersections];
+        this.stones = new GomokuStone[intersections][intersections];
         this.setDoubleBuffered(true);
-        this.setBackground(new Color(242, 187, 119));
+        this.setBackground(new Color(220, 180, 120));
     }
     
     public int getIntersections() {
@@ -39,18 +37,23 @@ public class GomokuBoardPanel extends JPanel {
     }
     
     public void updateIntersections(int intersections) {
-        this.stones = new Color[intersections][intersections];
+        this.stones = new GomokuStone[intersections][intersections];
         this.intersections = intersections;
         this.repaint();
     }
     
-    public void clearTransparentStone(int row, int col) {
-        stones[row][col] = null;
+    public void addBlackStone(int row, int col, float alpha) {
+        this.stones[row][col] = new GomokuStone(StoneColor.BLACK, alpha);
         repaint();
     }
     
-    public void addTransparentStone(int row, int col) {
-        stones[row][col] = new Color(0, 0, 0, 90);
+    public void addWhiteStone(int row, int col, float alpha) {
+        this.stones[row][col] = new GomokuStone(StoneColor.WHITE, alpha);
+        repaint();
+    }
+    
+    public void removeStone(int row, int col) {
+        this.stones[row][col] = null;
         repaint();
     }
     
@@ -59,45 +62,14 @@ public class GomokuBoardPanel extends JPanel {
      * not removed from the previous game
      */
     public void reset() {
-        for(int row = 0; row < intersections; row++) {
-            for(int col = 0; col < intersections; col++) {
-                stones[row][col] = null;
-            }
-        }
-        removeListeners();
-        repaint();
-    }
-    
-    public void removeListeners() {
+        this.stones = new GomokuStone[intersections][intersections];
         for(MouseMotionListener listener : this.getMouseMotionListeners()) {
             this.removeMouseMotionListener(listener);
         }
         for(MouseListener listener : this.getMouseListeners()) {
             this.removeMouseListener(listener);
         }
-    }
-    
-    /**
-     * Draw a given Gomoku state onto the panel
-     * @param state 2D integer array where [i][j] maps to a player index, or 0
-     * if empty
-     * @param colours An ordered array of colours forming a map between a player 
-     * index and a colour, e.g. [Black, White, Purple, ...]
-     * @param terminal
-     */
-    
-    // This should not be in the panel, but be handled in the game
-    public void drawState(int[][] state, Color[] colours, boolean terminal) {
-        for(int row = 0; row < state.length; row++) {
-            for(int col = 0; col < state.length; col++) {
-                // Check if the current row/col in state isn't empty
-                if(state[row][col] != 0) {
-                    // Set the corresponding colour
-                    stones[row][col] = colours[state[row][col] - 1];
-                }
-            }
-        }
-        this.repaint();
+        repaint();
     }
     
     @Override
@@ -112,7 +84,7 @@ public class GomokuBoardPanel extends JPanel {
         int lowestDimension = Math.min(this.getWidth(), this.getHeight());
         
         // Minus one pixel here, so the stroke doesn't get cut off at the end
-        this.boardsize = lowestDimension;
+        int boardsize = lowestDimension;
         
         // Divide the space by intersections + 1. The grid is actually 
         // (intersections - 1)*(intersections - 1), but we add extra grid space
@@ -123,7 +95,7 @@ public class GomokuBoardPanel extends JPanel {
         int remainder = boardsize % (intersections + 1);
         
         // Set piece size to be a fraction of the cell size
-        this.piecesize = (int) (cellsize * 0.8);
+        int piecesize = (int) (cellsize * 0.8);
         
         // Set padding to cellsize, and spread the remainder around the board
         this.padding = cellsize + remainder / 2;
@@ -155,12 +127,12 @@ public class GomokuBoardPanel extends JPanel {
         for(int row = 0; row < intersections; row++) {
             for(int col = 0; col < intersections; col++) {
                 if(stones[row][col] != null) {
-                    g2d.setColor(stones[row][col]);
-                    g2d.fill(new Ellipse2D.Double(
+                    stones[row][col].setHeight(piecesize);
+                    stones[row][col].setWidth(piecesize);
+                    stones[row][col].paintIcon(this, g2d, 
                             getPanelX(col) - piecesize/2, 
-                            getPanelY(row) - piecesize/2, 
-                            piecesize, 
-                            piecesize));
+                            getPanelY(row) - piecesize/2
+                    );
                 }
             }
         }

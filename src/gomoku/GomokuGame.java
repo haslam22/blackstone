@@ -2,7 +2,6 @@ package gomoku;
 
 import gui.GomokuBoardListener;
 import gui.GomokuBoardPanel;
-import java.awt.Color;
 import players.GomokuPlayer;
 import players.HumanPlayer;
 import players.RandomPlayer;
@@ -16,15 +15,15 @@ public class GomokuGame implements Runnable {
     
     private GomokuState gameState;
     private final GomokuPlayer[] players;
-    private final Color[] playerColours;
     private final GomokuBoardPanel gamePanel;
+    private final int intersections;
     
     public GomokuGame(GomokuBoardPanel gamePanel, int intersections,
-            String[] players, Color[] playerColours) {
-        this.gameState = new GomokuState(intersections, players.length);
+            String[] players) {
+        this.intersections = intersections;
+        this.gameState = new GomokuState(intersections);
         this.gamePanel = gamePanel;
         this.players = new GomokuPlayer[players.length];
-        this.playerColours = playerColours;
         for(int i = 0; i < players.length; i++) {
             this.players[i] = createPlayer(players[i], i+1);
         }
@@ -39,7 +38,17 @@ public class GomokuGame implements Runnable {
             GomokuLocation move = getPlayer(gameState.getCurrentPlayerIndex())
                     .getMove(gameState);
             this.gameState = gameState.makeMove(move);
-            gamePanel.drawState(gameState.board, playerColours, false);
+            
+            for(int row = 0; row < intersections; row++) {
+                for(int col = 0; col < intersections; col++) {
+                    if(gameState.board[row][col] == 1) {
+                        gamePanel.addBlackStone(row, col, 1);
+                    }
+                    if(gameState.board[row][col] == 2) {
+                        gamePanel.addWhiteStone(row, col, 1);
+                    }
+                }
+            }
         }
         
         // TODO: Highlight the winning move
@@ -63,8 +72,9 @@ public class GomokuGame implements Runnable {
     }
     
     /**
-     * 
-     * @param player
+     * Attach a move listener to the board which will notify a HumanPlayer
+     * instance when a valid move has been clicked.
+     * @param player The HumanPlayer instance to get a move for
      */
     public void addListener(HumanPlayer player) {
         GomokuBoardListener listener = new GomokuBoardListener(gamePanel, 

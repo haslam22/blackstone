@@ -1,6 +1,6 @@
 package gui;
 
-import java.awt.Color;
+import gui.GomokuStone.StoneColor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -8,7 +8,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.RenderingHints;
-import java.awt.geom.Ellipse2D;
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -25,13 +24,13 @@ import javax.swing.border.EtchedBorder;
 public class GomokuPlayerPanel extends JPanel {
     
     private final int player;
-    private final Color colour;
+    private final StoneColor color;
     private JLabel timeLabel;
     private JComboBox selectionBox;
     
-    protected GomokuPlayerPanel(int player, Color colour) {
+    protected GomokuPlayerPanel(int player, StoneColor color) {
         this.player = player;
-        this.colour = colour;
+        this.color = color;
         this.init();
     }
     
@@ -62,7 +61,7 @@ public class GomokuPlayerPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(selectionBox, gbc);
 
-        ColourPanel playerColourPanel = new ColourPanel(colour);
+        ColourPanel playerColourPanel = new ColourPanel(color);
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.weightx = 2;
@@ -90,10 +89,10 @@ public class GomokuPlayerPanel extends JPanel {
     
     private class ColourPanel extends JPanel {
         
-        private final Color colour;
+        private final StoneColor color;
         
-        public ColourPanel(Color colour) {
-            this.colour = colour;
+        public ColourPanel(StoneColor color) {
+            this.color = color;
         }
         
         @Override
@@ -107,9 +106,10 @@ public class GomokuPlayerPanel extends JPanel {
             int size = Math.min(this.getHeight(), this.getWidth()) - 10;
             int x = (this.getWidth() / 2) - size / 2;
             int y = (this.getHeight() / 2) - size / 2;
-            Ellipse2D circle = new Ellipse2D.Double(x, y, size, size);
-            g2d.setColor(colour);
-            g2d.fill(circle);
+            GomokuStone stone = new GomokuStone(color);
+            stone.setHeight(size);
+            stone.setWidth(size);
+            stone.paintIcon(this, g2d, x, y);
         }
     }
     

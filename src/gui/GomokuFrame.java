@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.Color;
 import gomoku.GomokuGame;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -59,7 +58,7 @@ public class GomokuFrame extends JFrame {
         jSplitPane.setDividerSize(0);
     }
     
-    public void handleNewGame() {
+    protected void handleNewGame() {
         settingsPanel.lockSettings();
         gamePanel.setForfeitEnabled(true);
         gamePanel.setNewGameEnabled(false);
@@ -68,27 +67,24 @@ public class GomokuFrame extends JFrame {
             gamePanel.getPlayerPanel(1).getPlayerString(),
             gamePanel.getPlayerPanel(2).getPlayerString()
         };
-        Color[] colours = new Color[] {
-            Color.BLACK,
-            Color.WHITE
-        };
+        
         GomokuGame game = new GomokuGame(this.boardPanel, 
-                this.boardPanel.getIntersections(), players, colours);
+                this.boardPanel.getIntersections(), players);
         this.gameThread = new Thread(game);
         gameThread.start();
     }
     
-    public void handleForfeit() {
+    protected void handleForfeit() {
         settingsPanel.unlockSettings();
         gamePanel.setForfeitEnabled(false);
         gamePanel.setNewGameEnabled(true);
     }
     
-    public void handleIntersectionsChange(int intersections) {
+    protected void handleIntersectionsChange(int intersections) {
         boardPanel.updateIntersections(intersections);
     }
     
-    public void handleTimeChange(String time) {
+    protected void handleTimeChange(String time) {
         gamePanel.getPlayerPanel(1).updateTime(time);
         gamePanel.getPlayerPanel(2).updateTime(time);
     }

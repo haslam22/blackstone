@@ -29,7 +29,7 @@ public class GomokuBoardListener extends MouseAdapter {
     public void mouseMoved(MouseEvent e) {
         // Clear the previous transparent stone, if any
         if(previousLocation != null) {
-            board.clearTransparentStone(previousLocation.row, 
+            board.removeStone(previousLocation.row, 
                     previousLocation.col);
         }
         int nearestRow = board.getNearestRow(e.getY());
@@ -40,7 +40,12 @@ public class GomokuBoardListener extends MouseAdapter {
         for(GomokuLocation move: moves) {
             if(move.row == nearestRow && move.col == nearestCol) {
                 // Create a transparent stone
-                board.addTransparentStone(move.row, move.col);
+                if(player.getIndex() == 1) {
+                    board.addBlackStone(move.row, move.col, 0.5f);
+                }
+                if(player.getIndex() == 2) {
+                    board.addWhiteStone(move.row, move.col, 0.5f);
+                }
                 // Set the previous location, so we can clear the stone on the
                 // next mouse movement
                 previousLocation = new GomokuLocation(move.row, move.col);
