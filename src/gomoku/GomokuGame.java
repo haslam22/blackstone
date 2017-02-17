@@ -50,8 +50,6 @@ public class GomokuGame implements Runnable {
                 }
             }
         }
-        
-        // TODO: Highlight the winning move
     }
     
     /**

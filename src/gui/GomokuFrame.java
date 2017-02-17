@@ -32,7 +32,7 @@ public class GomokuFrame extends JFrame {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(800, 600));
-        this.setPreferredSize(new Dimension(800, 600));
+        this.setPreferredSize(new Dimension(1000, 700));
         
         this.boardPanel = new GomokuBoardPanel(15);
         this.gamePanel = new GomokuGamePanel(this);
@@ -54,12 +54,14 @@ public class GomokuFrame extends JFrame {
         this.pack();
         
         jSplitPane.setResizeWeight(1);
-        jSplitPane.setDividerLocation(0.65);
+        jSplitPane.setDividerLocation(0.7);
         jSplitPane.setDividerSize(0);
     }
     
     protected void handleNewGame() {
-        settingsPanel.lockSettings();
+        settingsPanel.setSelectionEnabled(false);
+        gamePanel.getPlayerPanel(1).setSelectionEnabled(false);
+        gamePanel.getPlayerPanel(2).setSelectionEnabled(false);
         gamePanel.setForfeitEnabled(true);
         gamePanel.setNewGameEnabled(false);
         
@@ -74,8 +76,10 @@ public class GomokuFrame extends JFrame {
         gameThread.start();
     }
     
-    protected void handleForfeit() {
-        settingsPanel.unlockSettings();
+    protected void handleGameOver() {
+        settingsPanel.setSelectionEnabled(true);
+        gamePanel.getPlayerPanel(1).setSelectionEnabled(true);
+        gamePanel.getPlayerPanel(2).setSelectionEnabled(true);
         gamePanel.setForfeitEnabled(false);
         gamePanel.setNewGameEnabled(true);
     }

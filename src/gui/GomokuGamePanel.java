@@ -89,7 +89,7 @@ public class GomokuGamePanel extends JPanel {
         });
         
         forfeitButton.addActionListener((ActionEvent e) -> {
-            frame.handleForfeit(); 
+            frame.handleGameOver(); 
         });
         
         JLabel emptyLabel = new JLabel("");

@@ -183,7 +183,7 @@ public class GomokuState {
                 if(board[row+k][col-k] == index) {
                     count++;
                 }
-            }
+            }  
             return count == 4;
         }
         return false;

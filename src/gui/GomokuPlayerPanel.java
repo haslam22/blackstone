@@ -1,6 +1,7 @@
 package gui;
 
 import gui.GomokuStone.StoneColor;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -40,6 +41,10 @@ public class GomokuPlayerPanel extends JPanel {
     
     public void updateTime(String time) {
         this.timeLabel.setText(time);
+    }
+    
+    public void setSelectionEnabled(boolean enabled) {
+        this.selectionBox.setEnabled(enabled);
     }
     
     private void init() {
@@ -96,6 +101,16 @@ public class GomokuPlayerPanel extends JPanel {
         }
         
         @Override
+        public Dimension getMinimumSize() {
+            return new Dimension(40, 40);
+        }
+        
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(40, 40);
+        }
+        
+        @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
             
@@ -106,10 +121,9 @@ public class GomokuPlayerPanel extends JPanel {
             int size = Math.min(this.getHeight(), this.getWidth()) - 10;
             int x = (this.getWidth() / 2) - size / 2;
             int y = (this.getHeight() / 2) - size / 2;
+            
             GomokuStone stone = new GomokuStone(color);
-            stone.setHeight(size);
-            stone.setWidth(size);
-            stone.paintIcon(this, g2d, x, y);
+            stone.paintStone(g2d, x, y, size, size, Color.WHITE);
         }
     }
     

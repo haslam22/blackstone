@@ -26,14 +26,9 @@ public class GomokuSettingsPanel extends JPanel {
         init();
     }
     
-    public void lockSettings() {
-        this.intersections.setEnabled(false);
-        this.time.setEnabled(false);
-    }
-    
-    public void unlockSettings() {
-        this.intersections.setEnabled(true);
-        this.time.setEnabled(true);
+    protected void setSelectionEnabled(boolean enabled) {
+        this.intersections.setEnabled(enabled);
+        this.time.setEnabled(enabled);
     }
     
     public int getIntersections() {
@@ -53,13 +48,13 @@ public class GomokuSettingsPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         
-        JLabel intersectionsLabel = new JLabel("Intersections");
+        JLabel intersectionsLabel = new JLabel("Intersections (n*n)");
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.anchor = GridBagConstraints.WEST;
         this.add(intersectionsLabel, gbc);
         
         this.intersections = new JComboBox(new String[] {
@@ -75,16 +70,16 @@ public class GomokuSettingsPanel extends JPanel {
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
         this.add(intersections, gbc);
         
-        JLabel timeLabel = new JLabel("Time");
+        JLabel timeLabel = new JLabel("Time per game (minutes)");
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
         this.add(timeLabel, gbc);
         
@@ -92,7 +87,9 @@ public class GomokuSettingsPanel extends JPanel {
             "5", 
             "10",
             "15",
-            "20"
+            "20",
+            "30",
+            "Unlimited"
         });
         
         time.addActionListener((ActionEvent e) -> {
@@ -104,7 +101,7 @@ public class GomokuSettingsPanel extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(time, gbc);
         
         JLabel emptyLabel = new JLabel("");

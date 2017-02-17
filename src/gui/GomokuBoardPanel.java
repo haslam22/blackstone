@@ -19,39 +19,61 @@ public class GomokuBoardPanel extends JPanel {
     // used to map from row/col to x/y on the board
     private int startX;
     private int startY;
-    private int cellsize;
+    private int cellSize;
     private int padding;
     
     private int intersections;
     private GomokuStone[][] stones;
+    private final Color backgroundColor = new Color(220, 180, 120);
     
     protected GomokuBoardPanel(int intersections) {
         this.intersections = intersections;
         this.stones = new GomokuStone[intersections][intersections];
         this.setDoubleBuffered(true);
-        this.setBackground(new Color(220, 180, 120));
+        this.setBackground(backgroundColor);
     }
     
     public int getIntersections() {
         return this.intersections;
     }
     
-    public void updateIntersections(int intersections) {
+    /**
+     * Update the intersections, and redraw the grid
+     * @param intersections Number of intersections
+     */
+    protected void updateIntersections(int intersections) {
         this.stones = new GomokuStone[intersections][intersections];
         this.intersections = intersections;
         this.repaint();
     }
     
+    /**
+     * Add a black stone to the board at a specified location
+     * @param row Row of the stone to add
+     * @param col Column of the stone to add
+     * @param alpha Alpha transparency value
+     */
     public void addBlackStone(int row, int col, float alpha) {
         this.stones[row][col] = new GomokuStone(StoneColor.BLACK, alpha);
         repaint();
     }
     
+    /**
+     * Add a white stone to the board at a specified location
+     * @param row Row of the stone to add
+     * @param col Column of the stone to add
+     * @param alpha Alpha transparency value
+     */
     public void addWhiteStone(int row, int col, float alpha) {
         this.stones[row][col] = new GomokuStone(StoneColor.WHITE, alpha);
         repaint();
     }
     
+    /**
+     * Remove the stone at the specified location
+     * @param row Row of stone to remove
+     * @param col Column of stone to remove
+     */
     public void removeStone(int row, int col) {
         this.stones[row][col] = null;
         repaint();
@@ -78,31 +100,33 @@ public class GomokuBoardPanel extends JPanel {
         
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON);
+            RenderingHints.VALUE_ANTIALIAS_ON);    
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
         
         // Draw a grid spanning the space we have - the panels lowest dimension
         int lowestDimension = Math.min(this.getWidth(), this.getHeight());
         
         // Minus one pixel here, so the stroke doesn't get cut off at the end
-        int boardsize = lowestDimension;
+        int boardSize = lowestDimension;
         
         // Divide the space by intersections + 1. The grid is actually 
         // (intersections - 1)*(intersections - 1), but we add extra grid space
         // around the board for some padding
-        this.cellsize = boardsize / (intersections + 1);
+        this.cellSize = boardSize / (intersections + 1);
         
         // Division won't always be exact, so calculate the leftover space:
-        int remainder = boardsize % (intersections + 1);
+        int remainder = boardSize % (intersections + 1);
         
         // Set piece size to be a fraction of the cell size
-        int piecesize = (int) (cellsize * 0.8);
+        int stoneSize = (int) (cellSize * 0.8);
         
         // Set padding to cellsize, and spread the remainder around the board
-        this.padding = cellsize + remainder / 2;
+        this.padding = cellSize + remainder / 2;
         
         // Get the highest dimension, so we can center the grid
         int highestDimension = Math.max(this.getWidth(), this.getHeight());
-        int start = (highestDimension - boardsize) / 2;
+        int start = (highestDimension - boardSize) / 2;
         
         this.startX = highestDimension == this.getWidth() ? start : 0;
         this.startY = highestDimension == this.getHeight() ? start : 0;
@@ -116,10 +140,10 @@ public class GomokuBoardPanel extends JPanel {
                 int y = getPanelY(row);
                 // Draw the rectangle outline
                 g2d.setColor(new Color(0, 0, 0));
-                g2d.drawRect(x, y, cellsize, cellsize);
+                g2d.drawRect(x, y, cellSize, cellSize);
                 // Add a subtle shadow around the grid
                 g2d.setColor(new Color(0, 0, 0, 30));
-                g2d.drawRect(x + 1, y + 1, cellsize, cellsize);
+                g2d.drawRect(x + 1, y + 1, cellSize, cellSize);
             }
         }
         
@@ -127,17 +151,16 @@ public class GomokuBoardPanel extends JPanel {
         for(int row = 0; row < intersections; row++) {
             for(int col = 0; col < intersections; col++) {
                 if(stones[row][col] != null) {
-                    stones[row][col].setHeight(piecesize);
-                    stones[row][col].setWidth(piecesize);
-                    stones[row][col].paintIcon(this, g2d, 
-                            getPanelX(col) - piecesize/2, 
-                            getPanelY(row) - piecesize/2
+                    stones[row][col].paintStone(g2d, 
+                            getPanelX(col) - stoneSize/2, 
+                            getPanelY(row) - stoneSize/2, 
+                            stoneSize, 
+                            stoneSize, 
+                            this.backgroundColor
                     );
                 }
             }
         }
-        
-        g2d.dispose();
     }
     
     /**
@@ -146,7 +169,7 @@ public class GomokuBoardPanel extends JPanel {
      * @return
      */
     protected int getPanelX(int col) {
-        return startX + padding + col*cellsize;
+        return startX + padding + col*cellSize;
     }
     
     /**
@@ -155,7 +178,7 @@ public class GomokuBoardPanel extends JPanel {
      * @return
      */
     protected int getPanelY(int row) {
-        return startY + padding + row*cellsize;
+        return startY + padding + row*cellSize;
     }
     
     /**
@@ -164,8 +187,8 @@ public class GomokuBoardPanel extends JPanel {
      * @return
      */
     public int getNearestRow(int y) {
-        y = (y - padding - startY) + cellsize/2;
-        return y / cellsize;
+        y = (y - padding - startY) + cellSize/2;
+        return y / cellSize;
     }
     
     /**
@@ -174,8 +197,8 @@ public class GomokuBoardPanel extends JPanel {
      * @return
      */
     public int getNearestCol(int x) {
-        x = (x - padding - startX) + cellsize/2;
-        return x / cellsize;
+        x = (x - padding - startX) + cellSize/2;
+        return x / cellSize;
     }
     
 }
