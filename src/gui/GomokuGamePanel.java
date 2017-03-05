@@ -1,11 +1,12 @@
 package gui;
 
-import gui.GomokuStone.StoneColor;
+import gui.GomokuBoardPanel.StoneColor;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -14,32 +15,49 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 
 /**
- * JPanel holding the player panels, and any other game controls
+ * Intermediate JPanel holding the player panels, and any other game controls
+ * (new game, forfeit, etc)
  * @author Hassan
  */
 public class GomokuGamePanel extends JPanel {
     
+    private final GomokuApplication app;
     private final GomokuPlayerPanel[] playerPanels;
-    private final GomokuFrame frame;
     private JButton newGameButton;
     private JButton forfeitButton;
+    private JLabel statusLabel;
     
-    protected GomokuGamePanel(GomokuFrame frame) {
-        this.frame = frame;
+    protected GomokuGamePanel(GomokuApplication app) {
+        this.app = app;
         this.playerPanels = new GomokuPlayerPanel[2];
         init();
     }
     
-    protected void setForfeitEnabled(boolean enabled) {
-        this.forfeitButton.setEnabled(enabled);
+    protected void updateTime(int time) {
+        if(time == 0) {
+            playerPanels[0].setTime("No time limit");
+            playerPanels[1].setTime("No time limit");
+        } else {
+            playerPanels[0].setTime(time + ":00");
+            playerPanels[1].setTime(time + ":00");
+        }
     }
     
-    protected void setNewGameEnabled(boolean enabled) {
-        this.newGameButton.setEnabled(enabled);
+    protected void updateStatus(String status) {
+        this.statusLabel.setText(status);
     }
     
-    protected GomokuPlayerPanel getPlayerPanel(int player) {
-        return playerPanels[player - 1];
+    @Override
+    public void setEnabled(boolean enabled) {
+        playerPanels[0].setEnabled(enabled);
+        playerPanels[1].setEnabled(enabled);
+        if(enabled) {
+            forfeitButton.setEnabled(false);
+            newGameButton.setEnabled(true);
+        } else {
+            forfeitButton.setEnabled(true);
+            newGameButton.setEnabled(false);
+        }
     }
     
     private void init() {
@@ -81,23 +99,37 @@ public class GomokuGamePanel extends JPanel {
         this.newGameButton = new JButton("New Game");
         this.forfeitButton = new JButton("Forfeit");
         forfeitButton.setEnabled(false);
+        
         buttonPanel.add(newGameButton);
         buttonPanel.add(forfeitButton);
         
-        newGameButton.addActionListener((ActionEvent e) -> {
-            frame.handleNewGame();
-        });
-        
-        forfeitButton.addActionListener((ActionEvent e) -> {
-            frame.handleGameOver(); 
-        });
-        
-        JLabel emptyLabel = new JLabel("");
+        JPanel statusPanel = new JPanel(new FlowLayout());
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.weightx = 20;
         gbc.weighty = 20;
         gbc.gridwidth = 2;
-        this.add(emptyLabel, gbc);
+        this.add(statusPanel, gbc);
+        
+        this.statusLabel = new JLabel("");
+        statusPanel.add(statusLabel);
+        
+        // Add listeners to handle any game buttons
+        newGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                app.newGame(new String[] { 
+                    playerPanels[0].getPlayerString(),
+                    playerPanels[1].getPlayerString()
+                });
+            }
+        });
+        
+        forfeitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                app.forfeit();
+            }
+        });
     }
 }

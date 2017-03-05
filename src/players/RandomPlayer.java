@@ -1,6 +1,6 @@
 package players;
 
-import gomoku.GomokuLocation;
+import gomoku.GomokuMove;
 import gomoku.GomokuState;
 import java.util.List;
 import java.util.Random;
@@ -11,17 +11,19 @@ import java.util.Random;
  */
 public class RandomPlayer extends GomokuPlayer {
 
-    public RandomPlayer(int index) {
-        super(index);
+    public RandomPlayer(int playerIndex, int opponentIndex) {
+        super(playerIndex, opponentIndex);
     }
 
     @Override
-    public GomokuLocation getMove(GomokuState state) {
+    public GomokuMove getMove(GomokuState state) {
         Random random = new Random();
-        List<GomokuLocation> legalMoves = state.getLegalMoves();
+        List<GomokuMove> legalMoves = state.getMoves();
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException ex) {}
+        } catch (InterruptedException ex) {
+            return null;
+        }
         return legalMoves.get(random.nextInt(legalMoves.size()));
     }
 

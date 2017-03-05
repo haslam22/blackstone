@@ -2,6 +2,7 @@ package gomoku;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * A class representing the state of a Gomoku game at any point.
@@ -9,9 +10,10 @@ import java.util.List;
  */
 public class GomokuState {
     
-    protected final int[][] board;
-    private final int playerIndex;
+    private final int[][] board;
     private final int intersections;
+    private final Stack<GomokuMove> moveHistory;
+    private int playerIndex;
     
     /**
      * Create a new GomokuState instance
@@ -21,36 +23,36 @@ public class GomokuState {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
         this.playerIndex = 1;
+        this.moveHistory = new Stack<>();
     }    
     
     /**
      * Copy constructor for GomokuState, to apply a new move
-     * @param previousState The previous state
+     * @param previousState State to make a move on
      * @param move The move to make
      */
-    private GomokuState(GomokuState previousState, GomokuLocation move) {
+    private GomokuState(GomokuState previousState) {
         this.intersections = previousState.intersections;
         this.board = new int[intersections][intersections];
+        this.playerIndex = previousState.playerIndex;
+        this.moveHistory = previousState.moveHistory;
         // Copy the previous state
         for(int i = 0; i < intersections; i++) {
             System.arraycopy(previousState.board[i], 0, this.board[i], 0, 
                     intersections);
         }
-        // Apply the move and update the current player
-        this.board[move.row][move.col] = previousState.playerIndex;
-        this.playerIndex = previousState.playerIndex == 1 ? 2 : 1;
     }
     
     /**
-     * Calculate the legal moves (unoccupied spaces) on the board
-     * @return A list of legal moves
+     * Return available moves (unoccupied intersections) on the board
+     * @return A list of moves
      */
-    public List<GomokuLocation> getLegalMoves() {
-        List<GomokuLocation> moves = new ArrayList<>();
+    public List<GomokuMove> getMoves() {
+        List<GomokuMove> moves = new ArrayList<>();
         for(int i = 0; i < board.length; i++) {
             for(int j = 0; j < board.length; j++) {
                 if(board[i][j] == 0) {
-                    moves.add(new GomokuLocation(i, j));
+                    moves.add(new GomokuMove(i, j));
                 }
             }
         }
@@ -58,36 +60,50 @@ public class GomokuState {
     }
     
     /**
-     * Make a move on the current state, returning a new state with that
-     * move applied.
-     * @param move The move to make
+     * Copy the current state and return a new instance of it.
      * @return
      */
-    public GomokuState makeMove(GomokuLocation move) {
-        return new GomokuState(this, move);
+    public GomokuState copy() {
+        return new GomokuState(this);
+    }
+    
+    public void makeMove(GomokuMove move) {
+        if(board[move.row][move.col] == 0) {
+            this.board[move.row][move.col] = this.getCurrentIndex();
+            this.playerIndex = this.playerIndex == 1 ? 2 : 1;
+            this.moveHistory.push(move);
+        }
+    }
+    
+    public void undoMove(GomokuMove move) {
+        if(moveHistory.peek().equals(move)) {
+            this.board[move.row][move.col] = 0;
+            this.playerIndex = this.playerIndex == 1 ? 2 : 1;
+            this.moveHistory.pop();
+        }
     }
     
     /**
-     * Return the index of the current player
-     * @return
+     * Return the index of the current player for this state
+     * @return Integer index (Player 1 or 2)
      */
-    public int getCurrentPlayerIndex() {
+    public int getCurrentIndex() {
         return this.playerIndex;
     }
     
     /**
      * Determine if the specified player has won the game
-     * @param index Player index
-     * @return
+     * @param index Player index (1 or 2)
+     * @return True if the index has won
      */
     public boolean isWinner(int index) {
         for(int i = 0; i < intersections; i++) {
             for(int j = 0; j < intersections; j++) {
                 if(board[i][j] == index) {
-                    if(searchVerticalWin(i, j, index)) return true;
-                    if(searchHorizontalWin(i, j, index)) return true;
-                    if(searchDiagonalLeftWin(i, j, index)) return true;
-                    if(searchDiagonalRightWin(i, j, index)) return true;
+                    if(searchVertical(i, j, index, 4)) return true;
+                    if(searchHorizontal(i, j, index, 4)) return true;
+                    if(searchDiagonalLeft(i, j, index, 4)) return true;
+                    if(searchDiagonalRight(i, j, index, 4)) return true;
                 }
             }
         }
@@ -95,8 +111,17 @@ public class GomokuState {
     }
     
     /**
-     * Determine if the board is full, to check if the game has ended in a draw
+     * Return an integer array representing the board, where [i][j] maps to
+     * a player index, or 0 if empty.
      * @return
+     */
+    public int[][] getBoardArray() {
+        return board;
+    }
+    
+    /**
+     * Check if the board is full
+     * @return True if the board has no more available moves
      */
     public boolean isFull() {
         for(int i = 0; i < intersections; i++) {
@@ -108,83 +133,88 @@ public class GomokuState {
     }
     
     /**
-     * Search vertically for a winning sequence at a specific point
+     * Search vertically for a sequence of stones belonging to an index
      * @param row Row position
      * @param col Column position
      * @param index Player index
+     * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchVerticalWin(int row, int col, int index) {
-        if(row + 4 < intersections) {
+    public boolean searchVertical(int row, int col, int index, int amount) {
+        if(row + amount < intersections) {
             int count = 0;
-            for(int k = 1; k <= 4; k++) {
+            for(int k = 1; k <= amount; k++) {
                 if(board[row+k][col] == index) {
                     count++;
                 }
             }
-            return count == 4;
+            return count == amount;
         }
         return false;
     }    
     
     /**
-     * Search horizontally for a winning sequence at a specific point
+     * Search horizontally for a sequence of stones belonging to an index
      * @param row Row position
      * @param col Column position
      * @param index Player index
+     * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchHorizontalWin(int row, int col, int index) {
-        if(col + 4 < intersections) {
+    public boolean searchHorizontal(int row, int col, int index, int amount) {
+        if(col + amount < intersections) {
             int count = 0;
-            for(int k = 1; k <= 4; k++) {
+            for(int k = 1; k <= amount; k++) {
                 if(board[row][col+k] == index) {
                     count++;
                 }
             }
-            return count == 4;
+            return count == amount;
         }
         return false;
     }    
     
     /**
-     * Search diagonally and down to the right for a winning sequence at a 
-     * specific point
+     * Search diagonally and down to the right for a sequence of stones 
+     * belonging to an index
      * @param row Row position
      * @param col Column position
      * @param index Player index
+     * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchDiagonalRightWin(int row, int col, int index) {
-        if(col + 4 < intersections && row + 4 < intersections) {
+    public boolean searchDiagonalRight(int row, int col, int index, 
+            int amount) {
+        if(col + amount < intersections && row + amount < intersections) {
             int count = 0;
-            for(int k = 1; k <= 4; k++) {
+            for(int k = 1; k <= amount; k++) {
                 if(board[row+k][col+k] == index) {
                     count++;
                 }
             }
-            return count == 4;
+            return count == amount;
         }
         return false;
     }
     
     /**
-     * Search diagonally and down to the left for a winning sequence at a
-     * specific point
+     * Search diagonally and down to the left for a sequence of stones 
+     * belonging to an index
      * @param row Row position
      * @param col Column position
      * @param index Player index
+     * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchDiagonalLeftWin(int row, int col, int index) {
-        if(col - 4 >= 0 && row + 4 < intersections) {
+    public boolean searchDiagonalLeft(int row, int col, int index, int amount) {
+        if(col - amount >= 0 && row + amount < intersections) {
             int count = 0;
-            for(int k = 1; k <= 4; k++) {
+            for(int k = 1; k <= amount; k++) {
                 if(board[row+k][col-k] == index) {
                     count++;
                 }
             }  
-            return count == 4;
+            return count == amount;
         }
         return false;
     }

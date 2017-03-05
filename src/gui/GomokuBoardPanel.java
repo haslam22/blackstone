@@ -1,12 +1,21 @@
 package gui;
 
-import gui.GomokuStone.StoneColor;
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
+import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
-import java.awt.event.MouseListener;
+import java.awt.Shape;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import javax.swing.JPanel;
 
 /**
@@ -14,6 +23,20 @@ import javax.swing.JPanel;
  * @author Hassan
  */
 public class GomokuBoardPanel extends JPanel {
+    
+    public static enum StoneColor {
+        BLACK, WHITE
+    }
+    
+    private class GomokuStone {
+        private final StoneColor color;
+        private final boolean transparent;
+        
+        public GomokuStone(StoneColor color, boolean transparent) {
+            this.color = color;
+            this.transparent = transparent;
+        }
+    }
     
     // Board properties, calculated dynamically based on the available space,
     // used to map from row/col to x/y on the board
@@ -24,13 +47,13 @@ public class GomokuBoardPanel extends JPanel {
     
     private int intersections;
     private GomokuStone[][] stones;
-    private final Color backgroundColor = new Color(220, 180, 120);
+    private MouseMotionListener motionListener;
     
     protected GomokuBoardPanel(int intersections) {
         this.intersections = intersections;
         this.stones = new GomokuStone[intersections][intersections];
         this.setDoubleBuffered(true);
-        this.setBackground(backgroundColor);
+        this.setBackground(new Color(220, 180, 120));
     }
     
     public int getIntersections() {
@@ -48,50 +71,62 @@ public class GomokuBoardPanel extends JPanel {
     }
     
     /**
-     * Add a black stone to the board at a specified location
+     * Add a stone to the board at the specified intersection
+     * @param color
      * @param row Row of the stone to add
      * @param col Column of the stone to add
-     * @param alpha Alpha transparency value
      */
-    public void addBlackStone(int row, int col, float alpha) {
-        this.stones[row][col] = new GomokuStone(StoneColor.BLACK, alpha);
-        repaint();
+    public void addStone(StoneColor color, int row, int col) {
+        if(stones[row][col] == null) {
+            this.stones[row][col] = new GomokuStone(color, false);
+            repaint();
+        }
     }
     
     /**
-     * Add a white stone to the board at a specified location
-     * @param row Row of the stone to add
-     * @param col Column of the stone to add
-     * @param alpha Alpha transparency value
+     * Add a transparent stone at the specified intersection, which is removed
+     * when the panel is repainted
+     * @param color
+     * @param row
+     * @param col
      */
-    public void addWhiteStone(int row, int col, float alpha) {
-        this.stones[row][col] = new GomokuStone(StoneColor.WHITE, alpha);
-        repaint();
+    private void addTransparentStone(StoneColor color, int row, int col) {
+        if(stones[row][col] == null) {
+            this.stones[row][col] = new GomokuStone(color, true);
+            repaint();
+        }
     }
     
     /**
-     * Remove the stone at the specified location
-     * @param row Row of stone to remove
-     * @param col Column of stone to remove
-     */
-    public void removeStone(int row, int col) {
-        this.stones[row][col] = null;
-        repaint();
-    }
-    
-    /**
-     * Reset the board, removing all pieces and removing any listeners that were
-     * not removed from the previous game
+     * Reset the board, removing all pieces
      */
     public void reset() {
         this.stones = new GomokuStone[intersections][intersections];
-        for(MouseMotionListener listener : this.getMouseMotionListeners()) {
-            this.removeMouseMotionListener(listener);
-        }
-        for(MouseListener listener : this.getMouseListeners()) {
-            this.removeMouseListener(listener);
-        }
         repaint();
+    }
+    
+    public void enableStonePicker(StoneColor color) {
+        if(this.motionListener == null) {
+            this.motionListener = new MouseAdapter() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    int row = getNearestRow(e.getY());
+                    int col = getNearestCol(e.getX());
+                    if(row >= 0 && col >= 0 && row <= intersections - 1 &&
+                            col <= intersections - 1) {
+                        addTransparentStone(color, row, col);
+                    }
+                }
+            };
+            this.addMouseMotionListener(motionListener);
+        }
+    }
+    
+    public void disableStonePicker() {
+        if(this.motionListener != null) {
+            this.removeMouseMotionListener(motionListener);
+            this.motionListener = null;
+        }
     }
     
     @Override
@@ -101,9 +136,9 @@ public class GomokuBoardPanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
             RenderingHints.VALUE_ANTIALIAS_ON);    
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, 
+                RenderingHints.VALUE_RENDER_QUALITY);
 
-        
         // Draw a grid spanning the space we have - the panels lowest dimension
         int lowestDimension = Math.min(this.getWidth(), this.getHeight());
         
@@ -147,20 +182,75 @@ public class GomokuBoardPanel extends JPanel {
             }
         }
         
-        // Draw the pieces
         for(int row = 0; row < intersections; row++) {
             for(int col = 0; col < intersections; col++) {
                 if(stones[row][col] != null) {
-                    stones[row][col].paintStone(g2d, 
+                    paintStone(g2d, 
                             getPanelX(col) - stoneSize/2, 
-                            getPanelY(row) - stoneSize/2, 
+                            getPanelY(row) - stoneSize/2,
                             stoneSize, 
                             stoneSize, 
-                            this.backgroundColor
+                            stones[row][col].color, 
+                            stones[row][col].transparent
                     );
+                    if(stones[row][col].transparent) stones[row][col] = null;
                 }
             }
         }
+        
+        g2d.dispose();
+    }
+    
+    private static RadialGradientPaint getGradientPaint(StoneColor color,
+            int x, int y, int width, int height) {
+        Color[] colors = new Color[2];
+
+        if(color == StoneColor.BLACK) {
+            colors[0] = new Color(0xA0A0A0);
+            colors[1] = new Color(0xE6000000);
+        }
+        else if(color == StoneColor.WHITE) {
+            colors[0] = Color.WHITE;
+            colors[1] = new Color(0xA0A0A0);
+        }
+
+        return new RadialGradientPaint(
+                new Point2D.Double(0.5, 0.5), 
+                0.5f, 
+                new Point2D.Double(0.75, 0.75), 
+                new float[]{0, 1}, 
+                colors, 
+                NO_CYCLE, 
+                SRGB, 
+                new AffineTransform(width, 0, 0, height, x, y)
+        );
+    }
+    
+    /**
+     * Paint a semi-realistic looking Gomoku stone with a radial gradient
+     * @param g2d Graphics context
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param width Width of the stone
+     * @param height Height of the stone
+     * @param color StoneColor.BLACK or StoneColor.WHITE
+     * @param transparent
+     */
+    protected static void paintStone(Graphics2D g2d, int x, int y, int width, 
+            int height, StoneColor color, boolean transparent) {
+        
+        Composite previousComposite = g2d.getComposite();
+        
+        if(transparent) {
+            AlphaComposite alphacom = AlphaComposite.getInstance(
+                    AlphaComposite.SRC_OVER, 0.5f);
+            g2d.setComposite(alphacom);
+        }
+        
+        Shape stone = new Ellipse2D.Double(x, y, width, height);
+        g2d.setPaint(getGradientPaint(color, x, y, width, height));
+        g2d.fill(stone);
+        g2d.setComposite(previousComposite);
     }
     
     /**
@@ -168,7 +258,7 @@ public class GomokuBoardPanel extends JPanel {
      * @param col
      * @return
      */
-    protected int getPanelX(int col) {
+    private int getPanelX(int col) {
         return startX + padding + col*cellSize;
     }
     
@@ -177,7 +267,7 @@ public class GomokuBoardPanel extends JPanel {
      * @param row
      * @return
      */
-    protected int getPanelY(int row) {
+    private int getPanelY(int row) {
         return startY + padding + row*cellSize;
     }
     

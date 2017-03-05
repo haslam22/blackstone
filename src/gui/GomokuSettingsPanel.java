@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -17,26 +18,13 @@ import javax.swing.border.EtchedBorder;
  */
 public class GomokuSettingsPanel extends JPanel {
     
-    private final GomokuFrame frame;
+    private final GomokuApplication app;
     private JComboBox intersections;
     private JComboBox time;
     
-    protected GomokuSettingsPanel(GomokuFrame frame) {
-        this.frame = frame;
+    protected GomokuSettingsPanel(GomokuApplication app) {
+        this.app = app;
         init();
-    }
-    
-    protected void setSelectionEnabled(boolean enabled) {
-        this.intersections.setEnabled(enabled);
-        this.time.setEnabled(enabled);
-    }
-    
-    public int getIntersections() {
-        return Integer.parseInt((String) intersections.getSelectedItem());
-    }
-    
-    public String getTime() {
-        return (String) time.getSelectedItem() + ":00";
     }
     
     private void init() {
@@ -60,10 +48,6 @@ public class GomokuSettingsPanel extends JPanel {
         this.intersections = new JComboBox(new String[] {
             "15", 
             "19"
-        });
-        
-        intersections.addActionListener((ActionEvent e) -> {
-            frame.handleIntersectionsChange(getIntersections());
         });
         
         gbc.gridx = 1;
@@ -91,10 +75,7 @@ public class GomokuSettingsPanel extends JPanel {
             "30",
             "Unlimited"
         });
-        
-        time.addActionListener((ActionEvent e) -> {
-            frame.handleTimeChange(getTime());
-        });
+        this.time.putClientProperty("time", time.getSelectedItem());
         
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -112,6 +93,26 @@ public class GomokuSettingsPanel extends JPanel {
         gbc.weightx = 20;
         gbc.weighty = 20;
         this.add(emptyLabel, gbc);
+        
+        // Add event listeners to handle any settings changes
+        this.intersections.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                app.updateIntersections(Integer.parseInt(
+                        (String) intersections.getSelectedItem()));
+            }
+        });        
+        this.time.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    app.updateTime(Integer.parseInt(
+                            (String) time.getSelectedItem()));
+                } catch(NumberFormatException ex) {
+                    app.updateTime(0);
+                }
+            }
+        });
     }
     
 }
