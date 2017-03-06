@@ -3,9 +3,10 @@ package players;
 import gomoku.GomokuMove;
 import gomoku.GomokuState;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Minimax player, with alpha-beta pruning and a simple evaluation function. 
@@ -20,18 +21,35 @@ public class MinimaxPlayer extends GomokuPlayer {
         super(playerIndex, opponentIndex);
     }
     
-    // Too many moves are still evaluated, even after being pruned. 
-    // Move ordering by evaluation score could also speed up the process
+    // Too many moves are still evaluated, even after being pruned.
     
     /**
      * Prune moves by focusing on areas where stones already exist to reduce
-     * the search space.
-     * @param board
-     * @param moves
+     * the search space, and sort the nodes using a heuristic evaluation
+     * @param state State to find moves for
      * @return A list of pruned moves
      */
-    public List<GomokuMove> pruneMoves(int[][] board, List<GomokuMove> moves) {
-        Set<GomokuMove> prunedMoves = new HashSet<>();
+    public List<GomokuMove> pruneMoves(GomokuState state) {
+        int[][] board = state.getBoardArray();
+        List<GomokuMove> moves = state.getMoves();
+        
+        // Comparator for our TreeSet, use the heuristic evaluation to sort
+        Comparator<GomokuMove> stateCompare = new Comparator<GomokuMove>() {
+            @Override
+            public int compare(GomokuMove move1, GomokuMove move2) {
+                state.makeMove(move1);
+                int move1heuristic = evaluateState(state);
+                state.undoMove(move1);
+                state.makeMove(move2);
+                int move2heuristic = evaluateState(state);
+                state.undoMove(move2);
+                return move1heuristic - move2heuristic;
+            }
+        };
+        
+        // Use a TreeSet - no duplicates, and sorted by heuristic score
+        Set<GomokuMove> prunedMoves = new TreeSet<>(stateCompare);
+        
         // Board is empty, we have to make an opening move
         if(moves.size() == board.length * board.length) {
             prunedMoves.add(new GomokuMove(board.length / 2, board.length / 2));
@@ -83,7 +101,7 @@ public class MinimaxPlayer extends GomokuPlayer {
                 }
             }
         }
-                
+        
         return new ArrayList(prunedMoves);
     }
     
@@ -192,15 +210,16 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param beta Best possible value for the minimising player
      * @return
      */
-    public int minimax(GomokuState state, int depth, int alpha, int beta) {
-        // Leaf nodes need to return a heuristic evaluation
-        if(depth == 0) return evaluateState(state);
+    private int minimax(GomokuState state, int depth, int alpha, int beta) {
+        // Leaf nodes/terminal nodes need to return a heuristic evaluation
+        if(depth == 0 || state.isTerminal()) {
+            return evaluateState(state);
+        }
         
         // Max's turn
         if(state.getCurrentIndex() == this.playerIndex) {
             // Get the maximum of the child states
-            for(GomokuMove move : pruneMoves(state.getBoardArray(), 
-                    state.getMoves())) {
+            for(GomokuMove move : pruneMoves(state)) {
                 state.makeMove(move);
                 int score = minimax(state, depth - 1, alpha, beta);
                 state.undoMove(move);
@@ -220,8 +239,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         // Min's turn
         else {
             // Get the minimum of the child states
-            for(GomokuMove move : pruneMoves(state.getBoardArray(), 
-                    state.getMoves())) {
+            for(GomokuMove move : pruneMoves(state)) {
                 state.makeMove(move);
                 int score = minimax(state, depth - 1, alpha, beta);
                 state.undoMove(move);
@@ -248,7 +266,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param state State to evaluate
      * @return Score of the state
      */
-    public int evaluateState(GomokuState state) {
+    private int evaluateState(GomokuState state) {
         int[][] board = state.getBoardArray();
         
         List<int[]> axes = new ArrayList<>();
@@ -302,18 +320,22 @@ public class MinimaxPlayer extends GomokuPlayer {
             }
         }
         
-        return  + (patterns_player[4] * 15000) 
-                + (patterns_player[3] * 2500) 
-                + (patterns_player[2] * 50) 
-                + (patterns_player[1] * 5) 
-                + (patterns_player[0] * 1) 
-                - (patterns_opponent[4] * 15000) 
-                - (patterns_opponent[3] * 2500) 
-                - (patterns_opponent[2] * 50) 
-                - (patterns_opponent[1] * 5) 
+        return  + (patterns_player[6] * 15000)
+                + (patterns_player[5] * 15000)
+                + (patterns_player[4] * 15000)
+                + (patterns_player[3] * 2500)
+                + (patterns_player[2] * 50)
+                + (patterns_player[1] * 5)
+                + (patterns_player[0] * 1)
+                - (patterns_opponent[6] * 15000)
+                - (patterns_opponent[5] * 15000)
+                - (patterns_opponent[4] * 15000)
+                - (patterns_opponent[3] * 2500)
+                - (patterns_opponent[2] * 50)
+                - (patterns_opponent[1] * 5)
                 - (patterns_opponent[0] * 1);
     }
-
+    
     @Override
     public GomokuMove getMove(GomokuState state) {
         minimax(state, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);

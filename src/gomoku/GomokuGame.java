@@ -65,11 +65,12 @@ public class GomokuGame implements Runnable {
         app.forfeit();
     }
     
+    public GomokuState getState() {
+        return this.state;
+    }
+    
     private boolean gameOver() {
-        if(state.isWinner(1) || state.isWinner(2)) {
-            return true;
-        }
-        return state.isFull();
+        return state.isWinner(1) || state.isWinner(2) || state.isFull();
     }
     
     private int getWinner() {

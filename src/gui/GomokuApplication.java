@@ -4,9 +4,14 @@ import gomoku.GomokuGame;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
@@ -26,6 +31,7 @@ public class GomokuApplication {
     private final GomokuBoardPanel boardPanel;
     private final GomokuGamePanel gamePanel;
     private final GomokuSettingsPanel settingsPanel;
+    private GomokuGame game;
     private Thread gameThread;
     
     private int time = 5;
@@ -60,6 +66,21 @@ public class GomokuApplication {
         jSplitPane.setDividerLocation(0.7);
         jSplitPane.setDividerSize(0);
         
+        // Create a menu bar, currently used for debugging only
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Debug");
+        JMenuItem printStateOption = new JMenuItem("Print state");
+        printStateOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                printState();
+            }
+        
+        });
+        menu.add(printStateOption);
+        menuBar.add(menu);
+        
+        gomokuFrame.setJMenuBar(menuBar);
         gomokuFrame.setVisible(true);
     }
     
@@ -95,7 +116,7 @@ public class GomokuApplication {
             createPlayer(playerStrings[0], 1, 2),
             createPlayer(playerStrings[1], 2, 1)
         };
-        GomokuGame game = new GomokuGame(this, intersections, players);
+        this.game = new GomokuGame(this, intersections, players);
         this.gameThread = new Thread(game);
         this.gameThread.start();
     }
@@ -103,6 +124,22 @@ public class GomokuApplication {
     public void forfeit() {
         this.gameThread.interrupt();
         this.gamePanel.setEnabled(true);
+    }
+    
+    private void printState() {
+        if(game != null) {
+            int[][] board = game.getState().getBoardArray();
+            for(int i = 0; i < board.length; i++) {
+                for(int j = 0; j < board.length; j++) {
+                    if(j == board.length - 1) { 
+                        System.out.print(board[i][j]);
+                    } else {
+                        System.out.print(board[i][j] + ", ");
+                    }
+                }
+                System.out.println();
+            }
+        }
     }
     
     private GomokuPlayer createPlayer(String name, 

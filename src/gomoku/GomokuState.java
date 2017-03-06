@@ -13,7 +13,7 @@ public class GomokuState {
     private final int[][] board;
     private final int intersections;
     private final Stack<GomokuMove> moveHistory;
-    private int playerIndex;
+    private int currentIndex;
     
     /**
      * Create a new GomokuState instance
@@ -22,9 +22,21 @@ public class GomokuState {
     public GomokuState(int intersections) {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
-        this.playerIndex = 1;
+        this.currentIndex = 1;
         this.moveHistory = new Stack<>();
-    }    
+    }
+    
+    /**
+     * Create a new GomokuState from a board array, for debugging
+     * @param board
+     * @param playerIndex
+     */
+    public GomokuState(int[][] board, int playerIndex) {
+        this.intersections = board.length;
+        this.board = board;
+        this.currentIndex = playerIndex;
+        this.moveHistory = new Stack<>();
+    }
     
     /**
      * Copy constructor for GomokuState, to apply a new move
@@ -34,7 +46,7 @@ public class GomokuState {
     private GomokuState(GomokuState previousState) {
         this.intersections = previousState.intersections;
         this.board = new int[intersections][intersections];
-        this.playerIndex = previousState.playerIndex;
+        this.currentIndex = previousState.currentIndex;
         this.moveHistory = previousState.moveHistory;
         // Copy the previous state
         for(int i = 0; i < intersections; i++) {
@@ -70,7 +82,7 @@ public class GomokuState {
     public void makeMove(GomokuMove move) {
         if(board[move.row][move.col] == 0) {
             this.board[move.row][move.col] = this.getCurrentIndex();
-            this.playerIndex = this.playerIndex == 1 ? 2 : 1;
+            this.currentIndex = this.currentIndex == 1 ? 2 : 1;
             this.moveHistory.push(move);
         }
     }
@@ -78,9 +90,18 @@ public class GomokuState {
     public void undoMove(GomokuMove move) {
         if(moveHistory.peek().equals(move)) {
             this.board[move.row][move.col] = 0;
-            this.playerIndex = this.playerIndex == 1 ? 2 : 1;
+            this.currentIndex = this.currentIndex == 1 ? 2 : 1;
             this.moveHistory.pop();
+
         }
+    }
+    
+    /**
+     * Check if this state is a terminal state.
+     * @return
+     */
+    public boolean isTerminal() {
+        return isWinner(1) || isWinner(2);
     }
     
     /**
@@ -88,7 +109,7 @@ public class GomokuState {
      * @return Integer index (Player 1 or 2)
      */
     public int getCurrentIndex() {
-        return this.playerIndex;
+        return this.currentIndex;
     }
     
     /**
