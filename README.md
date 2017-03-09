@@ -1,2 +1,4 @@
 # gomoku
-Gomoku game framework, with Minimax/Monte Carlo/Neural AI players
+Gomoku game app, with Minimax/Monte Carlo/Neural AI players
+
+![alt text](http://i.imgur.com/HtO5C6f.png)
