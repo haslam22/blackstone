@@ -42,8 +42,8 @@ public class GomokuApplication {
         gomokuFrame.setTitle("Gomoku");
         gomokuFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         gomokuFrame.setResizable(true);
-        gomokuFrame.setMinimumSize(new Dimension(800, 600));
-        gomokuFrame.setPreferredSize(new Dimension(1100, 700));
+        gomokuFrame.setMinimumSize(new Dimension(1000, 800));
+        gomokuFrame.setPreferredSize(new Dimension(1000, 800));
         
         this.boardPanel = new GomokuBoardPanel(intersections);
         this.gamePanel = new GomokuGamePanel(this);
@@ -69,13 +69,12 @@ public class GomokuApplication {
         // Create a menu bar, currently used for debugging only
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Debug");
-        JMenuItem printStateOption = new JMenuItem("Print state");
+        JMenuItem printStateOption = new JMenuItem("Print State");
         printStateOption.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 printState();
             }
-        
         });
         menu.add(printStateOption);
         menuBar.add(menu);
@@ -112,11 +111,9 @@ public class GomokuApplication {
     
     public void newGame(String[] playerStrings) {
         this.gamePanel.setEnabled(false);
-        GomokuPlayer[] players = new GomokuPlayer[] {
-            createPlayer(playerStrings[0], 1, 2),
-            createPlayer(playerStrings[1], 2, 1)
-        };
-        this.game = new GomokuGame(this, intersections, players);
+        GomokuPlayer player1 = createPlayer(playerStrings[0], 1, 2);
+        GomokuPlayer player2 = createPlayer(playerStrings[1], 2, 1);
+        this.game = new GomokuGame(this, intersections, player1, player2);
         this.gameThread = new Thread(game);
         this.gameThread.start();
     }

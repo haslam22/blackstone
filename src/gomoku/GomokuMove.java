@@ -18,18 +18,15 @@ public class GomokuMove {
     
     @Override
     public boolean equals(Object o) {
-        if(o instanceof GomokuMove) {
-            GomokuMove move = (GomokuMove) o;
-            return move.col == this.col && move.row == this.row;
-        }
-        return false;
+        GomokuMove move = (GomokuMove) o;
+        return (move.col == this.col) && (move.row == this.row);
     }
 
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 97 * hash + this.row;
-        hash = 97 * hash + this.col;
+        hash = 29 * hash + this.row;
+        hash = 29 * hash + this.col;
         return hash;
     }
 }

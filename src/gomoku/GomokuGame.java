@@ -19,32 +19,53 @@ public class GomokuGame implements Runnable {
     private final GomokuBoardPanel board;
     private final GomokuApplication app;
     
+    /**
+     * Create a new game between two players.
+     * @param app App instance
+     * @param intersections Game intersections
+     * @param player1 Player 1
+     * @param player2 Player 2
+     */
     public GomokuGame(GomokuApplication app, int intersections,
-            GomokuPlayer[] players) {
+            GomokuPlayer player1, GomokuPlayer player2) {
         this.state = new GomokuState(intersections);
-        this.players = players;
+        this.players = new GomokuPlayer[] { player1, player2 };
         this.app = app;
         this.board = app.getBoardPanel();
+    }
+    
+    /**
+     * Draw the state of the current game onto the board panel.
+     * @param state Current state
+     */
+    private void drawState(GomokuState state) {
+        int[][] boardArray = state.getBoardArray();
+        for(int i = 0; i < boardArray.length; i++) {
+            for(int j = 0; j < boardArray.length; j++) {
+                if(boardArray[i][j] == 1) {
+                    board.addStone(StoneColor.BLACK, i, j);
+                }
+                if(boardArray[i][j] == 2) {
+                    board.addStone(StoneColor.WHITE, i, j);
+                }
+            }
+        }
     }
     
     @Override
     public void run() {
         board.reset();
         
-        // Continuously grab the move from each player
+        // Start the game, request a move from each player in a loop
         while(!gameOver() && !Thread.interrupted()) {
             app.updateStatus("Waiting for turn from player " + 
                     state.getCurrentIndex() + "...");
-            GomokuMove move;
             try {
                 // Pass a copy of the state and request a move
-                move = players[state.getCurrentIndex() - 1]
+                GomokuMove move = players[state.getCurrentIndex() - 1]
                         .getMove(state.copy());
-                // Add a stone to the board panel
-                board.addStone(getColor(state.getCurrentIndex()), move.row, 
-                        move.col);
-                // Make the move on our copy of the state
                 this.state.makeMove(move);
+                this.drawState(state);
             } catch (NullPointerException e) {
                 // A move wasn't returned, exit
                 break;

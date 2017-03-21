@@ -3,6 +3,8 @@ package gui;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
@@ -135,7 +137,7 @@ public class GomokuBoardPanel extends JPanel {
         
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON);    
+            RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, 
                 RenderingHints.VALUE_RENDER_QUALITY);
 
@@ -154,10 +156,10 @@ public class GomokuBoardPanel extends JPanel {
         int remainder = boardSize % (intersections + 1);
         
         // Set piece size to be a fraction of the cell size
-        int stoneSize = (int) (cellSize * 0.8);
+        int stoneSize = (int) (cellSize * 0.725);
         
         // Set padding to cellsize, and spread the remainder around the board
-        this.padding = cellSize + remainder / 2;
+        this.padding = cellSize + (remainder / 2);
         
         // Get the highest dimension, so we can center the grid
         int highestDimension = Math.max(this.getWidth(), this.getHeight());
@@ -165,6 +167,48 @@ public class GomokuBoardPanel extends JPanel {
         
         this.startX = highestDimension == this.getWidth() ? start : 0;
         this.startY = highestDimension == this.getHeight() ? start : 0;
+        
+        // Set the bounding rectangle size for our column/row strings
+        int stringBoundingSize = (int) (cellSize * 1.3);
+        
+        // Get the current Sans Serif font
+        Font font = new Font("Sans Serif", Font.PLAIN, stringBoundingSize / 4);
+        FontMetrics metrics = g2d.getFontMetrics(font);
+        
+        // Draw numbers for the rows
+        for(int row = 0; row < intersections; row++) {
+            // Row strings (1, 2, 3...)
+            String rowString = Integer.toString(intersections - row);
+            int rectX = getPanelX(0) - stringBoundingSize; // Rectangle y
+            int rectY = getPanelY(row) - stringBoundingSize / 2; // Rectangle x
+            
+            int stringWidth = (int) metrics.getStringBounds(rowString, g2d)
+                    .getWidth();
+            int stringHeight = (int) metrics.getAscent();
+            
+            int stringX = (rectX + stringBoundingSize / 2) - (stringWidth / 2);
+            int stringY = (rectY + stringBoundingSize / 2) + (stringHeight / 2);
+            
+            g2d.setFont(font);
+            g2d.drawString(rowString, stringX, stringY);
+        }
+        
+        // Draw letters for the columns
+        for(int col = 0; col < intersections; col++) {
+            String columnString = String.valueOf((char)((col + 1) + 'A' - 1));
+            int rectX = getPanelX(col) - stringBoundingSize / 2; // Rectangle y
+            int rectY = getPanelY(intersections - 1); // Rectangle x
+            
+            int stringWidth = (int) metrics.getStringBounds(columnString, g2d)
+                    .getWidth();
+            int stringHeight = (int) metrics.getAscent();
+            
+            int stringX = (rectX + stringBoundingSize / 2) - (stringWidth / 2);
+            int stringY = (rectY + stringBoundingSize / 2) + (stringHeight / 2);
+            
+            g2d.setFont(font);
+            g2d.drawString(columnString, stringX, stringY);
+        }
         
         // Draw the grid
         for(int row = 0; row < intersections - 1; row++) {
@@ -181,6 +225,7 @@ public class GomokuBoardPanel extends JPanel {
                 g2d.drawRect(x + 1, y + 1, cellSize, cellSize);
             }
         }
+        
         
         for(int row = 0; row < intersections; row++) {
             for(int col = 0; col < intersections; col++) {

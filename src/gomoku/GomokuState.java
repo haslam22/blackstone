@@ -11,6 +11,8 @@ import java.util.Stack;
 public class GomokuState {
     
     private final int[][] board;
+    private final int[][] player1Board;
+    private final int[][] player2Board;
     private final int intersections;
     private final Stack<GomokuMove> moveHistory;
     private int currentIndex;
@@ -22,6 +24,8 @@ public class GomokuState {
     public GomokuState(int intersections) {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
+        this.player1Board = new int[intersections][intersections];
+        this.player2Board = new int[intersections][intersections];
         this.currentIndex = 1;
         this.moveHistory = new Stack<>();
     }
@@ -33,25 +37,36 @@ public class GomokuState {
      */
     public GomokuState(int[][] board, int playerIndex) {
         this.intersections = board.length;
+        this.player1Board = new int[board.length][board.length];
+        this.player2Board = new int[board.length][board.length];
         this.board = board;
         this.currentIndex = playerIndex;
         this.moveHistory = new Stack<>();
     }
     
     /**
-     * Copy constructor for GomokuState, to apply a new move
-     * @param previousState State to make a move on
-     * @param move The move to make
+     * Copy constructor for GomokuState
+     * @param previousState State to copy
      */
     private GomokuState(GomokuState previousState) {
         this.intersections = previousState.intersections;
         this.board = new int[intersections][intersections];
+        this.player1Board = new int[intersections][intersections];
+        this.player2Board = new int[intersections][intersections];
         this.currentIndex = previousState.currentIndex;
         this.moveHistory = previousState.moveHistory;
         // Copy the previous state
         for(int i = 0; i < intersections; i++) {
             System.arraycopy(previousState.board[i], 0, this.board[i], 0, 
                     intersections);
+        }
+        for(int i = 0; i < intersections; i++) {
+            System.arraycopy(previousState.player1Board[i], 0, 
+                    this.player1Board[i], 0, intersections);
+        }
+        for(int i = 0; i < intersections; i++) {
+            System.arraycopy(previousState.player2Board[i], 0, 
+                    this.player2Board[i], 0, intersections);
         }
     }
     
@@ -81,7 +96,15 @@ public class GomokuState {
     
     public void makeMove(GomokuMove move) {
         if(board[move.row][move.col] == 0) {
-            this.board[move.row][move.col] = this.getCurrentIndex();
+            this.board[move.row][move.col] = this.currentIndex;
+            switch(this.currentIndex) {
+                case 1:
+                    player1Board[move.row][move.col] = 1;
+                    break;
+                case 2:
+                    player2Board[move.row][move.col] = 1;
+                    break;
+            }
             this.currentIndex = this.currentIndex == 1 ? 2 : 1;
             this.moveHistory.push(move);
         }
@@ -90,9 +113,16 @@ public class GomokuState {
     public void undoMove(GomokuMove move) {
         if(moveHistory.peek().equals(move)) {
             this.board[move.row][move.col] = 0;
+            switch(this.currentIndex) {
+                case 1:
+                    player2Board[move.row][move.col] = 0;
+                    break;
+                case 2:
+                    player1Board[move.row][move.col] = 0;
+                    break;
+            }
             this.currentIndex = this.currentIndex == 1 ? 2 : 1;
             this.moveHistory.pop();
-
         }
     }
     
@@ -138,6 +168,22 @@ public class GomokuState {
      */
     public int[][] getBoardArray() {
         return board;
+    }
+    
+    /**
+     * Return an integer array for an individual player, where [i][j] maps to
+     * 1 if the index has placed a stone there, or 0 if they haven't
+     * @param index
+     * @return
+     */
+    public int[][] getPlayerArray(int index) {
+        switch(index) {
+            case 1:
+                return this.player1Board;
+            case 2:
+                return this.player2Board;
+        }
+        return null;
     }
     
     /**
