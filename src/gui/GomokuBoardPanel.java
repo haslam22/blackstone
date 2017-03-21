@@ -172,7 +172,9 @@ public class GomokuBoardPanel extends JPanel {
         int stringBoundingSize = (int) (cellSize * 1.3);
         
         // Get the current Sans Serif font
-        Font font = new Font("Sans Serif", Font.PLAIN, stringBoundingSize / 4);
+        int fontSize = (stringBoundingSize / 4) < 16 ? stringBoundingSize / 4 
+                : 16;
+        Font font = new Font("Sans Serif", Font.PLAIN, fontSize);
         FontMetrics metrics = g2d.getFontMetrics(font);
         
         // Draw numbers for the rows
