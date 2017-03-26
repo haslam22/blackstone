@@ -1,5 +1,5 @@
 # Gomoku
-Gomoku game app, with Minimax/Monte Carlo/Neural AI players (Work in progress)
+Gomoku game app, with Minimax AI (Work in progress)
 
 ![alt text](http://i.imgur.com/phoL3oQ.png)
 
@@ -8,6 +8,7 @@ Gomoku game app, with Minimax/Monte Carlo/Neural AI players (Work in progress)
 - Minimax AI (up to depth 8), with alpha-beta pruning and simple move ordering
 
 ## Coming Soon
-- Higher depth Minimax, with faster evaluation function and transpositon tables
-- Monte Carlo Tree Search AI
-- Neural AI
+- Better evaluation function, which can detect disconnected threats
+- Use transpostion table to save minimax scores
+- Undo/Redo controls
+- More AI methods, e.g. Monte Carlo Tree Search
