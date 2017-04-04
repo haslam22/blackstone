@@ -1,7 +1,7 @@
 # Gomoku
 Gomoku game app, with Minimax AI (Work in progress)
 
-![alt text](http://i.imgur.com/phoL3oQ.png)
+![alt text](http://i.imgur.com/zI2FdPu.png)
 
 ## Current Features
 - Fully resizable Gomoku board, with interactive stone picking, player selection, etc
