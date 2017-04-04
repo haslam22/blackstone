@@ -5,34 +5,53 @@ import gomoku.GomokuState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map.Entry;
 
 /**
  * Minimax player, with alpha-beta pruning and a simple evaluation function. 
  * Can search up to a depth of 8 in a reasonable amount of time.
  * @author Hassan
  */
+
 public class MinimaxPlayer extends GomokuPlayer {
     
-    private GomokuMove bestMove;
+    // Create a HashMap with a limited capacity to store state evaluation
+    // values. Each time a value is accessed, it gets moved to the top of the
+    // list. Least accessed values get removed once the capacity is reached
+    private class TranspositionTable extends LinkedHashMap {
+        private final int capacity;
+
+        public TranspositionTable(int capacity) {
+            super(capacity + 1, 0.75f, true);
+            this.capacity = capacity;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Entry eldest) {
+            return this.size() > capacity;
+        }
+    }
+    
+    private final TranspositionTable transpositionTable;
     
     public MinimaxPlayer(int playerIndex, int opponentIndex) {
         super(playerIndex, opponentIndex);
+        this.transpositionTable = new TranspositionTable(1000000);
     }
     
     /**
      * Prune moves by focusing on areas where stones already exist to reduce
-     * the search space, and sort the nodes using a heuristic evaluation
+     * the search space, and sort the nodes using the evaluation function
      * @param state State to find moves for
      * @return A list of pruned moves
      */
     public List<GomokuMove> pruneMoves(GomokuState state) {
         int[][] board = state.getBoardArray();
-        List<GomokuMove> moves = state.getMoves();
+        List<GomokuMove> moves = state.getMoves();        
         
-        // Comparator for our TreeSet, use the heuristic evaluation to sort
         Comparator<GomokuMove> stateCompare = new Comparator<GomokuMove>() {
             @Override
             public int compare(GomokuMove move1, GomokuMove move2) {
@@ -46,8 +65,8 @@ public class MinimaxPlayer extends GomokuPlayer {
             }
         };
         
-        // Use a TreeSet - no duplicates, and sorted by heuristic score
-        Set<GomokuMove> prunedMoves = new TreeSet<>(stateCompare);
+        // Store the pruned moves, avoid duplicates
+        HashSet<GomokuMove> prunedMoves = new HashSet<>();
         
         // Board is empty, we have to make an opening move
         if(moves.size() == board.length * board.length) {
@@ -56,8 +75,8 @@ public class MinimaxPlayer extends GomokuPlayer {
         }
         
         // Focus on moves that occur up to k intersections around an existing
-        // stone on the board
-        for(int k = 1; k <= 1; k++) {
+        // stone on the board (avoid evaluating moves too far away)
+        for(int k = 1; k <= 2; k++) {
             for(int i = 0; i < board.length; i++) {
                 for(int j = 0; j < board.length; j++) {
                     if(board[i][j] != 0) {
@@ -101,16 +120,18 @@ public class MinimaxPlayer extends GomokuPlayer {
             }
         }
         
-        // Evaluate the best 10 moves on each level, and ignore all others
+        // Return the 10 best moves on each level to reduce branching factor
         
         // Sort by worst heuristic scores first if opponent
         if(state.getCurrentIndex() == this.opponentIndex) {
             List<GomokuMove> prunedList = new ArrayList(prunedMoves);
+            prunedList.sort(stateCompare);
             return prunedList.size() > 10 ? prunedList.subList(0, 10) 
                     : prunedList;
         // Sort by best heuristic scores first if player (reverse the list)
         } else {
             List<GomokuMove> prunedList = new ArrayList(prunedMoves);
+            prunedList.sort(stateCompare);
             Collections.reverse(prunedList);
             return prunedList.size() > 10 ? prunedList.subList(0, 10) 
                     : prunedList;
@@ -118,94 +139,171 @@ public class MinimaxPlayer extends GomokuPlayer {
     }
     
     /**
-     * Return the diagonals, columns and rows of a 2D array as a list of 1D 
-     * arrays for more readable processing.
-     * @param array Input array
-     * @return List of 1D arrays for each row/column/diagonal
-     * length
+     * Evaluate the stone at this position, returning a value based on how 
+     * possible this stone can be used to form 5's.
+     * We look around the stone in every direction (horizontal, vertical,
+     * 2x diagonal) and assign a score to each direction individually, based
+     * on how many 5's we can create in this direction and in how many moves.
+     * The evaluation for this stone is then the sum of all the directions.
+     * @param board
+     * @param row
+     * @param col
+     * @return 
      */
-    private List<int[]> getAxes(int[][] array) {
-        List<int[]> axes = new ArrayList<>();
+    public int evaluateStone(int[][] board, int row, int col) {
+        // Record the index of the current stone
+        int stoneIndex = board[row][col];
+        int score = 0;
         
-        // Loop the top half of the diagonals, moving to the left
-        for(int i = 0; i < array.length; i++) {
-            if(i >= 5 - 1) {
-                int rowlength = i + 1;
-                int[] diagonal = new int[rowlength];
-                boolean empty = true;
-                for(int j = 0; j < rowlength; j++) {
-                    diagonal[j] = array[j][i - j];
-                    if(diagonal[j] != 0) empty = false;
+        // Diagonal, vertical, and horizontal directions
+        int[] diag1 = new int[] { -1, -1, -1, -1, stoneIndex, -1, -1, -1, -1 };
+        int[] diag2 = new int[] { -1, -1, -1, -1, stoneIndex, -1, -1, -1, -1 };
+        int[]  vert = new int[] { -1, -1, -1, -1, stoneIndex, -1, -1, -1, -1 };
+        int[] horiz = new int[] { -1, -1, -1, -1, stoneIndex, -1, -1, -1, -1 };
+        
+        // Diagonal 1, top left
+        for(int i = 1; i < 5; i++) {
+            if(row - i >= 0 && col - i >=0) {
+                if(board[row - i][col - i] == 0) {
+                    diag1[4 - i] = board[row - i][col - i];
+                } else if(board[row - i][col - i] == stoneIndex) {
+                    diag1[4 - i] = board[row - i][col - i];
+                } else {
+                    break;
                 }
-                if(!empty) axes.add(diagonal);
             }
         }
         
-        // Loop the bottom half of the diagonals, moving to the left
-        for(int i = 1; i < array.length; i++) {
-            if(i <= array.length - 5) {
-                int rowlength = array.length - i;
-                int[] diagonal = new int[rowlength];
-                boolean empty = true;
-                for(int j = 0; j < rowlength; j++) {
-                    diagonal[j] = array[i + j][array.length - 1 - j];
-                    if(diagonal[j] != 0) empty = false;
+        // Diagonal 1, bottom right
+        for(int i = 1; i < 5; i++) {
+            if(row + i < board.length && col + i < board.length) {
+                if(board[row + i][col + i] == 0) {
+                    diag1[4 + i] = board[row + i][col + i];
+                } else if(board[row + i][col + i] == stoneIndex) {
+                    diag1[4 + i] = board[row + i][col + i];
+                } else {
+                    break;
                 }
-                if(!empty) axes.add(diagonal);
             }
         }
         
-        // Loop the top half of the diagonals, moving to the right
-        for(int i = 0; i < array.length; i++) {
-            int rowlength = array.length - i;
-            if(rowlength >= 5) {
-                int[] diagonal = new int[rowlength];
-                boolean empty = true;
-                for(int j = 0; j < rowlength; j++) {
-                    diagonal[j] = array[j][i + j];
-                    if(diagonal[j] != 0) empty = false;
+        // Diagonal 2, top right
+        for(int i = 1; i < 5; i++) {
+            if(row - i >= 0 && col + i < board.length) {
+                if(board[row - i][col + i] == 0) {
+                    diag2[4 - i] = board[row - i][col + i];
+                } else if(board[row - i][col + i] == stoneIndex) {
+                    diag2[4 - i] = board[row - i][col + i];
+                } else {
+                    break;
                 }
-                if(!empty) axes.add(diagonal);
             }
         }
         
-        // Loop the bottom half of the diagonals, moving to the right
-        for(int i = 1; i < array.length; i++) {
-            int rowlength = array.length - i;
-            if(rowlength >= 5) {
-                int[] diagonal = new int[rowlength];
-                boolean empty = true;
-                for(int j = 0; j < rowlength; j++) {
-                    diagonal[j] = array[i + j][j];
-                    if(diagonal[j] != 0) empty = false;
+        // Diagonal 2, bottom left
+        for(int i = 1; i < 5; i++) {
+            if(row + i < board.length && col - i >=0) {
+                if(board[row + i][col - i] == 0) {
+                    diag2[4 + i] = board[row + i][col - i];
+                } else if(board[row + i][col - i] == stoneIndex) {
+                    diag2[4 + i] = board[row + i][col - i];
+                } else {
+                    break;
                 }
-                if(!empty) axes.add(diagonal);
             }
         }
         
-        // Loop the columns
-        for(int j = 0; j < array.length; j++) {
-            int[] column = new int[array.length];
-            boolean empty = true;
-            for(int i = 0; i < array.length; i++) {
-                column[i] = array[i][j];
-                if(column[i] != 0) empty = false;
+        // Vertical top
+        for(int i = 1; i < 5; i++) {
+            if(row - i >= 0) {
+                if(board[row - i][col] == 0) {
+                    vert[4 - i] = board[row - i][col];
+                } else if(board[row - i][col] == stoneIndex) {
+                    vert[4 - i] = board[row - i][col];
+                } else {
+                    break;
+                }
             }
-            if(!empty) axes.add(column);
+        }        
+
+        // Vertical bottom
+        for(int i = 1; i < 5; i++) {
+            if(row + i < board.length) {
+                if(board[row + i][col] == 0) {
+                    vert[4 + i] = board[row + i][col];
+                } else if(board[row + i][col] == stoneIndex) {
+                    vert[4 + i] = board[row + i][col];
+                } else {
+                    break;
+                }
+            }
+        }        
+        
+        // Horizontal left
+        for(int i = 1; i < 5; i++) {
+            if(col - i >= 0) {
+                if(board[row][col - i] == 0) {
+                    horiz[4 - i] = board[row][col - i];
+                } else if(board[row][col - i] == stoneIndex) {
+                    horiz[4 - i] = board[row][col - i];
+                } else {
+                    break;
+                }
+            }
+        }         
+
+        // Horizontal right
+        for(int i = 1; i < 5; i++) {
+            if(col + i < board.length) {
+                if(board[row][col + i] == 0) {
+                    horiz[4 + i] = board[row][col + i];
+                } else if(board[row][col + i] == stoneIndex) {
+                    horiz[4 + i] = board[row][col + i];
+                } else {
+                    break;
+                }
+            }
         }
         
-        // Loop the rows
-        for(int i = 0; i < array.length; i++) {
-            int[] row = new int[array.length];
-            boolean empty = true;
-            for(int j = 0; j < array.length; j++) {
-                row[j] = array[i][j];
-                if(row[j] != 0) empty = false;
-            }
-            if(!empty) axes.add(row);
-        }
+        score+= scoreDirection(diag1, stoneIndex);
+        score+= scoreDirection(diag2, stoneIndex);
+        score+= scoreDirection(vert, stoneIndex);
+        score+= scoreDirection(horiz, stoneIndex);
+        return score;
+    }
+    
+    /**
+     * Given some array representing a vertical/horizontal/diagonal direction
+     * on the board, calculate a score based on how many 5's can be formed
+     * and in how many moves.
+     * @param direction A 1D array representing a direction on the board,
+     * of any length >=5
+     * @param index The player index to check (1 or 2)
+     * @return Score for this direction
+     */
+    public int scoreDirection(int[] direction, int index) {
+        int score = 0;
+        // Scores for making a 5 in 4, 3, 2, 1 and 0 moves
+        int[] scores = {19, 15, 11, 7, 3};
         
-        return axes;
+        for(int i = 0; i < direction.length; i++) {
+            if(i + 4 < direction.length) {
+                int stones = 0;
+                int empty = 0;
+                // Pass a window of 5 across the direction and check how many
+                // stones and empty spots there are. 
+                for(int j = 0; j <= 4; j++) {
+                    if(direction[i + j] == index) stones++;
+                    if(direction[i + j] == 0) empty++;
+                }
+                // First check if it's possible to form a 5 in this window
+                if(stones + empty == 5) {
+                    // Amount of empty spots = # of moves needed to make a 5
+                    score += scores[empty];
+                }
+            }
+        }
+        return score;
     }
     
     /**
@@ -222,101 +320,110 @@ public class MinimaxPlayer extends GomokuPlayer {
             return evaluateState(state);
         }
         else if(state.getCurrentIndex() == this.playerIndex) {
-            int maximum = alpha;
+            int maximum = Integer.MIN_VALUE;
             for(GomokuMove move : pruneMoves(state)) {
                 state.makeMove(move);
-                int score = minimax(state, depth - 1, maximum, beta);
+                int score = minimax(state, depth - 1, alpha, beta);
                 state.undoMove(move);
                 if(score > maximum) {
-                    if(depth == 8) bestMove = move;
                     maximum = score;
                 }
-                if(beta <= maximum) break;
+                alpha = Math.max(alpha, maximum);
+                if(beta <= alpha) break;
             }
             return maximum;
         }
         else {
-            int minimum = beta;
+            int minimum = Integer.MAX_VALUE;
             for(GomokuMove move : pruneMoves(state)) {
                 state.makeMove(move);
-                int score = minimax(state, depth - 1, alpha, minimum);
+                int score = minimax(state, depth - 1, alpha, beta);
                 state.undoMove(move);
                 if(score < minimum) {
                     minimum = score;
                 }
-                if(minimum <= alpha) break;
+                beta = Math.min(beta, minimum);
+                if(beta <= alpha) break;
             }
             return minimum;
         }
     }
     
     /**
-     * Evaluate a state, count how many 5/4/3/2/1's we have, and subtract
-     * from how many our opponent has.
+     * Evaluate a state by evaluating each stone individually for each player,
+     * returning a score based on how many possible 5's pass through the stone,
+     * and in how many moves.
      * @param state State to evaluate
      * @return Score of the state
      */
     private int evaluateState(GomokuState state) {
+        if(transpositionTable.get(state.getZobristHash()) != null) {
+            return (int) transpositionTable.get(state.getZobristHash());
+        }
+        
+        // Check for a winning/losing situation first
+        if(state.isWinner(this.opponentIndex)) {
+            transpositionTable.put(state.getZobristHash(), -10000);
+            return -10000;
+        }
+        else if(state.isWinner(this.playerIndex)) {
+            transpositionTable.put(state.getZobristHash(), 10000);
+            return 10000;
+        }
+        
+        // No winning situation found, evaluate the state and return an 
+        // estimate of the value
+        int score = 0;
         int[][] board = state.getBoardArray();
-        List<int[]> axes = getAxes(board);
-        
-        // Store the patterns we find, rows of 1-5
-        int[] patterns_opponent = new int[5];
-        int[] patterns_player = new int[5];
-        
-        // For every diagonal, column, and row
-        for(int[] array : axes) {
-            for(int i = 0; i < array.length; i++) {
-                if(array[i] == playerIndex || array[i] == opponentIndex) {
-                    int index = array[i];
-                    int count = 1;
-                    // Count consecutive stones belonging to the index
-                    for(int j = i + 1; j < array.length; j++) {
-                        if(array[j] == index) count++;
-                        else break;
-                    }
-                    int open = 0;
-                    // Check if this row of stones is open on the left/right
-                    if(i - 1 >= 0 && array[i - 1] == 0) open++;
-                    if(i + count < array.length && array[i + count] == 0) open++;
-                    
-                    // Increment our patterns array, giving double open rows
-                    // a bigger weight
-                    if(index == playerIndex) {
-                        if(count <= 4) {
-                            patterns_player[count - 1] += open;
-                        } else {
-                            patterns_player[4]++;
-                        }
+        for(int i = 0; i < board.length; i++) {
+            for(int j = 0; j < board.length; j++) {
+                if(board[i][j] != 0) {
+                    // Evaluate each stone separately, minus score for opponent
+                    // and increase score for us
+                    if(board[i][j] == this.opponentIndex) {
+                        score -= evaluateStone(board, i, j);
                     } else {
-                        if(count <= 4) {
-                            patterns_opponent[count - 1] += open;
-                        } else {
-                            patterns_opponent[4]++;
-                        }
+                        score += evaluateStone(board, i, j);
                     }
-                    i = i + count - 1;
                 }
             }
         }
         
-        return + (patterns_player[4] * 15000)
-                + (patterns_player[3] * 2500)
-                + (patterns_player[2] * 50)
-                + (patterns_player[1] * 5)
-                + (patterns_player[0] * 1)
-                - (patterns_opponent[4] * 15000)
-                - (patterns_opponent[3] * 2500)
-                - (patterns_opponent[2] * 50)
-                - (patterns_opponent[1] * 5)
-                - (patterns_opponent[0] * 1);
+        transpositionTable.put(state.getZobristHash(), score);
+        return score;
     }
     
     @Override
     public GomokuMove getMove(GomokuState state) {
-        System.out.println("Best score: " + minimax(state, 8, Integer.MIN_VALUE, 
-                Integer.MAX_VALUE));
-        System.out.println("Best move: " + bestMove.row + ", " + bestMove.col);
+        this.transpositionTable.clear();
+        long startTime = System.currentTimeMillis();
+        
+        // Initial moves for this state
+        List<GomokuMove> moves = pruneMoves(state);
+        
+        int depth = 8;
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
+        int bestScore = alpha;
+        GomokuMove bestMove = new GomokuMove();
+
+        // Run minimax for all the children (initial moves)
+        for(GomokuMove move : moves) {
+            state.makeMove(move);
+            int score = minimax(state, depth - 1, alpha, beta);
+            state.undoMove(move);
+            if(score > bestScore) {
+                // Save the best move found so far
+                bestScore = score;
+                bestMove = move;
+            }
+            alpha = Math.max(alpha, bestScore);
+        }
+        
+        long duration = System.currentTimeMillis() - startTime;
+        
+        System.out.println("Evaluation: " + bestScore);
+        System.out.println("Time taken: " + duration + "ms");
         return bestMove;
     }
     

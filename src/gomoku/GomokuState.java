@@ -2,20 +2,43 @@ package gomoku;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 
 /**
- * A class representing the state of a Gomoku game at any point.
+ * A class representing the state of a Gomoku game at any point. Supports
+ * Zobrist Hashing.
  * @author Hassan
  */
 public class GomokuState {
     
     private final int[][] board;
-    private final int[][] player1Board;
-    private final int[][] player2Board;
     private final int intersections;
     private final Stack<GomokuMove> moveHistory;
     private int currentIndex;
+    
+    // Zobrist Hashing information for this state
+    private long zobristHash;
+    private long[][][] zobristKeys;
+    
+    /**
+     * Generate random bit strings (64-bit) for every board position, and for
+     * every possible state that particular board position can be in
+     */
+    private void generateZobristKeys() {
+        Random keyGenerator = new Random();
+        for(int i = 0; i < zobristKeys.length; i++) {
+            for(int j = 0; j < zobristKeys[0].length; j++) {
+                for(int k = 0; k < zobristKeys[0][0].length; k++) {
+                    zobristKeys[i][j][k] = keyGenerator.nextLong();
+                }
+            }
+        }
+    }
+    
+    public long getZobristHash() {
+        return zobristHash;
+    }
     
     /**
      * Create a new GomokuState instance
@@ -24,24 +47,11 @@ public class GomokuState {
     public GomokuState(int intersections) {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
-        this.player1Board = new int[intersections][intersections];
-        this.player2Board = new int[intersections][intersections];
         this.currentIndex = 1;
         this.moveHistory = new Stack<>();
-    }
-    
-    /**
-     * Create a new GomokuState from a board array, for debugging
-     * @param board
-     * @param playerIndex
-     */
-    public GomokuState(int[][] board, int playerIndex) {
-        this.intersections = board.length;
-        this.player1Board = new int[board.length][board.length];
-        this.player2Board = new int[board.length][board.length];
-        this.board = board;
-        this.currentIndex = playerIndex;
-        this.moveHistory = new Stack<>();
+        this.zobristKeys = new long[2][intersections][intersections];
+        this.zobristHash = 0;
+        generateZobristKeys();
     }
     
     /**
@@ -51,23 +61,16 @@ public class GomokuState {
     private GomokuState(GomokuState previousState) {
         this.intersections = previousState.intersections;
         this.board = new int[intersections][intersections];
-        this.player1Board = new int[intersections][intersections];
-        this.player2Board = new int[intersections][intersections];
         this.currentIndex = previousState.currentIndex;
-        this.moveHistory = previousState.moveHistory;
+        this.moveHistory = (Stack<GomokuMove>) previousState.moveHistory.clone();
         // Copy the previous state
         for(int i = 0; i < intersections; i++) {
             System.arraycopy(previousState.board[i], 0, this.board[i], 0, 
                     intersections);
         }
-        for(int i = 0; i < intersections; i++) {
-            System.arraycopy(previousState.player1Board[i], 0, 
-                    this.player1Board[i], 0, intersections);
-        }
-        for(int i = 0; i < intersections; i++) {
-            System.arraycopy(previousState.player2Board[i], 0, 
-                    this.player2Board[i], 0, intersections);
-        }
+        // Copy Zobrist hash and keys
+        this.zobristHash = previousState.zobristHash;
+        this.zobristKeys = previousState.zobristKeys;
     }
     
     /**
@@ -86,44 +89,30 @@ public class GomokuState {
         return moves;
     }
     
-    /**
-     * Copy the current state and return a new instance of it.
-     * @return
-     */
-    public GomokuState copy() {
-        return new GomokuState(this);
-    }
-    
     public void makeMove(GomokuMove move) {
         if(board[move.row][move.col] == 0) {
             this.board[move.row][move.col] = this.currentIndex;
-            switch(this.currentIndex) {
-                case 1:
-                    player1Board[move.row][move.col] = 1;
-                    break;
-                case 2:
-                    player2Board[move.row][move.col] = 1;
-                    break;
-            }
             this.currentIndex = this.currentIndex == 1 ? 2 : 1;
             this.moveHistory.push(move);
+            this.zobristHash ^= zobristKeys[currentIndex - 1][move.row][move.col];
         }
     }
     
     public void undoMove(GomokuMove move) {
         if(moveHistory.peek().equals(move)) {
             this.board[move.row][move.col] = 0;
-            switch(this.currentIndex) {
-                case 1:
-                    player2Board[move.row][move.col] = 0;
-                    break;
-                case 2:
-                    player1Board[move.row][move.col] = 0;
-                    break;
-            }
+            this.zobristHash ^= zobristKeys[currentIndex - 1][move.row][move.col];
             this.currentIndex = this.currentIndex == 1 ? 2 : 1;
             this.moveHistory.pop();
         }
+    }
+    
+    /**
+     * Deep copy the current state and return a new instance.
+     * @return
+     */
+    public GomokuState copy() {
+        return new GomokuState(this);
     }
     
     /**
@@ -168,22 +157,6 @@ public class GomokuState {
      */
     public int[][] getBoardArray() {
         return board;
-    }
-    
-    /**
-     * Return an integer array for an individual player, where [i][j] maps to
-     * 1 if the index has placed a stone there, or 0 if they haven't
-     * @param index
-     * @return
-     */
-    public int[][] getPlayerArray(int index) {
-        switch(index) {
-            case 1:
-                return this.player1Board;
-            case 2:
-                return this.player2Board;
-        }
-        return null;
     }
     
     /**

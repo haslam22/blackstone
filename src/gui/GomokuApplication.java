@@ -42,7 +42,7 @@ public class GomokuApplication {
         gomokuFrame.setTitle("Gomoku");
         gomokuFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         gomokuFrame.setResizable(true);
-        gomokuFrame.setMinimumSize(new Dimension(1000, 800));
+        gomokuFrame.setMinimumSize(new Dimension(800, 600));
         gomokuFrame.setPreferredSize(new Dimension(1000, 800));
         
         this.boardPanel = new GomokuBoardPanel(intersections);
