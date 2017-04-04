@@ -1,5 +1,5 @@
 # Gomoku
-Gomoku game app, with Minimax AI (Work in progress)
+Gomoku game app + Minimax AI written in Java. Latest build (runnable jar): [dist/Gomoku.jar](dist/Gomoku.jar)
 
 ![alt text](http://i.imgur.com/zI2FdPu.png)
 
