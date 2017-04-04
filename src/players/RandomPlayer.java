@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- *
+ * Test player for debugging - places random valid moves on the board.
  * @author Hassan
  */
 public class RandomPlayer extends GomokuPlayer {
@@ -27,5 +27,4 @@ public class RandomPlayer extends GomokuPlayer {
         return legalMoves.get(random.nextInt(legalMoves.size()));
     }
 
-    
 }

@@ -37,6 +37,10 @@ public class GomokuApplication {
     private int time = 5;
     private int intersections = 15;
     
+    /**
+     * Create the JFrame. Initialises the child panels (board, game, settings)
+     * and assembles them in a GridLayout.
+     */
     private GomokuApplication() {
         JFrame gomokuFrame = new JFrame();
         gomokuFrame.setTitle("Gomoku");

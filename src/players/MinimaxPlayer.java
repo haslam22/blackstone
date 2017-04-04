@@ -35,11 +35,11 @@ public class MinimaxPlayer extends GomokuPlayer {
         }
     }
     
-    private final TranspositionTable transpositionTable;
+    private final TranspositionTable evaluationCache;
     
     public MinimaxPlayer(int playerIndex, int opponentIndex) {
         super(playerIndex, opponentIndex);
-        this.transpositionTable = new TranspositionTable(1000000);
+        this.evaluationCache = new TranspositionTable(1000000);
     }
     
     /**
@@ -52,6 +52,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         int[][] board = state.getBoardArray();
         List<GomokuMove> moves = state.getMoves();        
         
+        // Compare two moves based on the evaluation after making the move
         Comparator<GomokuMove> stateCompare = new Comparator<GomokuMove>() {
             @Override
             public int compare(GomokuMove move1, GomokuMove move2) {
@@ -68,7 +69,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         // Store the pruned moves, avoid duplicates
         HashSet<GomokuMove> prunedMoves = new HashSet<>();
         
-        // Board is empty, we have to make an opening move
+        // Board is empty, make an opening move in the middle
         if(moves.size() == board.length * board.length) {
             prunedMoves.add(new GomokuMove(board.length / 2, board.length / 2));
             return new ArrayList(prunedMoves);
@@ -145,9 +146,9 @@ public class MinimaxPlayer extends GomokuPlayer {
      * 2x diagonal) and assign a score to each direction individually, based
      * on how many 5's we can create in this direction and in how many moves.
      * The evaluation for this stone is then the sum of all the directions.
-     * @param board
-     * @param row
-     * @param col
+     * @param board 2D board array
+     * @param row Row of the stone
+     * @param col Column of the stone
      * @return 
      */
     public int evaluateStone(int[][] board, int row, int col) {
@@ -276,8 +277,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * Given some array representing a vertical/horizontal/diagonal direction
      * on the board, calculate a score based on how many 5's can be formed
      * and in how many moves.
-     * @param direction A 1D array representing a direction on the board,
-     * of any length >=5
+     * @param direction A 1D array representing a direction on the board
      * @param index The player index to check (1 or 2)
      * @return Score for this direction
      */
@@ -310,7 +310,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * Run the minimax algorithm up to a certain depth, with alpha-beta
      * pruning.
      * @param state Starting state
-     * @param depth How deep to search the tree
+     * @param depth How deep to search the tree before evaluating
      * @param alpha Best possible value for the maximising player so far
      * @param beta Best possible value for the minimising player so far
      * @return
@@ -357,17 +357,18 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @return Score of the state
      */
     private int evaluateState(GomokuState state) {
-        if(transpositionTable.get(state.getZobristHash()) != null) {
-            return (int) transpositionTable.get(state.getZobristHash());
+        // Check evaluation cache, may have already seen this state
+        if(evaluationCache.get(state.getZobristHash()) != null) {
+            return (int) evaluationCache.get(state.getZobristHash());
         }
         
         // Check for a winning/losing situation first
         if(state.isWinner(this.opponentIndex)) {
-            transpositionTable.put(state.getZobristHash(), -10000);
+            evaluationCache.put(state.getZobristHash(), -10000);
             return -10000;
         }
         else if(state.isWinner(this.playerIndex)) {
-            transpositionTable.put(state.getZobristHash(), 10000);
+            evaluationCache.put(state.getZobristHash(), 10000);
             return 10000;
         }
         
@@ -389,21 +390,25 @@ public class MinimaxPlayer extends GomokuPlayer {
             }
         }
         
-        transpositionTable.put(state.getZobristHash(), score);
+        // Place this evaluation into the cache
+        evaluationCache.put(state.getZobristHash(), score);
         return score;
     }
     
     @Override
     public GomokuMove getMove(GomokuState state) {
-        this.transpositionTable.clear();
+        this.evaluationCache.clear();
         long startTime = System.currentTimeMillis();
         
         // Initial moves for this state
         List<GomokuMove> moves = pruneMoves(state);
         
+        // Minimax search parameters
         int depth = 8;
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
+        
+        // Track the best score and the best move
         int bestScore = alpha;
         GomokuMove bestMove = new GomokuMove();
 

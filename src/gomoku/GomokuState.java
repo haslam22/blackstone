@@ -6,8 +6,7 @@ import java.util.Random;
 import java.util.Stack;
 
 /**
- * A class representing the state of a Gomoku game at any point. Supports
- * Zobrist Hashing.
+ * A class representing the state of a Gomoku game at any point.
  * @author Hassan
  */
 public class GomokuState {
@@ -17,7 +16,6 @@ public class GomokuState {
     private final Stack<GomokuMove> moveHistory;
     private int currentIndex;
     
-    // Zobrist Hashing information for this state
     private long zobristHash;
     private long[][][] zobristKeys;
     
@@ -36,10 +34,6 @@ public class GomokuState {
         }
     }
     
-    public long getZobristHash() {
-        return zobristHash;
-    }
-    
     /**
      * Create a new GomokuState instance
      * @param intersections Number of intersections on the board
@@ -55,7 +49,7 @@ public class GomokuState {
     }
     
     /**
-     * Copy constructor for GomokuState
+     * Deep copy constructor for GomokuState.
      * @param previousState State to copy
      */
     private GomokuState(GomokuState previousState) {
@@ -74,8 +68,8 @@ public class GomokuState {
     }
     
     /**
-     * Return available moves (unoccupied intersections) on the board
-     * @return A list of moves
+     * Return available moves (unoccupied intersections) on the board.
+     * @return A list of valid moves
      */
     public List<GomokuMove> getMoves() {
         List<GomokuMove> moves = new ArrayList<>();
@@ -89,6 +83,10 @@ public class GomokuState {
         return moves;
     }
     
+    /**
+     * Apply a move to this state. Must be unoccupied.
+     * @param move Move to apply
+     */
     public void makeMove(GomokuMove move) {
         if(board[move.row][move.col] == 0) {
             this.board[move.row][move.col] = this.currentIndex;
@@ -98,6 +96,11 @@ public class GomokuState {
         }
     }
     
+    /**
+     * Undo a move on this state. Must be the previous move applied to this
+     * state.
+     * @param move Move to undo
+     */
     public void undoMove(GomokuMove move) {
         if(moveHistory.peek().equals(move)) {
             this.board[move.row][move.col] = 0;
@@ -108,8 +111,20 @@ public class GomokuState {
     }
     
     /**
+     * Return the Zobrist hash value for this state, a unique 64-bit long value 
+     * representing this state. This is updated automatically as moves are made
+     * and unmade.
+     * Note: Collisions can still occur, although very rarely.
+     * @return Zobrist hash value (64-bit, type long)
+     */
+    public long getZobristHash() {
+        return zobristHash;
+    }
+    
+    /**
      * Deep copy the current state and return a new instance.
-     * @return
+     * @return A deep copy of the state, with no references to the previous
+     * state.
      */
     public GomokuState copy() {
         return new GomokuState(this);
@@ -117,15 +132,15 @@ public class GomokuState {
     
     /**
      * Check if this state is a terminal state.
-     * @return
+     * @return True if a player has won or the board is full
      */
     public boolean isTerminal() {
-        return isWinner(1) || isWinner(2);
+        return isWinner(1) || isWinner(2) || isFull();
     }
     
     /**
-     * Return the index of the current player for this state
-     * @return Integer index (Player 1 or 2)
+     * Return the index of the player who has to make a move for this state.
+     * @return Player index (Player 1 or 2)
      */
     public int getCurrentIndex() {
         return this.currentIndex;
@@ -151,17 +166,19 @@ public class GomokuState {
     }
     
     /**
-     * Return an integer array representing the board, where [i][j] maps to
-     * a player index, or 0 if empty.
-     * @return
+     * Get the internal 2D board array representing the stones on each
+     * intersection for this state.
+     * @return 2D board array, were [i][j] represents an intersection on the 
+     * GomokuBoard and maps to 0 (empty) or a player index (1 or 2) if the 
+     * intersection is occupied by that index.
      */
     public int[][] getBoardArray() {
         return board;
     }
     
     /**
-     * Check if the board is full
-     * @return True if the board has no more available moves
+     * Check if the board is full.
+     * @return True if all the intersections for the board are occupied
      */
     public boolean isFull() {
         for(int i = 0; i < intersections; i++) {
@@ -180,7 +197,7 @@ public class GomokuState {
      * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchVertical(int row, int col, int index, int amount) {
+    private boolean searchVertical(int row, int col, int index, int amount) {
         if(row + amount < intersections) {
             int count = 0;
             for(int k = 1; k <= amount; k++) {
@@ -201,7 +218,7 @@ public class GomokuState {
      * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchHorizontal(int row, int col, int index, int amount) {
+    private boolean searchHorizontal(int row, int col, int index, int amount) {
         if(col + amount < intersections) {
             int count = 0;
             for(int k = 1; k <= amount; k++) {
@@ -223,7 +240,7 @@ public class GomokuState {
      * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchDiagonalRight(int row, int col, int index, 
+    private boolean searchDiagonalRight(int row, int col, int index, 
             int amount) {
         if(col + amount < intersections && row + amount < intersections) {
             int count = 0;
@@ -246,7 +263,7 @@ public class GomokuState {
      * @param amount Amount of stones to find
      * @return
      */
-    public boolean searchDiagonalLeft(int row, int col, int index, int amount) {
+    private boolean searchDiagonalLeft(int row, int col, int index, int amount) {
         if(col - amount >= 0 && row + amount < intersections) {
             int count = 0;
             for(int k = 1; k <= amount; k++) {
