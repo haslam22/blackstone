@@ -3,7 +3,7 @@ A powerful Gomoku (Renju, Pente, Five in a Row) AI written in Java, using the Mi
 
 Latest build (runnable jar): [dist/Gomoku.jar](dist/Gomoku.jar)
 
-![alt text](http://i.imgur.com/zI2FdPu.png)
+![alt text](http://i.imgur.com/sMCavOR.png)
 
 ## Current Features
 - Minimax AI (up to depth 8) with alpha-beta pruning, simple move ordering and evaluation caching
