@@ -1,15 +1,18 @@
 package gomoku;
 
 /**
- * A simple class representing a move or position on the Gomoku board
+ * A simple class representing a move or position on the Gomoku board.
  * @author Hassan
  */
 public class GomokuMove {
     
-    public int row;
-    public int col;
+    public final int row;
+    public final int col;
     
-    public GomokuMove() {}
+    public GomokuMove() {
+        this.row = -1;
+        this.col = -1;
+    }
     
     public GomokuMove(int row, int col) {
         this.row = row;
@@ -18,6 +21,7 @@ public class GomokuMove {
     
     @Override
     public boolean equals(Object o) {
+        if(!(o instanceof GomokuMove)) return false;
         GomokuMove move = (GomokuMove) o;
         return (move.col == this.col) && (move.row == this.row);
     }

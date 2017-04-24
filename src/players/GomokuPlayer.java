@@ -1,5 +1,6 @@
 package players;
 
+import gomoku.GomokuGame;
 import gomoku.GomokuMove;
 import gomoku.GomokuState;
 
@@ -14,13 +15,16 @@ public abstract class GomokuPlayer {
 
     protected final int playerIndex;
     protected final int opponentIndex;
+    protected final GomokuGame game;
     
     /**
      * Create a new GomokuPlayer.
-     * @param playerIndex Index of this player.
-     * @param opponentIndex Index of the opponent.
+     * @param game
+     * @param playerIndex Index of this player
+     * @param opponentIndex Index of the opponent
      */
-    public GomokuPlayer(int playerIndex, int opponentIndex) {
+    public GomokuPlayer(GomokuGame game, int playerIndex, int opponentIndex) {
+        this.game = game;
         this.playerIndex = playerIndex;
         this.opponentIndex = opponentIndex;
     }

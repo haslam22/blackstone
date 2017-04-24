@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
@@ -25,7 +24,6 @@ public class GomokuGamePanel extends JPanel {
     private final GomokuPlayerPanel[] playerPanels;
     private JButton newGameButton;
     private JButton forfeitButton;
-    private JLabel statusLabel;
     
     protected GomokuGamePanel(GomokuApplication app) {
         this.app = app;
@@ -41,10 +39,6 @@ public class GomokuGamePanel extends JPanel {
             playerPanels[0].setTime(time + ":00");
             playerPanels[1].setTime(time + ":00");
         }
-    }
-    
-    protected void updateStatus(String status) {
-        this.statusLabel.setText(status);
     }
     
     @Override
@@ -102,17 +96,6 @@ public class GomokuGamePanel extends JPanel {
         
         buttonPanel.add(newGameButton);
         buttonPanel.add(forfeitButton);
-        
-        JPanel statusPanel = new JPanel(new FlowLayout());
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weightx = 20;
-        gbc.weighty = 20;
-        gbc.gridwidth = 2;
-        this.add(statusPanel, gbc);
-        
-        this.statusLabel = new JLabel("");
-        statusPanel.add(statusLabel);
         
         // Add listeners to handle any game buttons
         newGameButton.addActionListener(new ActionListener() {

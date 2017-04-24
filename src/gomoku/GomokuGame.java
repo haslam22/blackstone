@@ -2,22 +2,28 @@ package gomoku;
 
 import gui.GomokuApplication;
 import gui.GomokuBoardPanel;
-import gui.GomokuBoardPanel.StoneColor;
 import static gui.GomokuBoardPanel.StoneColor.BLACK;
 import static gui.GomokuBoardPanel.StoneColor.WHITE;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import players.GomokuPlayer;
+import players.HumanPlayer;
+import players.minimax.MinimaxPlayer;
 
 /**
  * This class manages a game between two players, calling getMove() on
  * each player until the game ends.
  * @author Hassan
  */
-public class GomokuGame implements Runnable {
+public class GomokuGame {
     
     private final GomokuState state;
     private final GomokuPlayer[] players;
     private final GomokuBoardPanel board;
     private final GomokuApplication app;
+    private final int intersections;
+    private final Thread gameThread;
     
     /**
      * Create a new game between two players.
@@ -27,80 +33,126 @@ public class GomokuGame implements Runnable {
      * @param player2 Player 2
      */
     public GomokuGame(GomokuApplication app, int intersections,
-            GomokuPlayer player1, GomokuPlayer player2) {
-        this.state = new GomokuState(intersections);
-        this.players = new GomokuPlayer[] { player1, player2 };
+            String player1, String player2) {
         this.app = app;
         this.board = app.getBoardPanel();
+        this.state = new GomokuState(intersections);
+        this.intersections = intersections;
+        this.players = new GomokuPlayer[] { 
+            createPlayer(player1, 1, 2), 
+            createPlayer(player2, 2, 1) 
+        };
+        this.gameThread = createGame();
+    }
+    
+    public void start(GomokuApplication app) {
+        gameThread.start();
+    }
+    
+    public void stop(GomokuApplication app) {
+        gameThread.interrupt();
+    }
+    
+    private GomokuPlayer createPlayer(String name, 
+            int playerIndex, int opponentIndex) {
+        switch(name) {
+            case "Human":
+                return new HumanPlayer(this, playerIndex, opponentIndex);
+            case "Minimax":
+                return new MinimaxPlayer(this, playerIndex, opponentIndex);
+            default:
+                return null;
+        }
+    }
+    
+    public void writeLog(String text) {
+        app.writeLog(text);
+    }
+    
+    public void addBoardListener(HumanPlayer player) {
+        board.enableStonePicker(player.getPlayerIndex() == 1? BLACK : WHITE);
+        board.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Get the nearest intersection to where the user clicked
+                int row = board.getNearestRow(e.getY());
+                int col = board.getNearestCol(e.getX());
+                if(state.getIntersectionIndex(row, col) == 0) {
+                    synchronized(player) {
+                        // User clicked on a valid move, wake the thread up
+                        player.move = new GomokuMove(row, col);
+                        player.notify();
+                    }
+                    board.removeMouseListener(this);
+                    board.disableStonePicker();
+                }
+            }
+        });
+    }
+    
+    public int getIntersections() {
+        return intersections;
     }
     
     /**
-     * Draw the state of the current game onto the board panel.
-     * @param state Current state
+     * Draw a stone for a player on the board panel at a given row/col location
+     * @param row Intersection row
+     * @param col Intersection col
+     * @param index Index of the player
      */
-    private void drawState(GomokuState state) {
-        int[][] boardArray = state.getBoardArray();
-        for(int i = 0; i < boardArray.length; i++) {
-            for(int j = 0; j < boardArray.length; j++) {
-                if(boardArray[i][j] == 1) {
-                    board.addStone(StoneColor.BLACK, i, j);
-                }
-                if(boardArray[i][j] == 2) {
-                    board.addStone(StoneColor.WHITE, i, j);
-                }
-            }
-        }
-    }
-    
-    @Override
-    public void run() {
-        board.reset();
-        
-        // Start the game, request a move from each player in a loop
-        while(!gameOver() && !Thread.interrupted()) {
-            app.updateStatus("Waiting for turn from player " + 
-                    state.getCurrentIndex() + "...");
-            try {
-                // Pass a copy of the state and request a move
-                GomokuMove move = players[state.getCurrentIndex() - 1]
-                        .getMove(state.copy());
-                this.state.makeMove(move);
-                this.drawState(state);
-            } catch (NullPointerException e) {
-                // A move wasn't returned, exit
+    private void draw(int row, int col, int index) {
+        switch(index) {
+            case 1:
+                board.addStone(BLACK, row, col);
                 break;
+            case 2:
+                board.addStone(WHITE, row, col);
+                break;
+        }
+    }
+    
+    private Thread createGame() {
+        return new Thread(new Runnable(){
+            @Override
+            public void run(){
+                board.reset();
+
+                // Start the game loop, keep requesting moves if the game is alive
+                while(state.terminal() == 0 && !Thread.interrupted()) {
+                    app.updateStatus("Waiting for move from player " + 
+                            state.getCurrentIndex() + "...");
+                    try {
+                        // Pass a copy of the state and request a move
+                        GomokuMove move = players[state.getCurrentIndex() - 1]
+                                .getMove(state);
+                        draw(move.row, move.col, state.getCurrentIndex());
+                        state.makeMove(move);
+                    } catch (NullPointerException e) {
+                        // A move wasn't returned, exit
+                        break;
+                    }
+                }
+
+                int terminal = state.terminal();
+
+                switch (terminal) {
+                    case 1:
+                    case 2:
+                        app.updateStatus("Game over. Winner: Player " + terminal);
+                        break;
+                    case 3:
+                        app.updateStatus("Game over. Winner: N/A (Draw)");
+                        break;
+                    case 0:
+                        app.updateStatus("Game over. Winner: N/A (Interrupted)");
+                        break;
+                }
+
+                // Game has finished, cleanup
+                board.repaint();
+                board.disableStonePicker();
+                app.forfeit();
             }
-        }
-        
-        // Set the winner in the panel
-        int winner = getWinner();
-        if(winner == 1 || winner == 2) {
-            app.updateStatus("Game over. Winner: Player " + winner);
-        } else {
-            app.updateStatus("Game over. Winner: N/A (Draw)");
-        }
-        
-        // Game has finished, cleanup
-        board.repaint();
-        board.disableStonePicker();
-        app.forfeit();
-    }
-    
-    public GomokuState getState() {
-        return this.state;
-    }
-    
-    private boolean gameOver() {
-        return state.isWinner(1) || state.isWinner(2) || state.isFull();
-    }
-    
-    private int getWinner() {
-        if(state.isWinner(1)) return 1;
-        if(state.isWinner(2)) return 2;
-        else return 0;
-    }
-    
-    private StoneColor getColor(int index) {
-        return index == 1? BLACK : WHITE;
+        });
     }
 }

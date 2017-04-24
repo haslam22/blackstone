@@ -40,8 +40,7 @@ public class GomokuBoardPanel extends JPanel {
         }
     }
     
-    // Board properties, calculated dynamically based on the available space,
-    // used to map from row/col to x/y on the board
+    // Board properties, calculated dynamically based on the available space
     private int startX;
     private int startY;
     private int cellSize;
@@ -50,12 +49,17 @@ public class GomokuBoardPanel extends JPanel {
     private int intersections;
     private GomokuStone[][] stones;
     private MouseMotionListener motionListener;
+    private final Font[] fonts;
     
     protected GomokuBoardPanel(int intersections) {
         this.intersections = intersections;
         this.stones = new GomokuStone[intersections][intersections];
         this.setDoubleBuffered(true);
         this.setBackground(new Color(220, 180, 120));
+        this.fonts = new Font[16];
+        for(int i = 0; i < fonts.length; i++) {
+            fonts[i] = new Font("Sans Serif", Font.PLAIN, i);
+        }
     }
     
     public int getIntersections() {
@@ -63,7 +67,7 @@ public class GomokuBoardPanel extends JPanel {
     }
     
     /**
-     * Update the intersections, and redraw the grid
+     * Update the intersections and redraw the grid
      * @param intersections Number of intersections
      */
     protected void updateIntersections(int intersections) {
@@ -74,7 +78,7 @@ public class GomokuBoardPanel extends JPanel {
     
     /**
      * Add a stone to the board at the specified intersection
-     * @param color
+     * @param color StoneColor.BLACK or StoneColor.WHITE
      * @param row Row of the stone to add
      * @param col Column of the stone to add
      */
@@ -88,9 +92,9 @@ public class GomokuBoardPanel extends JPanel {
     /**
      * Add a transparent stone at the specified intersection, which is removed
      * when the panel is repainted
-     * @param color
-     * @param row
-     * @param col
+     * @param color StoneColor.BLACK or StoneColor.WHITE
+     * @param row Row of the stone to add
+     * @param col Column of the stone to add
      */
     private void addTransparentStone(StoneColor color, int row, int col) {
         if(stones[row][col] == null) {
@@ -100,13 +104,18 @@ public class GomokuBoardPanel extends JPanel {
     }
     
     /**
-     * Reset the board, removing all pieces
+     * Reset the board, removing all pieces and repainting
      */
     public void reset() {
         this.stones = new GomokuStone[intersections][intersections];
         repaint();
     }
     
+    /**
+     * Enable the stone picker for the board, showing a semi-transparent piece
+     * on the intersection closest to the mouse cursor.
+     * @param color
+     */
     public void enableStonePicker(StoneColor color) {
         if(this.motionListener == null) {
             this.motionListener = new MouseAdapter() {
@@ -124,6 +133,9 @@ public class GomokuBoardPanel extends JPanel {
         }
     }
     
+    /**
+     * Disable the stone picker for the board, if enabled.
+     */
     public void disableStonePicker() {
         if(this.motionListener != null) {
             this.removeMouseMotionListener(motionListener);
@@ -174,7 +186,7 @@ public class GomokuBoardPanel extends JPanel {
         // Get the current Sans Serif font
         int fontSize = (stringBoundingSize / 4) < 16 ? stringBoundingSize / 4 
                 : 16;
-        Font font = new Font("Sans Serif", Font.PLAIN, fontSize);
+        Font font = this.fonts[fontSize - 1];
         FontMetrics metrics = g2d.getFontMetrics(font);
         
         // Draw numbers for the rows
@@ -228,7 +240,7 @@ public class GomokuBoardPanel extends JPanel {
             }
         }
         
-        
+        // Draw the pieces
         for(int row = 0; row < intersections; row++) {
             for(int col = 0; col < intersections; col++) {
                 if(stones[row][col] != null) {
@@ -248,6 +260,15 @@ public class GomokuBoardPanel extends JPanel {
         g2d.dispose();
     }
     
+    /**
+     * Create the RadialGradientPaint for painting the stone.
+     * @param color StoneColor.WHITE or StoneColor.BLACK
+     * @param x X coordinate (starting at upper left)
+     * @param y Y coordinate (starting at upper left)
+     * @param width Width of the stone
+     * @param height Height of the stone
+     * @return
+     */
     private static RadialGradientPaint getGradientPaint(StoneColor color,
             int x, int y, int width, int height) {
         Color[] colors = new Color[2];
@@ -274,10 +295,11 @@ public class GomokuBoardPanel extends JPanel {
     }
     
     /**
-     * Paint a semi-realistic looking Gomoku stone with a radial gradient
+     * Paint a fancy looking Gomoku stone with a radial gradient on some
+     * given graphics context.
      * @param g2d Graphics context
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x X coordinate (starting at upper left)
+     * @param y Y coordinate (starting at upper left)
      * @param width Width of the stone
      * @param height Height of the stone
      * @param color StoneColor.BLACK or StoneColor.WHITE

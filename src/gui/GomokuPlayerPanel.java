@@ -85,10 +85,7 @@ public class GomokuPlayerPanel extends JPanel {
     private String[] getPlayerStrings() {
         return new String[] {
             "Human",
-            "Minimax",
-            "Monte Carlo",
-            "Neural",
-            "Random"
+            "Minimax"
         };
     }
     
