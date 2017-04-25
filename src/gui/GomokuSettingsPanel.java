@@ -27,6 +27,12 @@ public class GomokuSettingsPanel extends JPanel {
         init();
     }
     
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.intersections.setEnabled(enabled);
+        this.time.setEnabled(enabled);
+    }
+    
     private void init() {
         Border loweredetched = BorderFactory.createEtchedBorder(
                 EtchedBorder.LOWERED);

@@ -16,6 +16,7 @@ public abstract class GomokuPlayer {
     protected final int playerIndex;
     protected final int opponentIndex;
     protected final GomokuGame game;
+    public boolean interrupted;
     
     /**
      * Create a new GomokuPlayer.

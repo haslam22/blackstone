@@ -60,4 +60,8 @@ public class GomokuLogPanel extends JPanel {
         this.statusLabel.setText(text);
     }
     
+    public void clear() {
+        textBox.setText("");
+    }
+    
 }

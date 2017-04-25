@@ -5,11 +5,8 @@ import gomoku.GomokuMove;
 import gomoku.GomokuState;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import players.GomokuPlayer;
 import players.minimax.MinimaxState.GomokuField;
@@ -26,6 +23,21 @@ public class MinimaxPlayer extends GomokuPlayer {
         public ThreatPattern(int[] threatSquares, int startIndex) {
             this.threatSquares = threatSquares;
             this.startIndex = startIndex;
+        }
+    }
+    
+    private static class Threat {
+        // String representation of the threat, e.g. 01111
+        String threatString;
+        // How many moves required to create a 5 from the threat
+        int threatClass; 
+        // The threat squares (moves to defend against/create the threat)
+        int[] threatSquares;
+        public Threat(String threatString, int threatClass, 
+                int[] threatSquares) {
+            this.threatString = threatString;
+            this.threatClass = threatClass;
+            this.threatSquares = threatSquares;
         }
     }
     
@@ -74,7 +86,7 @@ public class MinimaxPlayer extends GomokuPlayer {
                     for(int k = 0; k < threats.length; k++) {
                         if(threats[k] != null) {
                             // Threat exists in this direction (k). Get the
-                            // threat squares (moves to defend/create the threat)
+                            // threat squares (moves to defend/create threat)
                             int[] squares = threats[k].threatSquares;
                             // Loop over every threat square
                             for(int l = 0; l < squares.length; l++) {
@@ -131,7 +143,8 @@ public class MinimaxPlayer extends GomokuPlayer {
      */
     private int minimax(MinimaxState state, int depth, int alpha, int beta) 
             throws InterruptedException {
-        if((System.currentTimeMillis() - startTime) > timeout) {
+        if(this.interrupted || 
+                (System.currentTimeMillis() - startTime) > timeout) {
             throw new InterruptedException();
         }
         nodes++;
@@ -285,7 +298,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         int beta = Integer.MAX_VALUE;
         int bestScore = alpha;
 
-        // Run minimax for all the children (initial moves)
+        // Run minimax for all the moves
         try {
             for(ScoredMove move : scoredMoves) {
                 state.makeMove(move.move);
@@ -298,6 +311,7 @@ public class MinimaxPlayer extends GomokuPlayer {
                 if(beta <= alpha) break;
             }
         } catch(InterruptedException ex) {
+            // Time limit reached, cannot complete search
             return null;
         }
         
@@ -333,7 +347,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         List<GomokuMove> initialMoves = pruneMoves(state);
         GomokuMove bestMove = new GomokuMove();
         
-        int depth = 8;
+        int depth = 10;
         for(int i = 2; i <= depth; i++) {
             // Search and sort moves based on score
             initialMoves = search(initialMoves, i);
@@ -362,7 +376,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param index The player index to check (1 or 2)
      * @return Score for this direction
      */
-    public static int scoreDirection(int[] direction, int index) {
+    private static int scoreDirection(int[] direction, int index) {
         int score = 0;
         // Scores for making a 5
         int[] scores = {19, 15, 11, 7, 3};
@@ -404,7 +418,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param col
      * @return
      */
-    public String convertCol(int col) {
+    private String convertCol(int col) {
         return String.valueOf((char)((col + 1) + 'A' - 1));
     }
     
@@ -413,26 +427,26 @@ public class MinimaxPlayer extends GomokuPlayer {
      * and record any threats found.
      */
     static {
-        Map<String, int[]> THREATS = new HashMap<>();
+        List<Threat> threats = new ArrayList<>();
         // Four
-        THREATS.put("01111", new int[] { 0 });
-        THREATS.put("10111", new int[] { 1 });
-        THREATS.put("11011", new int[] { 2 });
-        THREATS.put("11101", new int[] { 3 });
-        THREATS.put("11110", new int[] { 4 });
-        THREATS.put("02222", new int[] { 0 });
-        THREATS.put("20222", new int[] { 1 });
-        THREATS.put("22022", new int[] { 2 });
-        THREATS.put("22202", new int[] { 3 });
-        THREATS.put("22220", new int[] { 4 });
+        threats.add(new Threat("01111", 1, new int[] { 0 }));
+        threats.add(new Threat("10111", 1, new int[] { 1 }));
+        threats.add(new Threat("11011", 1, new int[] { 2 }));
+        threats.add(new Threat("11101", 1, new int[] { 3 }));
+        threats.add(new Threat("11110", 1, new int[] { 4 }));
+        threats.add(new Threat("02222", 1, new int[] { 0 }));
+        threats.add(new Threat("20222", 1, new int[] { 1 }));
+        threats.add(new Threat("22022", 1, new int[] { 2 }));
+        threats.add(new Threat("22202", 1, new int[] { 3 }));
+        threats.add(new Threat("22220", 1, new int[] { 4 }));
         // Three
-        THREATS.put("0011100", new int[] { 1, 5 });
-        THREATS.put("0022200", new int[] { 1, 5 });
+        threats.add(new Threat("0011100", 2, new int[] { 1, 5 }));
+        threats.add(new Threat("0022200", 2, new int[] { 1, 5 }));
         // Broken three
-        THREATS.put("011010", new int[] { 0, 3, 5 });
-        THREATS.put("010110", new int[] { 0, 2, 5 });
-        THREATS.put("022020", new int[] { 0, 3, 5 });
-        THREATS.put("020220", new int[] { 0, 2, 5 });
+        threats.add(new Threat("011010", 2, new int[] { 0, 3, 5 }));
+        threats.add(new Threat("010110", 2, new int[] { 0, 2, 5 }));
+        threats.add(new Threat("022020", 2, new int[] { 0, 3, 5 }));
+        threats.add(new Threat("020220", 2, new int[] { 0, 2, 5 }));
         
         THREAT_PATTERNS = new ThreatPattern[2][4][4][4][4][4][4][4][4][4];
         SCORES = new int[2][4][4][4][4][4][4][4][4][4];
@@ -455,19 +469,17 @@ public class MinimaxPlayer extends GomokuPlayer {
             // Place scores in the lookup array
             if(score[0] > 0) {
                 // Check for threats in this pattern, record it along with the
-                // defensive moves and offset
+                // threat moves and offset
                 if(score[0] != 30000) {
-                    Iterator it = THREATS.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry pair = (Map.Entry) it.next();
-                        int index = numStr.indexOf((String) pair.getKey());
+                    for(Threat threat : threats) {
+                        int index = numStr.indexOf(threat.threatString);
                         if(index != -1) {
                             THREAT_PATTERNS[0][numArray[0]][numArray[1]]
                                     [numArray[2]][numArray[3]]
                                     [numArray[4]][numArray[5]]
                                     [numArray[6]][numArray[7]]
-                                    [numArray[8]] = new ThreatPattern((int[]) 
-                                            pair.getValue(), index);
+                                    [numArray[8]] = new ThreatPattern(
+                                            threat.threatSquares, index);
                         }
                     }
                 }
@@ -477,19 +489,17 @@ public class MinimaxPlayer extends GomokuPlayer {
             }
             if(score[1] > 0) {
                 // Check for threats in this pattern, record it along with the
-                // defensive moves and offset
+                // threat moves and offset
                 if(score[1] != 30000) {
-                    Iterator it = THREATS.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry pair = (Map.Entry) it.next();
-                        int index = numStr.indexOf((String) pair.getKey());
+                    for(Threat threat : threats) {
+                        int index = numStr.indexOf(threat.threatString);
                         if(index != -1) {
                             THREAT_PATTERNS[1][numArray[0]][numArray[1]]
                                     [numArray[2]][numArray[3]]
                                     [numArray[4]][numArray[5]]
                                     [numArray[6]][numArray[7]]
-                                    [numArray[8]] = new ThreatPattern((int[]) 
-                                            pair.getValue(), index);
+                                    [numArray[8]] = new ThreatPattern(
+                                            threat.threatSquares, index);
                         }
                     }
                 }

@@ -97,15 +97,21 @@ public class GomokuApplication {
         this.game = new GomokuGame(this, intersections, 
                 playerStrings[0], playerStrings[1]);
         this.game.start(this);
+        this.settingsPanel.setEnabled(false);
     }
     
     public void forfeit() {
         this.game.stop(this);
         this.gamePanel.setEnabled(true);
+        this.settingsPanel.setEnabled(true);
     }
     
     public void writeLog(String text) {
         this.logPanel.appendText(text);
+    }
+    
+    public void clearLog() {
+        this.logPanel.clear();
     }
     
     public static void main(String[] args) {
