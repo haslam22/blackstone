@@ -30,8 +30,8 @@ public class MinimaxPlayer extends GomokuPlayer {
     }
     
     private int nodes;
+    private final int intersections;
     private MinimaxState state;
-    private static final Map<String, int[]> THREATS;
     private static final int[][][][][][][][][][] SCORES;
     private static final ThreatPattern[][][][][][][][][][] THREAT_PATTERNS;
     private int timeout = 7500;
@@ -39,6 +39,7 @@ public class MinimaxPlayer extends GomokuPlayer {
     
     public MinimaxPlayer(GomokuGame game, int playerIndex, int opponentIndex) {
         super(game, playerIndex, opponentIndex);
+        this.intersections = game.getIntersections();
         this.state = new MinimaxState(game.getIntersections());
     }
 
@@ -59,7 +60,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param state State to find moves for
      * @return A list of pruned moves
      */
-    public List<GomokuMove> pruneMoves(MinimaxState state) {
+    private List<GomokuMove> pruneMoves(MinimaxState state) {
         // If there are any threats on the board, the search space can be 
         // reduced to the threats alone
         Set<GomokuMove> threatSquares = new HashSet<>(225);
@@ -67,10 +68,9 @@ public class MinimaxPlayer extends GomokuPlayer {
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
                 GomokuField field = state.board[i][j];
-                int index = field.index;
-                if(index != 0) {
+                if(field.index != 0) {
                     // Get the threats (if any) around this field
-                    ThreatPattern[] threats = getThreats(field, index);
+                    ThreatPattern[] threats = getThreats(field);
                     for(int k = 0; k < threats.length; k++) {
                         if(threats[k] != null) {
                             // Threat exists in this direction (k). Get the
@@ -99,6 +99,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         
         ArrayList<GomokuMove> pruned = new ArrayList<>(225);
         
+        // Have to make an opening move, return a move in the middle
         if(state.moves == 0) {
             pruned.add(new GomokuMove(
                     state.board.length / 2, state.board.length / 2));
@@ -189,7 +190,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param index Player index to evaluate for
      * @return Score of this field
      */
-    public int getScore(GomokuField field, int index) {
+    private int getScore(GomokuField field, int index) {
         int score = 0;
         for(int i = 0; i < 4; i++) {
             score+= SCORES[index - 1]
@@ -206,10 +207,15 @@ public class MinimaxPlayer extends GomokuPlayer {
         return score;
     }    
     
-    public ThreatPattern[] getThreats(GomokuField field, int index) {
+    /**
+     * Lookup and return the threat patterns for a field.
+     * @param field Field to get search
+     * @return ThreatPattern array of threats
+     */
+    private ThreatPattern[] getThreats(GomokuField field) {
         ThreatPattern[] threats = new ThreatPattern[4];
         for(int i = 0; i < 4; i++) {
-            threats[i] = THREAT_PATTERNS[index - 1]
+            threats[i] = THREAT_PATTERNS[field.index - 1]
                     [field.directions[i][0].index]
                     [field.directions[i][1].index]
                     [field.directions[i][2].index]
@@ -252,7 +258,7 @@ public class MinimaxPlayer extends GomokuPlayer {
      * @param depth Depth to search moves
      * @return List of moves, sorted by best score first
      */
-    public List<GomokuMove> search(List<GomokuMove> moves, int depth) {
+    private List<GomokuMove> search(List<GomokuMove> moves, int depth) {
         class ScoredMove {
             GomokuMove move;
             int score;
@@ -303,7 +309,8 @@ public class MinimaxPlayer extends GomokuPlayer {
             moves.add(scoredMoves.get(i).move);
         }
         
-        String bestMove = "[" + moves.get(0).row + "," + moves.get(0).col + "]";
+        String bestMove = "[" + convertRow(moves.get(0).row)
+                + convertCol(moves.get(0).col) + "]";
         
         game.writeLog(
                 String.format("Depth: %d, Evaluation: %d, Best move: %s",
@@ -383,12 +390,30 @@ public class MinimaxPlayer extends GomokuPlayer {
         return score;
     }
     
+    /**
+     * Convert a board row to its board representation (15, 14, 13, 12..)
+     * @param row
+     * @return
+     */
+    private int convertRow(int row) {
+        return this.intersections - row;
+    }
+    
+    /**
+     * Convert a board column to its board representation (A, B, C, D...)
+     * @param col
+     * @return
+     */
+    public String convertCol(int col) {
+        return String.valueOf((char)((col + 1) + 'A' - 1));
+    }
+    
     /*
      * Precompute all the possible scores for every direction around a piece,
      * and record any threats found.
      */
     static {
-        THREATS = new HashMap<>();
+        Map<String, int[]> THREATS = new HashMap<>();
         // Four
         THREATS.put("01111", new int[] { 0 });
         THREATS.put("10111", new int[] { 1 });

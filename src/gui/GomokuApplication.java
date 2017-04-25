@@ -22,11 +22,11 @@ public class GomokuApplication {
     private final GomokuBoardPanel boardPanel;
     private final GomokuGamePanel gamePanel;
     private final GomokuSettingsPanel settingsPanel;
+    private final GomokuLogPanel logPanel;
     private GomokuGame game;
     
     private int time = 5;
     private int intersections = 15;
-    private final GomokuLogPanel logPanel;
     
     /**
      * Create the JFrame. Initialises the child panels (board, game, settings)
