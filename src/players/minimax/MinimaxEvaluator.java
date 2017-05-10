@@ -1,7 +1,5 @@
 package players.minimax;
 
-import players.minimax.MinimaxState.GomokuField;
-
 /**
  * Static evaluator, providing heuristic evaluations for positions in the game.
  * 
@@ -60,7 +58,7 @@ public class MinimaxEvaluator {
      * @param index Player index to evaluate for
      * @return Score of this field
      */
-    protected int evaluateField(GomokuField field, int index) {
+    protected int evaluateField(MinimaxField field, int index) {
         int score = 0;
         for(int i = 0; i < 4; i++) {
             score+= SCORES[index - 1]
@@ -101,7 +99,7 @@ public class MinimaxEvaluator {
                     else if(direction[i + j] == 0) empty++;
                 }
                 if(stones == 5) {
-                    return 30000;
+                    return 10000;
                 }
                 // First check if it's possible to form a 5 in this window
                 if(stones + empty == 5 && empty != 5) {

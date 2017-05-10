@@ -119,8 +119,8 @@ public class MinimaxPlayer extends GomokuPlayer {
         // Not terminal or leaf node, continue recursing
         if(state.currentIndex == this.playerIndex) {
             int maximum = Integer.MIN_VALUE;
-            List<GomokuMove> prunedMoves = getMoves(state);
-            for(GomokuMove move : prunedMoves) {
+            List<GomokuMove> moves = getMoves(state);
+            for(GomokuMove move : moves) {
                 state.makeMove(move);
                 int score = minimax(state, depth - 1, alpha, beta);
                 state.undoMove(move);

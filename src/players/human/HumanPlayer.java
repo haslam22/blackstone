@@ -7,7 +7,8 @@ import players.GomokuPlayer;
 
 /**
  * Class for a non-AI player. Attaches a mouse listener to the board and waits
- * for a valid move.
+ * for a valid move. Listener calls notify() to wake this thread up and return a
+ * move when the user clicks on the board.
  * @author Hassan
  */
 public class HumanPlayer extends GomokuPlayer {

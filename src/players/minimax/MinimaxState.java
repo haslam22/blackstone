@@ -10,34 +10,7 @@ import java.util.Random;
  */
 public class MinimaxState {
     
-    /**
-     * Class representing an intersection on the Gomoku board.
-     */
-    protected class GomokuField {
-        // Location of the field
-        public final int row;
-        public final int col;
-        // The index (state) of the field, 0 if empty, 1/2 if player 1/2 has
-        // occupied it, and 3 if out of bounds.
-        public int index;
-        // References to 4 fields in each direction around the field
-        public final GomokuField[][] directions;
-        
-        public GomokuField() {
-            this.row = -1;
-            this.col = -1;
-            this.index = 3;
-            this.directions = null;
-        }
-        
-        public GomokuField(int row, int col) {
-            this.row = row;
-            this.col = col;
-            this.directions = new GomokuField[4][9];
-        }
-    }
-    
-    protected final GomokuField[][] board;
+    protected final MinimaxField[][] board;
     protected final int intersections;
     protected int currentIndex;
     protected int moves;
@@ -51,10 +24,10 @@ public class MinimaxState {
      */
     public MinimaxState(int intersections) {
         this.intersections = intersections;
-        this.board = new GomokuField[intersections][intersections];
+        this.board = new MinimaxField[intersections][intersections];
         for(int i = 0; i < intersections; i++) {
             for(int j = 0; j < intersections; j++) {
-                board[i][j] = new GomokuField(i, j);
+                board[i][j] = new MinimaxField(i, j);
             }
         }
         setDirections(board);
@@ -163,10 +136,10 @@ public class MinimaxState {
      * the Minimax search.
      * @param board Field array
      */
-    private void setDirections(GomokuField[][] board) {
+    private void setDirections(MinimaxField[][] board) {
         for(int row = 0; row < board.length; row++) {
             for(int col = 0; col < board.length; col++) {
-                GomokuField field = board[row][col];
+                MinimaxField field = board[row][col];
 
                 // [0][0-9] -> Diagonal from top left to bottom right
                 field.directions[0][4] = field; 
@@ -182,56 +155,56 @@ public class MinimaxState {
                     if(row - k >= 0 && col - k >=0) {
                         field.directions[0][4 - k] = board[row - k][col - k];
                     } else {
-                        field.directions[0][4 - k] = new GomokuField();
+                        field.directions[0][4 - k] = new MinimaxField();
                     }
 
                     // Diagonal 1, bottom right
                     if(row + k < board.length && col + k < board.length) {
                         field.directions[0][4 + k] = board[row + k][col + k];
                     } else {
-                        field.directions[0][4 + k] = new GomokuField();
+                        field.directions[0][4 + k] = new MinimaxField();
                     }
 
                     // Diagonal 2, top right
                     if(row - k >= 0 && col + k < board.length) {
                         field.directions[1][4 - k] = board[row - k][col + k];
                     } else {
-                        field.directions[1][4 - k] = new GomokuField();
+                        field.directions[1][4 - k] = new MinimaxField();
                     }
 
                     // Diagonal 2, bottom left
                     if(row + k < board.length && col - k >=0) {
                         field.directions[1][4 + k] = board[row + k][col - k];
                     } else {
-                        field.directions[1][4 + k] = new GomokuField();
+                        field.directions[1][4 + k] = new MinimaxField();
                     }
 
                     // Vertical top
                     if(row - k >= 0) {
                         field.directions[2][4 - k] = board[row - k][col];
                     } else {
-                        field.directions[2][4 - k] = new GomokuField();
+                        field.directions[2][4 - k] = new MinimaxField();
                     }
 
                     // Vertical bottom
                     if(row + k < board.length) {
                         field.directions[2][4 + k] = board[row + k][col];
                     } else {
-                        field.directions[2][4 + k] = new GomokuField();
+                        field.directions[2][4 + k] = new MinimaxField();
                     }
 
                     // Horizontal left
                     if(col - k >= 0) {
                         field.directions[3][4 - k] = board[row][col - k];
                     } else {
-                        field.directions[3][4 - k] = new GomokuField();
+                        field.directions[3][4 - k] = new MinimaxField();
                     }
 
                     // Horizontal right
                     if(col + k < board.length) {
                         field.directions[3][4 + k] = board[row][col + k];
                     } else {
-                        field.directions[3][4 + k] = new GomokuField();
+                        field.directions[3][4 + k] = new MinimaxField();
                     }
                 }
             }

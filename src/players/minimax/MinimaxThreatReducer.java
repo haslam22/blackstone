@@ -4,7 +4,6 @@ import gomoku.GomokuMove;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import players.minimax.MinimaxState.GomokuField;
 
 /**
  * This class searches a state for threats and reduces the search space to only
@@ -96,7 +95,7 @@ public class MinimaxThreatReducer {
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board[0].length; j++) {
                 if(state.board[i][j].index != 0) {
-                    GomokuField field = state.board[i][j];
+                    MinimaxField field = state.board[i][j];
                     // Get the threats for every direction around this field
                     ThreatInstance[] threats = getThreats(field);
                     // Loop every direction
@@ -108,7 +107,7 @@ public class MinimaxThreatReducer {
                             // Loop over every threat square
                             for(int l = 0; l < squares.length; l++) {
                                 // Direction + offset + square index = field
-                                GomokuField threatField = field.directions[k]
+                                MinimaxField threatField = field.directions[k]
                                         [threats[k].startIndex + squares[l]];
                                 // Add this index as a possible move
                                 threatMoves.add(new GomokuMove(
@@ -168,7 +167,7 @@ public class MinimaxThreatReducer {
      * @param field Field to search
      * @return Array of threats found around this field
      */
-    private ThreatInstance[] getThreats(GomokuField field) {
+    private ThreatInstance[] getThreats(MinimaxField field) {
         ThreatInstance[] threats = new ThreatInstance[4];
         for(int i = 0; i < 4; i++) {
             threats[i] = THREAT_PATTERNS[field.index - 1]
@@ -190,7 +189,7 @@ public class MinimaxThreatReducer {
      * @param field Field to search
      * @return Array of threats found around this field
      */
-    private RefutationInstance[] getRefutations(GomokuField field, int index) {
+    private RefutationInstance[] getRefutations(MinimaxField field, int index) {
         RefutationInstance[] refs = new RefutationInstance[4];
         for(int i = 0; i < 4; i++) {
             refs[i] = REFUTATIONS[index - 1]
@@ -248,51 +247,55 @@ public class MinimaxThreatReducer {
         refutations.add(new RefutationPattern("11001", new int[] { 2, 3 }, 1));
         refutations.add(new RefutationPattern("11100", new int[] { 3, 4 }, 1));
         refutations.add(new RefutationPattern("00111", new int[] { 0, 1 }, 1));
+        refutations.add(new RefutationPattern("01101", new int[] { 0, 3 }, 1));
+        refutations.add(new RefutationPattern("01110", new int[] { 0, 4 }, 1));
         
         refutations.add(new RefutationPattern("20022", new int[] { 1, 2 }, 2));
         refutations.add(new RefutationPattern("22002", new int[] { 2, 3 }, 2));
         refutations.add(new RefutationPattern("22200", new int[] { 3, 4 }, 2));
         refutations.add(new RefutationPattern("00222", new int[] { 0, 1 }, 2));
+        refutations.add(new RefutationPattern("02202", new int[] { 0, 3 }, 2));
+        refutations.add(new RefutationPattern("02220", new int[] { 0, 4 }, 1));
         
-        List<ThreatPattern> patterns = new ArrayList<>();
+        List<ThreatPattern> threats = new ArrayList<>();
         
         // Four
-        patterns.add(new ThreatPattern("01111", 1, new int[] { 0 }, 1));
-        patterns.add(new ThreatPattern("10111", 1, new int[] { 1 }, 1));
-        patterns.add(new ThreatPattern("11011", 1, new int[] { 2 }, 1));
-        patterns.add(new ThreatPattern("11101", 1, new int[] { 3 }, 1));
-        patterns.add(new ThreatPattern("11110", 1, new int[] { 4 }, 1));
-        patterns.add(new ThreatPattern("02222", 1, new int[] { 0 }, 2));
-        patterns.add(new ThreatPattern("20222", 1, new int[] { 1 }, 2));
-        patterns.add(new ThreatPattern("22022", 1, new int[] { 2 }, 2));
-        patterns.add(new ThreatPattern("22202", 1, new int[] { 3 }, 2));
-        patterns.add(new ThreatPattern("22220", 1, new int[] { 4 }, 2));
+        threats.add(new ThreatPattern("01111", 1, new int[] { 0 }, 1));
+        threats.add(new ThreatPattern("10111", 1, new int[] { 1 }, 1));
+        threats.add(new ThreatPattern("11011", 1, new int[] { 2 }, 1));
+        threats.add(new ThreatPattern("11101", 1, new int[] { 3 }, 1));
+        threats.add(new ThreatPattern("11110", 1, new int[] { 4 }, 1));
+        threats.add(new ThreatPattern("02222", 1, new int[] { 0 }, 2));
+        threats.add(new ThreatPattern("20222", 1, new int[] { 1 }, 2));
+        threats.add(new ThreatPattern("22022", 1, new int[] { 2 }, 2));
+        threats.add(new ThreatPattern("22202", 1, new int[] { 3 }, 2));
+        threats.add(new ThreatPattern("22220", 1, new int[] { 4 }, 2));
         
         // Three
-        patterns.add(new ThreatPattern("0111002", 2, new int[] { 0, 4, 5 }, 1));
-        patterns.add(new ThreatPattern("0011102", 2, new int[] { 0, 1, 5 }, 1));
-        patterns.add(new ThreatPattern("0111003", 2, new int[] { 0, 4, 5 }, 1));
-        patterns.add(new ThreatPattern("0011103", 2, new int[] { 0, 1, 5 }, 1));
-        patterns.add(new ThreatPattern("2001110", 2, new int[] { 1, 2, 6 }, 1));
-        patterns.add(new ThreatPattern("2011100", 2, new int[] { 1, 5, 6 }, 1));
-        patterns.add(new ThreatPattern("3001110", 2, new int[] { 1, 2, 6 }, 1));
-        patterns.add(new ThreatPattern("3011100", 2, new int[] { 1, 5, 6 }, 1));
-        patterns.add(new ThreatPattern("0222001", 2, new int[] { 0, 4, 5 }, 2));
-        patterns.add(new ThreatPattern("0022201", 2, new int[] { 0, 1, 5 }, 2));
-        patterns.add(new ThreatPattern("0222003", 2, new int[] { 0, 4, 5 }, 2));
-        patterns.add(new ThreatPattern("0022203", 2, new int[] { 0, 1, 5 }, 2));
-        patterns.add(new ThreatPattern("1002220", 2, new int[] { 1, 2, 6 }, 2));
-        patterns.add(new ThreatPattern("1022200", 2, new int[] { 1, 5, 6 }, 2));
-        patterns.add(new ThreatPattern("3002220", 2, new int[] { 1, 2, 6 }, 2));
-        patterns.add(new ThreatPattern("3022200", 2, new int[] { 1, 5, 6 }, 2));
-        patterns.add(new ThreatPattern("0011100", 2, new int[] { 1, 5 }, 1));
-        patterns.add(new ThreatPattern("0022200", 2, new int[] { 1, 5 }, 2));
+        threats.add(new ThreatPattern("0111002", 2, new int[] { 0, 4, 5 }, 1));
+        threats.add(new ThreatPattern("0011102", 2, new int[] { 0, 1, 5 }, 1));
+        threats.add(new ThreatPattern("0111003", 2, new int[] { 0, 4, 5 }, 1));
+        threats.add(new ThreatPattern("0011103", 2, new int[] { 0, 1, 5 }, 1));
+        threats.add(new ThreatPattern("2001110", 2, new int[] { 1, 2, 6 }, 1));
+        threats.add(new ThreatPattern("2011100", 2, new int[] { 1, 5, 6 }, 1));
+        threats.add(new ThreatPattern("3001110", 2, new int[] { 1, 2, 6 }, 1));
+        threats.add(new ThreatPattern("3011100", 2, new int[] { 1, 5, 6 }, 1));
+        threats.add(new ThreatPattern("0222001", 2, new int[] { 0, 4, 5 }, 2));
+        threats.add(new ThreatPattern("0022201", 2, new int[] { 0, 1, 5 }, 2));
+        threats.add(new ThreatPattern("0222003", 2, new int[] { 0, 4, 5 }, 2));
+        threats.add(new ThreatPattern("0022203", 2, new int[] { 0, 1, 5 }, 2));
+        threats.add(new ThreatPattern("1002220", 2, new int[] { 1, 2, 6 }, 2));
+        threats.add(new ThreatPattern("1022200", 2, new int[] { 1, 5, 6 }, 2));
+        threats.add(new ThreatPattern("3002220", 2, new int[] { 1, 2, 6 }, 2));
+        threats.add(new ThreatPattern("3022200", 2, new int[] { 1, 5, 6 }, 2));
+        threats.add(new ThreatPattern("0011100", 2, new int[] { 1, 5 }, 1));
+        threats.add(new ThreatPattern("0022200", 2, new int[] { 1, 5 }, 2));
         
         // Broken three
-        patterns.add(new ThreatPattern("011010", 2, new int[] { 0, 3, 5 }, 1));
-        patterns.add(new ThreatPattern("010110", 2, new int[] { 0, 2, 5 }, 1));
-        patterns.add(new ThreatPattern("022020", 2, new int[] { 0, 3, 5 }, 2));
-        patterns.add(new ThreatPattern("020220", 2, new int[] { 0, 2, 5 }, 2));
+        threats.add(new ThreatPattern("011010", 2, new int[] { 0, 3, 5 }, 1));
+        threats.add(new ThreatPattern("010110", 2, new int[] { 0, 2, 5 }, 1));
+        threats.add(new ThreatPattern("022020", 2, new int[] { 0, 3, 5 }, 2));
+        threats.add(new ThreatPattern("020220", 2, new int[] { 0, 2, 5 }, 2));
         
         // Generate all possible numbers of length 9 in radix 4 (0,1,2,3)
         // E.g. 1234 -> 000103102
@@ -308,7 +311,7 @@ public class MinimaxThreatReducer {
             
             int threatCount = 0;
             
-            for(ThreatPattern pattern : patterns) {
+            for(ThreatPattern pattern : threats) {
                 // Search for the threat in this direction
                 int patternIndex = directionStr
                         .indexOf(pattern.threatString);
