@@ -4,8 +4,7 @@ import gui.GomokuApplication;
 import gui.GomokuBoardPanel;
 import static gui.GomokuBoardPanel.StoneColor.BLACK;
 import static gui.GomokuBoardPanel.StoneColor.WHITE;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -118,32 +117,29 @@ public class GomokuGame {
     }
     
     /**
-     * Add a board listener for a Human player, which will return a move when
-     * a valid click is detected on the board panel.
-     * @param player HumanPlayer instance
+     * Add a listener to the board, which is automatically removed after the
+     * next move.
+     * @param listener Listener to add
+     * @param showPicker Show the stone picker
      */
-    public void addBoardListener(HumanPlayer player) {
-        board.enableStonePicker(player.getPlayerIndex() == 1? BLACK : WHITE);
-        MouseAdapter listener = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Get the nearest intersection to where the user clicked
-                int row = board.getNearestRow(e.getY());
-                int col = board.getNearestCol(e.getX());
-                if(row >= 0 && col >= 0) {
-                    if(state.getIntersectionIndex(row, col) == 0) {
-                        synchronized(player) {
-                            // User clicked on a valid move, wake the thread up
-                            player.move = new GomokuMove(row, col);
-                            player.notify();
-                        }
-                        board.removeMouseListener(this);
-                        board.disableStonePicker();
-                    }
-                }
-            }
-        };
+    public void addBoardListener(MouseListener listener, boolean showPicker) {
+        if(showPicker) {
+            board.enableStonePicker(state.getCurrentIndex() == 1? BLACK : WHITE);
+        }
         board.addMouseListener(listener);
+    }
+    
+    /**
+     * Given some x/y coordinate on the board, return the move that corresponds 
+     * to the location clicked.
+     * @param x
+     * @param y
+     * @return Closest move to the location clicked
+     */
+    public GomokuMove getMouseMove(int x, int y) {
+        int nearestRow = board.getNearestRow(y);
+        int nearestCol = board.getNearestCol(x);
+        return new GomokuMove(nearestRow, nearestCol);
     }
     
     /**
@@ -212,6 +208,8 @@ public class GomokuGame {
                         app.updateStatus(String.format(STATUS_CURRENT_PLAYER,
                                 state.getCurrentIndex()));
                         move = getMove(players[state.getCurrentIndex() - 1]);
+                        board.disableStonePicker();
+                        board.removeListeners();
                         drawMove(move, state.getCurrentIndex());
                         writeMove(move, state.getCurrentIndex());
                         state.makeMove(move);

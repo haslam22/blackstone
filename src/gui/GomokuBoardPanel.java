@@ -14,6 +14,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -40,10 +41,10 @@ public class GomokuBoardPanel extends JPanel {
         }
     }
     
-    public enum CoordinateDisplay {
+    protected enum CoordinateDisplay {
         ALGEBRAIC("Algebraic"), NUMERIC("Numeric");
         
-        private String name; 
+        private final String name; 
         private CoordinateDisplay(String name) { 
             this.name = name; 
         }
@@ -78,6 +79,10 @@ public class GomokuBoardPanel extends JPanel {
         this.coordinateMode = CoordinateDisplay.ALGEBRAIC;
     }
     
+    /**
+     * Get the current board size.
+     * @return Board size n, (total of n*n intersections)
+     */
     public int getIntersections() {
         return this.intersections;
     }
@@ -136,6 +141,16 @@ public class GomokuBoardPanel extends JPanel {
     public void reset() {
         this.stones = new GomokuStone[intersections][intersections];
         repaint();
+    }
+    
+    /**
+     * Remove any listeners that were added to the board.
+     */
+    public void removeListeners() {
+        MouseListener[] mouseListeners = this.getMouseListeners();
+        for(MouseListener listener : mouseListeners) {
+            this.removeMouseListener(listener);
+        }
     }
     
     /**

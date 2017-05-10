@@ -21,7 +21,7 @@ public class HumanPlayer extends GomokuPlayer {
     
     @Override
     public GomokuMove getMove(GomokuState state) {
-        game.addBoardListener(this);
+        game.addBoardListener(new HumanListener(this, this.game, state), true);
         try {
             // Wait until the mouse listener calls notify() on this thread
             synchronized(this) {
