@@ -16,7 +16,6 @@ public abstract class GomokuPlayer {
     protected final int playerIndex;
     protected final int opponentIndex;
     protected final GomokuGame game;
-    public boolean interrupted;
     
     /**
      * Create a new GomokuPlayer.
@@ -52,5 +51,11 @@ public abstract class GomokuPlayer {
      * @return
      */
     public abstract GomokuMove getMove(GomokuState state);
+    
+    @Override
+    /*
+     * Get the name identifier for this player.
+     */
+    public abstract String toString();
     
 }

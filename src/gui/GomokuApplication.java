@@ -1,6 +1,7 @@
 package gui;
 
 import gomoku.GomokuGame;
+import gui.GomokuBoardPanel.CoordinateDisplay;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
@@ -25,7 +26,7 @@ public class GomokuApplication {
     private final GomokuLogPanel logPanel;
     private GomokuGame game;
     
-    private int time = 5;
+    private int time = 3000;
     private int intersections = 15;
     
     /**
@@ -78,6 +79,10 @@ public class GomokuApplication {
         return this.gamePanel;
     }
     
+    public void updateDisplayMode(CoordinateDisplay displayMode) {
+        boardPanel.changeCoordinateDisplay(displayMode);
+    }
+    
     public void updateIntersections(int intersections) {
         this.intersections = intersections;
         this.boardPanel.updateIntersections(intersections);
@@ -85,7 +90,6 @@ public class GomokuApplication {
     
     public void updateTime(int time) {
         this.time = time;
-        this.gamePanel.updateTime(time);
     }
     
     public void updateStatus(String status) {
@@ -95,7 +99,7 @@ public class GomokuApplication {
     public void newGame(String[] playerStrings) {
         this.gamePanel.setEnabled(false);
         this.game = new GomokuGame(this, intersections, 
-                playerStrings[0], playerStrings[1]);
+                playerStrings[0], playerStrings[1], time);
         this.game.start(this);
         this.settingsPanel.setEnabled(false);
     }

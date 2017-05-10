@@ -6,8 +6,13 @@ import static gui.GomokuBoardPanel.StoneColor.BLACK;
 import static gui.GomokuBoardPanel.StoneColor.WHITE;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import players.GomokuPlayer;
-import players.HumanPlayer;
+import players.human.HumanPlayer;
 import players.minimax.MinimaxPlayer;
 
 /**
@@ -23,9 +28,17 @@ public class GomokuGame {
     private final GomokuApplication app;
     private final int intersections;
     private final Thread gameThread;
-    private MouseAdapter listener;
-    private HumanPlayer listeningPlayer;
-    private boolean interrupted;
+    private final int time;
+    
+    // Status strings used to display the game status on the GUI
+    private static final String STATUS_INTERRUPTED = "Status: Game interrupted"
+            + " by user.";
+    private static final String STATUS_EXECUTION_ERROR = "Player %d (%s) "
+            + "failed to return a move due to an error, exiting.";
+    private static final String STATUS_CURRENT_PLAYER = "Status: Waiting for "
+            + "move from player %d ...";
+    private static final String STATUS_WINNER = "Status: Game over. Player %d "
+            + "wins.";
     
     /**
      * Create a new game between two players.
@@ -33,9 +46,11 @@ public class GomokuGame {
      * @param intersections Game intersections
      * @param player1 Player 1 string identifier
      * @param player2 Player 2 string identifier
+     * @param time Time limit for AI
      */
     public GomokuGame(GomokuApplication app, int intersections,
-            String player1, String player2) {
+            String player1, String player2, int time) {
+        this.time = time;
         this.app = app;
         this.board = app.getBoardPanel();
         this.state = new GomokuState(intersections);
@@ -44,7 +59,7 @@ public class GomokuGame {
             createPlayer(player1, 1, 2), 
             createPlayer(player2, 2, 1) 
         };
-        this.gameThread = createGame();
+        this.gameThread = createGameThread();
     }
     
     /**
@@ -53,26 +68,16 @@ public class GomokuGame {
      * @param app
      */
     public void start(GomokuApplication app) {
+        board.reset();
         gameThread.start();
     }
     
     /**
-     * Safely interrupt the game, notifies all players to stop calculating
-     * moves and removes all listeners.
+     * Safely interrupt the game.
      * @param app
      */
     public void stop(GomokuApplication app) {
-        // Set flag for the game thread to stop after the next move is returned
-        interrupted = true;
-        // Set flags to inform players to stop
-        players[0].interrupted = true;
-        players[1].interrupted = true;
-        // Disable listener
-        if(listener != null) {
-            synchronized(listeningPlayer) {
-                listeningPlayer.notify();
-            }
-        }
+        gameThread.interrupt();
     }
     
     /**
@@ -88,11 +93,20 @@ public class GomokuGame {
         switch(name) {
             case "Human":
                 return new HumanPlayer(this, playerIndex, opponentIndex);
-            case "Minimax":
-                return new MinimaxPlayer(this, playerIndex, opponentIndex);
+            case "AI":
+                return new MinimaxPlayer(this, playerIndex, opponentIndex,
+                        time);
             default:
                 return null;
         }
+    }
+    
+    /**
+     * Get the board size (number of intersections) for this game.
+     * @return
+     */
+    public int getIntersections() {
+        return intersections;
     }
     
     /**
@@ -110,35 +124,26 @@ public class GomokuGame {
      */
     public void addBoardListener(HumanPlayer player) {
         board.enableStonePicker(player.getPlayerIndex() == 1? BLACK : WHITE);
-        this.listener = new MouseAdapter() {
+        MouseAdapter listener = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 // Get the nearest intersection to where the user clicked
                 int row = board.getNearestRow(e.getY());
                 int col = board.getNearestCol(e.getX());
-                if(state.getIntersectionIndex(row, col) == 0) {
-                    synchronized(player) {
-                        // User clicked on a valid move, wake the thread up
-                        player.move = new GomokuMove(row, col);
-                        player.notify();
+                if(row >= 0 && col >= 0) {
+                    if(state.getIntersectionIndex(row, col) == 0) {
+                        synchronized(player) {
+                            // User clicked on a valid move, wake the thread up
+                            player.move = new GomokuMove(row, col);
+                            player.notify();
+                        }
+                        board.removeMouseListener(this);
+                        board.disableStonePicker();
                     }
-                    board.removeMouseListener(this);
-                    board.disableStonePicker();
-                    listeningPlayer = null;
-                    listener = null;
                 }
             }
         };
-        this.listeningPlayer = player;
         board.addMouseListener(listener);
-    }
-    
-    /**
-     * Get the board size (number of intersections) for this game.
-     * @return
-     */
-    public int getIntersections() {
-        return intersections;
     }
     
     /**
@@ -147,81 +152,93 @@ public class GomokuGame {
      * @param col Intersection col
      * @param index Index of the player
      */
-    private void draw(int row, int col, int index) {
+    private void drawMove(GomokuMove move, int index) {
         switch(index) {
             case 1:
-                board.addStone(BLACK, row, col);
+                board.addStone(BLACK, move.row, move.col);
                 break;
             case 2:
-                board.addStone(WHITE, row, col);
+                board.addStone(WHITE, move.row, move.col);
                 break;
         }
     }
     
     /**
-     * Convert a board row to its board representation (15, 14, 13, 12..)
-     * @param row
-     * @return
+     * Write a move to the log.
+     * @param move Move to write
+     * @param index Player who made the move
      */
-    private int convertRow(int row) {
-        return this.intersections - row;
+    private void writeMove(GomokuMove move, int index) {
+        String moveStr = this.intersections - move.row + String.valueOf((char)
+                ((move.col + 1) + 'A' - 1));
+        writeLog("Player " + index + " move: " + moveStr);
     }
     
     /**
-     * Convert a board column to its board representation (A, B, C, D...)
-     * @param col
-     * @return
+     * Asynchronously grab a move from a player instance for the current state.
+     * @param player
+     * @return Move returned by the player
+     * @throws InterruptedException
+     * @throws ExecutionException
      */
-    private String convertCol(int col) {
-        return String.valueOf((char)((col + 1) + 'A' - 1));
+    private GomokuMove getMove(GomokuPlayer player) throws InterruptedException, 
+            ExecutionException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Callable<GomokuMove> callable = new Callable<GomokuMove>() {
+            @Override
+            public GomokuMove call() {
+                return player.getMove(state);
+            }
+        };
+        Future<GomokuMove> future = executor.submit(callable);
+        executor.shutdown();
+        
+        try {
+            return future.get();
+        } catch(InterruptedException | ExecutionException ex) {
+            future.cancel(true);
+            throw(ex);
+        }
     }
     
-    private Thread createGame() {
-        return new Thread(new Runnable(){
+    private Thread createGameThread() {
+        return new Thread() {
             @Override
-            public void run(){
-                board.reset();
+            public void run() {
                 app.clearLog();
-
-                // Start the game loop, keep requesting moves if the game is alive
                 while(state.terminal() == 0) {
-                    app.updateStatus("Waiting for move from player " + 
-                            state.getCurrentIndex() + "...");
+                    GomokuMove move;
                     try {
-                        // Pass a copy of the state and request a move
-                        GomokuMove move = players[state.getCurrentIndex() - 1]
-                                .getMove(state);
-                        if(interrupted) break;
-                        draw(move.row, move.col, state.getCurrentIndex());
-                        writeLog("Player " + state.getCurrentIndex() + " move: "
-                        + convertRow(move.row) + convertCol(move.col));
+                        app.updateStatus(String.format(STATUS_CURRENT_PLAYER,
+                                state.getCurrentIndex()));
+                        move = getMove(players[state.getCurrentIndex() - 1]);
+                        drawMove(move, state.getCurrentIndex());
+                        writeMove(move, state.getCurrentIndex());
                         state.makeMove(move);
-                    } catch (NullPointerException e) {
-                        // A move wasn't returned, exit
+                    } catch (ExecutionException ex) {
+                        board.disableStonePicker();
+                        ex.printStackTrace();
+                        writeLog(String.format(STATUS_EXECUTION_ERROR, 
+                                state.getCurrentIndex(),
+                                players[state.getCurrentIndex() - 1]));
+                        break;
+                    } catch (InterruptedException ex) {
+                        board.disableStonePicker();
+                        app.updateStatus(STATUS_INTERRUPTED);
                         break;
                     }
                 }
-
                 int terminal = state.terminal();
-
-                switch (terminal) {
+                switch(terminal) {
                     case 1:
+                        app.updateStatus(String.format(STATUS_WINNER, 1));
+                        break;
                     case 2:
-                        app.updateStatus("Game over. Winner: Player " + terminal);
-                        break;
-                    case 3:
-                        app.updateStatus("Game over. Winner: N/A (Draw)");
-                        break;
-                    case 0:
-                        app.updateStatus("Game over. Winner: N/A (Interrupted)");
+                        app.updateStatus(String.format(STATUS_WINNER, 2));
                         break;
                 }
-
-                // Game has finished, cleanup
-                board.repaint();
-                board.disableStonePicker();
                 app.forfeit();
             }
-        });
+        };
     }
 }

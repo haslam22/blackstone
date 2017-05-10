@@ -128,7 +128,7 @@ public class MinimaxState {
      * given some maximum distance.
      * @param row Field row
      * @param col Field col
-     * @param distance How far to look in each direction, must be <= 4
+     * @param distance How far to look in each direction, limit 4
      * @return 
      */
     public boolean hasAdjacent(int row, int col, int distance) {
@@ -138,6 +138,18 @@ public class MinimaxState {
                         || board[row][col].directions[i][4 - j].index == 1
                         || board[row][col].directions[i][4 + j].index == 2
                         || board[row][col].directions[i][4 - j].index == 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }    
+    
+    public boolean hasAdjacent(int row, int col, int distance, int index) {
+        for(int i = 0; i < 4; i++) {
+            for(int j = 1; j <= distance; j++) {
+                if(board[row][col].directions[i][4 + j].index == index
+                        || board[row][col].directions[i][4 - j].index == index) {
                     return true;
                 }
             }

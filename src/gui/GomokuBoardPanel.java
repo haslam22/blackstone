@@ -40,6 +40,20 @@ public class GomokuBoardPanel extends JPanel {
         }
     }
     
+    public enum CoordinateDisplay {
+        ALGEBRAIC("Algebraic"), NUMERIC("Numeric");
+        
+        private String name; 
+        private CoordinateDisplay(String name) { 
+            this.name = name; 
+        }
+        
+        @Override 
+        public String toString(){ 
+            return name; 
+        } 
+    }
+    
     // Board properties, calculated dynamically based on the available space
     private int startX;
     private int startY;
@@ -50,20 +64,33 @@ public class GomokuBoardPanel extends JPanel {
     private GomokuStone[][] stones;
     private MouseMotionListener motionListener;
     private final Font[] fonts;
+    private CoordinateDisplay coordinateMode;
     
     protected GomokuBoardPanel(int intersections) {
         this.intersections = intersections;
         this.stones = new GomokuStone[intersections][intersections];
         this.setDoubleBuffered(true);
-        this.setBackground(new Color(220, 180, 120));
+        this.setBackground(new Color(220, 180, 120)); // 220 180 120
         this.fonts = new Font[16];
         for(int i = 0; i < fonts.length; i++) {
             fonts[i] = new Font("Sans Serif", Font.PLAIN, i);
         }
+        this.coordinateMode = CoordinateDisplay.ALGEBRAIC;
     }
     
     public int getIntersections() {
         return this.intersections;
+    }
+    
+    /**
+     * Switch the display mode of the coordinates around the board edges. 
+     * Supports either Algebraic mode (15A, 15B, ..) or Numeric (rows and 
+     * columns start run from 0 -> intersections).
+     * @param displayMode Display mode
+     */
+    public void changeCoordinateDisplay(CoordinateDisplay displayMode) {
+        this.coordinateMode = displayMode;
+        this.repaint();
     }
     
     /**
@@ -140,6 +167,7 @@ public class GomokuBoardPanel extends JPanel {
         if(this.motionListener != null) {
             this.removeMouseMotionListener(motionListener);
             this.motionListener = null;
+            this.repaint();
         }
     }
     
@@ -192,7 +220,12 @@ public class GomokuBoardPanel extends JPanel {
         // Draw numbers for the rows
         for(int row = 0; row < intersections; row++) {
             // Row strings (1, 2, 3...)
-            String rowString = Integer.toString(intersections - row);
+            String rowString;
+            if(this.coordinateMode == CoordinateDisplay.ALGEBRAIC) {
+                rowString = Integer.toString(intersections - row);
+            } else {
+                rowString = Integer.toString(row);
+            }
             int rectX = getPanelX(0) - stringBoundingSize; // Rectangle y
             int rectY = getPanelY(row) - stringBoundingSize / 2; // Rectangle x
             
@@ -209,7 +242,12 @@ public class GomokuBoardPanel extends JPanel {
         
         // Draw letters for the columns
         for(int col = 0; col < intersections; col++) {
-            String columnString = String.valueOf((char)((col + 1) + 'A' - 1));
+            String columnString;
+            if(this.coordinateMode == CoordinateDisplay.ALGEBRAIC) {
+                columnString = String.valueOf((char)((col + 1) + 'A' - 1));
+            } else {
+                columnString = Integer.toString(col);
+            }
             int rectX = getPanelX(col) - stringBoundingSize / 2; // Rectangle y
             int rectY = getPanelY(intersections - 1); // Rectangle x
             

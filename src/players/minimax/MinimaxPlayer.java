@@ -5,121 +5,74 @@ import gomoku.GomokuMove;
 import gomoku.GomokuState;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import players.GomokuPlayer;
-import players.minimax.MinimaxState.GomokuField;
 
 /**
  * Minimax player, with alpha-beta pruning.
  * @author Hassan
  */
 public class MinimaxPlayer extends GomokuPlayer {
+
+    private final MinimaxThreatReducer threatReducer;
+    private final MinimaxEvaluator staticEvaluator;
     
-    private static class ThreatPattern {
-        int[] threatSquares;
-        int startIndex;
-        public ThreatPattern(int[] threatSquares, int startIndex) {
-            this.threatSquares = threatSquares;
-            this.startIndex = startIndex;
-        }
-    }
-    
-    private static class Threat {
-        // String representation of the threat, e.g. 01111
-        String threatString;
-        // How many moves required to create a 5 from the threat
-        int threatClass; 
-        // The threat squares (moves to defend against/create the threat)
-        int[] threatSquares;
-        public Threat(String threatString, int threatClass, 
-                int[] threatSquares) {
-            this.threatString = threatString;
-            this.threatClass = threatClass;
-            this.threatSquares = threatSquares;
-        }
-    }
-    
-    private int nodes;
     private final int intersections;
     private MinimaxState state;
-    private static final int[][][][][][][][][][] SCORES;
-    private static final ThreatPattern[][][][][][][][][][] THREAT_PATTERNS;
-    private int timeout = 7500;
-    private long startTime;
+    private final int time;
     
-    public MinimaxPlayer(GomokuGame game, int playerIndex, int opponentIndex) {
+    private long startTime;
+    private int nodes;
+    
+    public MinimaxPlayer(GomokuGame game, int playerIndex, int opponentIndex, 
+            int time) {
         super(game, playerIndex, opponentIndex);
-        this.intersections = game.getIntersections();
         this.state = new MinimaxState(game.getIntersections());
+        this.threatReducer = new MinimaxThreatReducer();
+        this.staticEvaluator = new MinimaxEvaluator();
+        this.intersections = game.getIntersections();
+        this.time = time;
+    }
+    
+    @Override
+    public String toString() {
+        return "Minimax";
     }
 
     // Compare two moves based on the evaluation of the field
-    Comparator<GomokuMove> fieldCompare = new Comparator<GomokuMove>() {
+    Comparator<GomokuMove> fieldComparator = new Comparator<GomokuMove>() {
         @Override
         public int compare(GomokuMove move1, GomokuMove move2) {
-            return getScore(state.board[move2.row][move2.col],
-                        state.currentIndex) - 
-                    getScore(state.board[move1.row][move1.col],
-                        state.currentIndex);
+            return staticEvaluator.evaluateField(state.board[move2.row]
+                    [move2.col], state.currentIndex) - 
+                    staticEvaluator.evaluateField(state.board[move1.row]
+                            [move1.col], state.currentIndex);
         }
     };
     
     /**
-     * Prune moves by focusing on areas where stones already exist to reduce
-     * the search space, and sort nodes by evaluating their fields
-     * @param state State to find moves for
-     * @return A list of pruned moves
+     * Generate a list of moves for a state. Only returns moves near to other
+     * existing stones and reduces the search space when threats are found.
+     * @param state State to get moves for
+     * @return A list of moves
      */
-    private List<GomokuMove> pruneMoves(MinimaxState state) {
-        // If there are any threats on the board, the search space can be 
-        // reduced to the threats alone
-        Set<GomokuMove> threatSquares = new HashSet<>(225);
-        
-        for(int i = 0; i < state.board.length; i++) {
-            for(int j = 0; j < state.board.length; j++) {
-                GomokuField field = state.board[i][j];
-                if(field.index != 0) {
-                    // Get the threats (if any) around this field
-                    ThreatPattern[] threats = getThreats(field);
-                    for(int k = 0; k < threats.length; k++) {
-                        if(threats[k] != null) {
-                            // Threat exists in this direction (k). Get the
-                            // threat squares (moves to defend/create threat)
-                            int[] squares = threats[k].threatSquares;
-                            // Loop over every threat square
-                            for(int l = 0; l < squares.length; l++) {
-                                // Direction + offset + square index
-                                GomokuField threatField = field.directions[k]
-                                        [threats[k].startIndex + squares[l]];
-                                // Add this index as a possible move
-                                threatSquares.add(new GomokuMove(
-                                        threatField.row, threatField.col));
-                            }
-                        }
-                    }
-                }
-            }
+    private List<GomokuMove> getMoves(MinimaxState state) {
+        // Board is empty, return a move in the middle of the board
+        if(state.moves == 0) {
+            List<GomokuMove> moves = new ArrayList<>();
+            moves.add(new GomokuMove(
+                    state.board.length / 2, state.board.length / 2));
+            return moves;
+        }
+        List<GomokuMove> reducedMoves = threatReducer.reduceMoves(state);
+        if(reducedMoves != null) {
+            return reducedMoves;
         }
         
-        // There's at least one threat on the board, so we can just return the
-        // threat squares and ignore everything else
-        if(!threatSquares.isEmpty()) {
-            return new ArrayList(threatSquares);
-        }
-        
+        // Prune moves by only focusing on moves that are within 2 intersections
+        // of an occupied field
         ArrayList<GomokuMove> pruned = new ArrayList<>(225);
         
-        // Have to make an opening move, return a move in the middle
-        if(state.moves == 0) {
-            pruned.add(new GomokuMove(
-                    state.board.length / 2, state.board.length / 2));
-            return pruned;
-        }
-        
-        // Focus on moves that occur up to 2 intersections around an existing
-        // stone on the board
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
                 if(state.board[i][j].index == 0 && 
@@ -128,7 +81,10 @@ public class MinimaxPlayer extends GomokuPlayer {
                 }
             }
         }
-        pruned.sort(fieldCompare);
+        
+        // Sort the moves using a heuristic (static evaluator applied to a 
+        // single move)
+        pruned.sort(fieldComparator);
         return pruned;
     }
     
@@ -143,8 +99,8 @@ public class MinimaxPlayer extends GomokuPlayer {
      */
     private int minimax(MinimaxState state, int depth, int alpha, int beta) 
             throws InterruptedException {
-        if(this.interrupted || 
-                (System.currentTimeMillis() - startTime) > timeout) {
+        if(Thread.interrupted() || 
+                (System.currentTimeMillis() - startTime) > time) {
             throw new InterruptedException();
         }
         nodes++;
@@ -158,12 +114,12 @@ public class MinimaxPlayer extends GomokuPlayer {
         }
         // Reached leaf node, return evaluation
         if(depth == 0) {
-            return evaluateState(state);
+            return staticEvaluator.evaluate(state, playerIndex, opponentIndex);
         }
         // Not terminal or leaf node, continue recursing
         if(state.currentIndex == this.playerIndex) {
             int maximum = Integer.MIN_VALUE;
-            List<GomokuMove> prunedMoves = pruneMoves(state);
+            List<GomokuMove> prunedMoves = getMoves(state);
             for(GomokuMove move : prunedMoves) {
                 state.makeMove(move);
                 int score = minimax(state, depth - 1, alpha, beta);
@@ -180,7 +136,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         }
         else {
             int minimum = Integer.MAX_VALUE;
-            List<GomokuMove> prunedMoves = pruneMoves(state);
+            List<GomokuMove> prunedMoves = getMoves(state);
             for(GomokuMove move : prunedMoves) {
                 state.makeMove(move);
                 int score = minimax(state, depth - 1, alpha, beta);
@@ -198,80 +154,16 @@ public class MinimaxPlayer extends GomokuPlayer {
     }
     
     /**
-     * Lookup the evaluation of a field from the perspective of a player.
-     * @param field Field to evaluate
-     * @param index Player index to evaluate for
-     * @return Score of this field
-     */
-    private int getScore(GomokuField field, int index) {
-        int score = 0;
-        for(int i = 0; i < 4; i++) {
-            score+= SCORES[index - 1]
-                    [field.directions[i][0].index]
-                    [field.directions[i][1].index]
-                    [field.directions[i][2].index]
-                    [field.directions[i][3].index]
-                    [field.directions[i][4].index]
-                    [field.directions[i][5].index]
-                    [field.directions[i][6].index]
-                    [field.directions[i][7].index]
-                    [field.directions[i][8].index];
-        }
-        return score;
-    }    
-    
-    /**
-     * Lookup and return the threat patterns for a field.
-     * @param field Field to get search
-     * @return ThreatPattern array of threats
-     */
-    private ThreatPattern[] getThreats(GomokuField field) {
-        ThreatPattern[] threats = new ThreatPattern[4];
-        for(int i = 0; i < 4; i++) {
-            threats[i] = THREAT_PATTERNS[field.index - 1]
-                    [field.directions[i][0].index]
-                    [field.directions[i][1].index]
-                    [field.directions[i][2].index]
-                    [field.directions[i][3].index]
-                    [field.directions[i][4].index]
-                    [field.directions[i][5].index]
-                    [field.directions[i][6].index]
-                    [field.directions[i][7].index]
-                    [field.directions[i][8].index];
-        }
-        return threats;
-    }
-    
-    /**
-     * Evaluate a state by looking up the evaluation of each field that is
-     * occupied. Minus score for opponent, add score for AI.
-     * @param state State to evaluate
-     * @return Score of the state
-     */
-    private int evaluateState(MinimaxState state) {
-        int score = 0;
-        for(int i = 0; i < state.board.length; i++) {
-            for(int j = 0; j < state.board.length; j++) {
-                if(state.board[i][j].index == this.opponentIndex) {
-                    score -= this.getScore(state.board[i][j], 
-                            this.opponentIndex);
-                } else if(state.board[i][j].index == this.playerIndex) {
-                    score += this.getScore(state.board[i][j], 
-                            this.playerIndex);
-                }
-            }
-        }
-        return score;
-    }
-    
-    /**
      * Run minimax for a list of initial moves and sort them after the search
      * based on their scores.
      * @param moves Initial moves
      * @param depth Depth to search moves
-     * @return List of moves, sorted by best score first
+     * @return List of moves sorted by highest score first
      */
-    private List<GomokuMove> search(List<GomokuMove> moves, int depth) {
+    private List<GomokuMove> search(List<GomokuMove> moves, int depth) 
+            throws InterruptedException {
+        
+        // Helper class to associate a move with a minimax score
         class ScoredMove {
             GomokuMove move;
             int score;
@@ -279,16 +171,11 @@ public class MinimaxPlayer extends GomokuPlayer {
                 this.move = move;
                 this.score = score;
             }
-        }        
+        }
         
-        Comparator<ScoredMove> moveCompare = new Comparator<ScoredMove>() {
-            @Override
-            public int compare(ScoredMove move1, ScoredMove move2) {
-                return move2.score - move1.score;
-            }
-        };
-        
-        // Copy moves
+        // For each initial move, create a ScoredMove with an initial score of
+        // -infinity. These moves and their scores get updated after every 
+        // minimax search and are sorted before being searched again
         List<ScoredMove> scoredMoves = new ArrayList<>();
         moves.forEach((move) -> {
             scoredMoves.add(new ScoredMove(move, Integer.MIN_VALUE));
@@ -298,7 +185,7 @@ public class MinimaxPlayer extends GomokuPlayer {
         int beta = Integer.MAX_VALUE;
         int bestScore = alpha;
 
-        // Run minimax for all the moves
+        // Run minimax for all the initial moves
         try {
             for(ScoredMove move : scoredMoves) {
                 state.makeMove(move.move);
@@ -311,24 +198,31 @@ public class MinimaxPlayer extends GomokuPlayer {
                 if(beta <= alpha) break;
             }
         } catch(InterruptedException ex) {
-            // Time limit reached, cannot complete search
-            return null;
+            // Search was interrupted
+            throw(ex);
         }
         
-        // Sort moves by score
-        scoredMoves.sort(moveCompare);
-        // Clear original list and re-add sorted moves
+        scoredMoves.sort(new Comparator<ScoredMove>() {
+            @Override
+            public int compare(ScoredMove move1, ScoredMove move2) {
+                return move2.score - move1.score;
+            }
+        });
+        
         moves.clear();
-        for(int i = 0; i < scoredMoves.size(); i++) {
-            moves.add(scoredMoves.get(i).move);
+        
+        // Found a winning move, return it and ignore anything else
+        if(scoredMoves.get(0).score >= 10000) {
+            moves.add(scoredMoves.get(0).move);
+            printSearchInfo(moves.get(0), scoredMoves.get(0).score, depth);
+            return moves;
+        } else {
+            // Else add all the moves, sorted by best score first
+            for(int i = 0; i < scoredMoves.size(); i++) {
+                moves.add(scoredMoves.get(i).move);
+            }
         }
-        
-        String bestMove = "[" + convertRow(moves.get(0).row)
-                + convertCol(moves.get(0).col) + "]";
-        
-        game.writeLog(
-                String.format("Depth: %d, Evaluation: %d, Best move: %s",
-                depth, bestScore, bestMove));
+        printSearchInfo(moves.get(0), scoredMoves.get(0).score, depth);
         return moves;
     }
     
@@ -344,64 +238,57 @@ public class MinimaxPlayer extends GomokuPlayer {
         this.nodes = 0;
         this.startTime = System.currentTimeMillis();
         
-        List<GomokuMove> initialMoves = pruneMoves(state);
+        // Return the initial moves from this state
+        List<GomokuMove> initialMoves = getMoves(state);
+        
+        // Only one move available, return it
+        if(initialMoves.size() == 1) return initialMoves.get(0);
+        
         GomokuMove bestMove = new GomokuMove();
         
+        // Run a minimax search up to a maximum depth of 10 for all the moves
         int depth = 10;
         for(int i = 2; i <= depth; i++) {
-            // Search and sort moves based on score
-            initialMoves = search(initialMoves, i);
-            // Update best move if search completed
-            if(initialMoves != null) {
-                bestMove = initialMoves.get(0);
-            } else {
+            try {
+                // Search and sort moves based on score
+                initialMoves = search(initialMoves, i);
+                // If the size is 1, must be a winning move, return it
+                if(initialMoves.size() == 1) {
+                    bestMove = initialMoves.get(0);
+                    break;
+                }
+            } catch (InterruptedException ex) {
                 break;
             }
+            // Update the best move
+            bestMove = initialMoves.get(0);
         }
         
-        long duration = System.currentTimeMillis() - startTime;
-        
-        game.writeLog("Time: " + duration + "ms");
-        game.writeLog("Nodes: " + nodes);
-        game.writeLog("Nodes/ms: " + (nodes / (duration > 0 ? duration : 1)));
-        
+        printPerformanceInfo();
         return bestMove;
     }
     
     /**
-     * Given some array representing a vertical/horizontal/diagonal direction
-     * on the board, calculate a score based on how many possible 5's can be 
-     * formed for a player and in how many moves.
-     * @param direction A 1D array representing a direction on the board
-     * @param index The player index to check (1 or 2)
-     * @return Score for this direction
+     * Print performance information, including the amount of nodes traversed
+     * in the game tree and the nodes traversed per millisecond.
      */
-    private static int scoreDirection(int[] direction, int index) {
-        int score = 0;
-        // Scores for making a 5
-        int[] scores = {19, 15, 11, 7, 3};
+    private void printPerformanceInfo() {
+        long duration = System.currentTimeMillis() - startTime;
+        game.writeLog("Time: " + duration + "ms");
+        game.writeLog("Nodes: " + nodes);
+        game.writeLog("Nodes/ms: " + (nodes / (duration > 0 ? duration : 1)));
+    }
+    
+    /**
+     * Print the result of a search, including the best move found, depth
+     * searched, and the evaluation score.
+     */
+    private void printSearchInfo(GomokuMove bestMove, int score, int depth) {
+        String bestMoveString = "[" + convertCol(bestMove.col) 
+                + convertRow(bestMove.row) + "]";
         
-        for(int i = 0; i < direction.length; i++) {
-            if(i + 4 < direction.length) {
-                int stones = 0;
-                int empty = 0;
-                // Pass a window of 5 across the direction and check how many
-                // stones and empty spots there are
-                for(int j = 0; j <= 4; j++) {
-                    if(direction[i + j] == index) stones++;
-                    else if(direction[i + j] == 0) empty++;
-                }
-                if(stones == 5) {
-                    return 30000;
-                }
-                // First check if it's possible to form a 5 in this window
-                if(stones + empty == 5 && empty != 5) {
-                    // Amount of empty spots = # of moves needed to make a 5
-                    score += scores[empty];
-                }
-            }
-        }
-        return score;
+        game.writeLog(String.format("Depth: %d, Evaluation: %d, Best move: %s",
+                depth, score, bestMoveString));
     }
     
     /**
@@ -420,94 +307,6 @@ public class MinimaxPlayer extends GomokuPlayer {
      */
     private String convertCol(int col) {
         return String.valueOf((char)((col + 1) + 'A' - 1));
-    }
-    
-    /*
-     * Precompute all the possible scores for every direction around a piece,
-     * and record any threats found.
-     */
-    static {
-        List<Threat> threats = new ArrayList<>();
-        // Four
-        threats.add(new Threat("01111", 1, new int[] { 0 }));
-        threats.add(new Threat("10111", 1, new int[] { 1 }));
-        threats.add(new Threat("11011", 1, new int[] { 2 }));
-        threats.add(new Threat("11101", 1, new int[] { 3 }));
-        threats.add(new Threat("11110", 1, new int[] { 4 }));
-        threats.add(new Threat("02222", 1, new int[] { 0 }));
-        threats.add(new Threat("20222", 1, new int[] { 1 }));
-        threats.add(new Threat("22022", 1, new int[] { 2 }));
-        threats.add(new Threat("22202", 1, new int[] { 3 }));
-        threats.add(new Threat("22220", 1, new int[] { 4 }));
-        // Three
-        threats.add(new Threat("0011100", 2, new int[] { 1, 5 }));
-        threats.add(new Threat("0022200", 2, new int[] { 1, 5 }));
-        // Broken three
-        threats.add(new Threat("011010", 2, new int[] { 0, 3, 5 }));
-        threats.add(new Threat("010110", 2, new int[] { 0, 2, 5 }));
-        threats.add(new Threat("022020", 2, new int[] { 0, 3, 5 }));
-        threats.add(new Threat("020220", 2, new int[] { 0, 2, 5 }));
-        
-        THREAT_PATTERNS = new ThreatPattern[2][4][4][4][4][4][4][4][4][4];
-        SCORES = new int[2][4][4][4][4][4][4][4][4][4];
-        
-        // Generate all possible numbers of length 9 in radix 4 (0,1,2,3)
-        for(int i = 0; i < 262144; i++) {
-            String numStr = String.format("%9s", Integer.toString(i, 4))
-                    .replace(" ", "0");
-            // Convert radix 4 string to integer array
-            int[] numArray = new int[numStr.length()];
-            for(int j = 0; j < numArray.length; j++) {
-                numArray[j] = Character.getNumericValue(numStr.charAt(j));
-            }
-            // Calculate heuristic score for player 1 and 2
-            int[] score = new int[] {
-                scoreDirection(numArray, 1), 
-                scoreDirection(numArray, 2)
-            };
-            
-            // Place scores in the lookup array
-            if(score[0] > 0) {
-                // Check for threats in this pattern, record it along with the
-                // threat moves and offset
-                if(score[0] != 30000) {
-                    for(Threat threat : threats) {
-                        int index = numStr.indexOf(threat.threatString);
-                        if(index != -1) {
-                            THREAT_PATTERNS[0][numArray[0]][numArray[1]]
-                                    [numArray[2]][numArray[3]]
-                                    [numArray[4]][numArray[5]]
-                                    [numArray[6]][numArray[7]]
-                                    [numArray[8]] = new ThreatPattern(
-                                            threat.threatSquares, index);
-                        }
-                    }
-                }
-                SCORES[0][numArray[0]][numArray[1]][numArray[2]][numArray[3]]
-                        [numArray[4]][numArray[5]][numArray[6]][numArray[7]]
-                        [numArray[8]] = score[0];
-            }
-            if(score[1] > 0) {
-                // Check for threats in this pattern, record it along with the
-                // threat moves and offset
-                if(score[1] != 30000) {
-                    for(Threat threat : threats) {
-                        int index = numStr.indexOf(threat.threatString);
-                        if(index != -1) {
-                            THREAT_PATTERNS[1][numArray[0]][numArray[1]]
-                                    [numArray[2]][numArray[3]]
-                                    [numArray[4]][numArray[5]]
-                                    [numArray[6]][numArray[7]]
-                                    [numArray[8]] = new ThreatPattern(
-                                            threat.threatSquares, index);
-                        }
-                    }
-                }
-                SCORES[1][numArray[0]][numArray[1]][numArray[2]][numArray[3]]
-                        [numArray[4]][numArray[5]][numArray[6]][numArray[7]]
-                        [numArray[8]] = score[1];
-            }
-        }
     }
     
 }

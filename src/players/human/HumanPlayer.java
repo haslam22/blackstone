@@ -1,8 +1,9 @@
-package players;
+package players.human;
 
 import gomoku.GomokuGame;
 import gomoku.GomokuMove;
 import gomoku.GomokuState;
+import players.GomokuPlayer;
 
 /**
  * Class for a non-AI player. Attaches a mouse listener to the board and waits
@@ -29,6 +30,11 @@ public class HumanPlayer extends GomokuPlayer {
             return null;
         }
         return move;
+    }
+
+    @Override
+    public String toString() {
+        return "Human";
     }
     
 }

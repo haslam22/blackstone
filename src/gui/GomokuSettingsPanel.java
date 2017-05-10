@@ -1,5 +1,6 @@
 package gui;
 
+import gui.GomokuBoardPanel.CoordinateDisplay;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -64,7 +65,7 @@ public class GomokuSettingsPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         this.add(intersections, gbc);
         
-        JLabel timeLabel = new JLabel("Time per game (minutes)");
+        JLabel timeLabel = new JLabel("AI Time Limit (ms)");
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 1;
@@ -74,14 +75,13 @@ public class GomokuSettingsPanel extends JPanel {
         this.add(timeLabel, gbc);
         
         this.time = new JComboBox(new String[] {
-            "5", 
-            "10",
-            "15",
-            "20",
-            "30",
-            "Unlimited"
+            "1000", 
+            "2000",
+            "3000",
+            "4000",
+            "5000",
         });
-        this.time.putClientProperty("time", time.getSelectedItem());
+        time.setSelectedIndex(2);
         
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -91,9 +91,31 @@ public class GomokuSettingsPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(time, gbc);
         
-        JLabel emptyLabel = new JLabel("");
+        JLabel coordinateDisplayLabel = new JLabel("Coordinate Display Mode");
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+        this.add(coordinateDisplayLabel, gbc);
+        
+        JComboBox coordinateDisplayBox = new JComboBox(new CoordinateDisplay[] {
+            CoordinateDisplay.ALGEBRAIC,
+            CoordinateDisplay.NUMERIC
+        });
+        
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        this.add(coordinateDisplayBox, gbc);
+        
+        JLabel emptyLabel = new JLabel("");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 20;
@@ -117,6 +139,14 @@ public class GomokuSettingsPanel extends JPanel {
                 } catch(NumberFormatException ex) {
                     app.updateTime(0);
                 }
+            }
+        });
+        coordinateDisplayBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                app.updateDisplayMode(
+                        (CoordinateDisplay) 
+                                coordinateDisplayBox.getSelectedItem());
             }
         });
     }

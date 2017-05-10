@@ -74,7 +74,7 @@ public class GomokuPlayerPanel extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         this.add(playerColourPanel, gbc);
 
-        this.timeLabel = new JLabel("5:00", SwingConstants.CENTER);
+        this.timeLabel = new JLabel("0:00", SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.weightx = 1;
@@ -85,7 +85,7 @@ public class GomokuPlayerPanel extends JPanel {
     private String[] getPlayerStrings() {
         return new String[] {
             "Human",
-            "Minimax"
+            "AI"
         };
     }
     
