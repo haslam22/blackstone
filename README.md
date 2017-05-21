@@ -1,5 +1,5 @@
 # Gomoku
-A powerful Gomoku (Five in a Row) AI written in Java, using the Minimax algorithm with alpha-beta pruning and a strong heuristic evaluation function. Download the latest build [here](target/Gomoku-1.0.jar).
+A powerful Gomoku (Five in a Row) AI written in `Java`, based on the Minimax algorithm with α-β pruning and many performance optimisations. Download the latest build [here](target/Gomoku-1.0.jar).
 
 ![GUI Screenshot](http://i.imgur.com/sMCavOR.png)
 
