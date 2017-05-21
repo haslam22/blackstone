@@ -67,6 +67,7 @@ public class GomokuGame {
      * @param app
      */
     public void start(GomokuApplication app) {
+        app.setChangesEnabled(false);
         board.reset();
         gameThread.start();
     }
@@ -76,6 +77,7 @@ public class GomokuGame {
      * @param app
      */
     public void stop(GomokuApplication app) {
+        app.setChangesEnabled(true);
         gameThread.interrupt();
     }
     

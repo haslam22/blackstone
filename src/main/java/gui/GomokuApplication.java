@@ -97,17 +97,18 @@ public class GomokuApplication {
     }
     
     public void newGame(String[] playerStrings) {
-        this.gamePanel.setEnabled(false);
         this.game = new GomokuGame(this, intersections, 
                 playerStrings[0], playerStrings[1], time);
         this.game.start(this);
-        this.settingsPanel.setEnabled(false);
+    }
+    
+    public void setChangesEnabled(boolean enabled) {
+        this.settingsPanel.setEnabled(enabled);
+        this.gamePanel.setEnabled(enabled);
     }
     
     public void forfeit() {
         this.game.stop(this);
-        this.gamePanel.setEnabled(true);
-        this.settingsPanel.setEnabled(true);
     }
     
     public void writeLog(String text) {
@@ -128,8 +129,8 @@ public class GomokuApplication {
                     IllegalAccessException | 
                     UnsupportedLookAndFeelException ex) {
                 System.out.println("Unable to set system style: " + ex);
-            }        
-            GomokuApplication app = new GomokuApplication();
+            }   
+            GomokuApplication app = new GomokuApplication();   
         });
     }
 }
