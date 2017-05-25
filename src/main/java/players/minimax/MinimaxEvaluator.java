@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import javax.swing.JOptionPane;
 
 /**
  * Static evaluator, providing heuristic evaluations for positions in the game.
@@ -44,6 +43,7 @@ public class MinimaxEvaluator {
     protected int evaluate(MinimaxState state, int playerIndex, 
             int opponentIndex) {
         int score = 0;
+        
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
                 if(state.board[i][j].index == opponentIndex) {

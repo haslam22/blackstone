@@ -6,6 +6,8 @@ import gomoku.GomokuState;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import players.GomokuPlayer;
 
 /**
@@ -13,12 +15,14 @@ import players.GomokuPlayer;
  * @author Hassan
  */
 public class MinimaxPlayer extends GomokuPlayer {
+    
+    private static final Logger LOGGER = Logger.getGlobal();
 
     private final MinimaxThreatReducer threatReducer;
     private final MinimaxEvaluator staticEvaluator;
+    private MinimaxState state;
     
     private final int intersections;
-    private MinimaxState state;
     private final int time;
     
     private long startTime;
@@ -51,8 +55,9 @@ public class MinimaxPlayer extends GomokuPlayer {
     };
     
     /**
-     * Generate a list of moves for a state. Only returns moves near to other
-     * existing stones and reduces the search space when threats are found.
+     * Generate a list of moves for a state. Only look at moves close to other
+     * stones on the board and reduce moves when threats from the opponent
+     * are found.
      * @param state State to get moves for
      * @return A list of moves
      */
@@ -64,15 +69,17 @@ public class MinimaxPlayer extends GomokuPlayer {
                     state.board.length / 2, state.board.length / 2));
             return moves;
         }
+        
+        // Search for threats, return reduced set of moves if threats from the
+        // opponent exist
         List<GomokuMove> reducedMoves = threatReducer.reduceMoves(state);
         if(reducedMoves != null) {
             return reducedMoves;
         }
         
-        // Prune moves by only focusing on moves that are within 2 intersections
-        // of an occupied field
+        // Prune moves by only focusing on moves close to existing stones
         ArrayList<GomokuMove> pruned = new ArrayList<>(225);
-        
+        // Add moves adjacent to other stones (max distance of 2)
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
                 if(state.board[i][j].index == 0 && 
@@ -274,9 +281,10 @@ public class MinimaxPlayer extends GomokuPlayer {
      */
     private void printPerformanceInfo() {
         long duration = System.currentTimeMillis() - startTime;
-        game.writeLog("Time: " + duration + "ms");
-        game.writeLog("Nodes: " + nodes);
-        game.writeLog("Nodes/ms: " + (nodes / (duration > 0 ? duration : 1)));
+        LOGGER.log(Level.INFO, "Time: {0}ms", duration);
+        LOGGER.log(Level.INFO, "Nodes: {0}", nodes);
+        LOGGER.log(Level.INFO, "Nodes/ms: {0}", 
+                nodes / (duration > 0 ? duration : 1));
     }
     
     /**
@@ -286,9 +294,8 @@ public class MinimaxPlayer extends GomokuPlayer {
     private void printSearchInfo(GomokuMove bestMove, int score, int depth) {
         String bestMoveString = "[" + convertCol(bestMove.col) 
                 + convertRow(bestMove.row) + "]";
-        
-        game.writeLog(String.format("Depth: %d, Evaluation: %d, Best move: %s",
-                depth, score, bestMoveString));
+        LOGGER.log(Level.FINE, String.format("Depth: %d, Evaluation: %d, "
+                + "Best move: %s", depth, score, bestMoveString));
     }
     
     /**

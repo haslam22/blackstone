@@ -3,6 +3,13 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,10 +27,29 @@ import javax.swing.text.DefaultCaret;
 public class GomokuLogPanel extends JPanel {
 
     private JTextArea textBox;
-    private JLabel statusLabel;
+    private JLabel statusLabel;    
+    
+    private final Handler TextBoxHandler = new Handler() {
+        @Override
+        public void publish(LogRecord record) {
+            String recordFormatted = this.getFormatter().formatMessage(record);
+            appendText(recordFormatted);
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() throws SecurityException {
+        }
+    };
     
     public GomokuLogPanel(GomokuApplication app) {
         init();
+        TextBoxHandler.setFormatter(new SimpleFormatter());
+        Logger.getGlobal().addHandler(TextBoxHandler);
+        Logger.getGlobal().setLevel(Level.ALL);
     }
     
     private void init() {
@@ -52,7 +78,7 @@ public class GomokuLogPanel extends JPanel {
         this.add(statusLabel, BorderLayout.NORTH);
     }
     
-    public void appendText(String text) {
+    private void appendText(String text) {
         textBox.append(text + "\n");
     }
     

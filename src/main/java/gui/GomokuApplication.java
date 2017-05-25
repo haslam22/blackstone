@@ -5,6 +5,7 @@ import gui.GomokuBoardPanel.CoordinateDisplay;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
@@ -109,10 +110,6 @@ public class GomokuApplication {
     
     public void forfeit() {
         this.game.stop(this);
-    }
-    
-    public void writeLog(String text) {
-        this.logPanel.appendText(text);
     }
     
     public void clearLog() {

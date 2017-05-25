@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 /**
  * This class searches a state for threats and reduces the search space to only
@@ -149,9 +148,11 @@ public class MinimaxThreatReducer {
      * Search for refutation moves in a state. A refutation is a move that 
      * creates a four in response to a threat, forcing the opponent to block.
      * @param state
+     * @param index
      * @return
      */
-    private HashSet<GomokuMove> searchRefutations(MinimaxState state, int index) {
+    private HashSet<GomokuMove> searchRefutations(MinimaxState state, 
+            int index) {
         HashSet<GomokuMove> refutationMoves = new HashSet<>();
         
         // Loop over every field

@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import players.GomokuPlayer;
 import players.human.HumanPlayer;
 import players.minimax.MinimaxPlayer;
@@ -20,7 +22,8 @@ import players.minimax.MinimaxPlayer;
  * @author Hassan
  */
 public class GomokuGame {
-    
+    private static final Logger LOGGER = Logger.getGlobal();
+
     private final GomokuState state;
     private final GomokuPlayer[] players;
     private final GomokuBoardPanel board;
@@ -111,14 +114,6 @@ public class GomokuGame {
     }
     
     /**
-     * Add a new line to the game log on the interface.
-     * @param text String to append to the log as a new line
-     */
-    public void writeLog(String text) {
-        app.writeLog(text);
-    }
-    
-    /**
      * Add a listener to the board, which is automatically removed after the
      * next move.
      * @param listener Listener to add
@@ -169,7 +164,8 @@ public class GomokuGame {
     private void writeMove(GomokuMove move, int index) {
         String moveStr = this.intersections - move.row + String.valueOf((char)
                 ((move.col + 1) + 'A' - 1));
-        writeLog("Player " + index + " move: " + moveStr);
+        LOGGER.log(Level.FINE, "Player {0} move: {1}", 
+                new Object[]{index, moveStr});
     }
     
     /**
@@ -218,9 +214,10 @@ public class GomokuGame {
                     } catch (ExecutionException ex) {
                         board.disableStonePicker();
                         ex.printStackTrace();
-                        writeLog(String.format(STATUS_EXECUTION_ERROR, 
+                        LOGGER.log(Level.SEVERE, 
+                                String.format(STATUS_EXECUTION_ERROR, 
                                 state.getCurrentIndex(),
-                                players[state.getCurrentIndex() - 1]));
+                                players[state.getCurrentIndex() - 1]), ex);
                         break;
                     } catch (InterruptedException ex) {
                         board.disableStonePicker();
