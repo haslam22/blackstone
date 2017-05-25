@@ -1,15 +1,13 @@
-# Gomoku
-A powerful Gomoku (Renju, Pente, Five in a Row) AI written in Java, using the Minimax algorithm with alpha-beta pruning and a strong heuristic evaluation function.
+[![Build Status](https://travis-ci.org/haslam22/gomoku.svg?branch=master)](https://travis-ci.org/haslam22/gomoku)
 
-Latest build (runnable jar): [dist/Gomoku.jar](dist/Gomoku.jar)
+A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) client featuring a powerful AI written in `Java`. Download the latest build [here](target/Gomoku-1.0.jar).
 
-![alt text](http://i.imgur.com/sMCavOR.png)
+There are two main components in this project:
 
-## Current Features
-- Minimax AI (up to depth 8) with alpha-beta pruning, simple move ordering and evaluation caching
-- Fully resizable Gomoku board interface, with interactive stone picking and board customisation
+* A strong AI player based on Minimax with α-β pruning, alongside many performance optimisations ([/players/Minimax](src/main/java/players/minimax))
+* An interface to setup and create new games, created using Java's Swing GUI toolkit ([/gui](src/main/java/gui))
 
-## Coming Soon
-- Transposition table to save subtree evaluations
-- Faster evaluation by precomputing heuristic scores
-- Undo/Redo controls for the interface
+![GUI Screenshot](http://i.imgur.com/sMCavOR.png)
+
+## Install
+Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn package` to build the project in one step.
