@@ -109,7 +109,7 @@ public class GameManager {
         for(GameEventListener listener : listeners) {
             listener.gameOver();
         }
-        currentThread.interrupt();
+        if(currentThread != null) currentThread.interrupt();
     }
 
     /**

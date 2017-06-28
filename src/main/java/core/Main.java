@@ -46,7 +46,6 @@ public class Main extends Application {
             public void handle(WindowEvent t) {
                 manager.stopGame();
                 Platform.exit();
-                System.exit(0);
             }
         });
         primaryStage.getIcons().add(new Image(getClass().getClassLoader()
