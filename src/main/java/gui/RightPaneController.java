@@ -11,9 +11,12 @@ import java.util.logging.*;
 
 public class RightPaneController extends Controller {
 
+    public Label player1MoveTimeLabelDesc;
+    public Label player1GameTimeLabelDesc;
+    public Label player2GameTimeLabelDesc;
+    public Label player2MoveTimeLabelDesc;
     private Label[] gameTimeLabels;
     private Label[] moveTimeLabels;
-    private GridPane[] playerBoxes;
     public ComboBox<String> player2ComboBox;
     public ComboBox<String> player1ComboBox;
     public TextArea textbox;
@@ -24,6 +27,7 @@ public class RightPaneController extends Controller {
     public Label player1GameTimeLabel;
     public Label player1MoveTimeLabel;
     private GameManager manager;
+    private ComboBox[] playerComboBoxes;
 
     public RightPaneController() {
         setupLog();
@@ -75,11 +79,10 @@ public class RightPaneController extends Controller {
                 player1MoveTimeLabel,
                 player2MoveTimeLabel
         };
-        this.playerBoxes = new GridPane[] {
-                player1Box,
-                player2Box
+        this.playerComboBoxes = new ComboBox[] {
+                player1ComboBox,
+                player2ComboBox
         };
-
         // Events we need to respond to
         manager.addListener(new GameEventAdapter() {
             @Override
@@ -211,10 +214,31 @@ public class RightPaneController extends Controller {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                playerBoxes[0].setStyle("-fx-background-color:#eee;");
-                playerBoxes[1].setStyle("-fx-background-color:#eee;");
-                playerBoxes[player - 1].setStyle
-                        ("-fx-background-color:#e1e1e1;");
+                moveTimeLabels[0].setStyle("-fx-opacity: 0.7;");
+                moveTimeLabels[1].setStyle("-fx-opacity: 0.7;");
+                gameTimeLabels[0].setStyle("-fx-opacity: 0.7;");
+                gameTimeLabels[1].setStyle("-fx-opacity: 0.7;");
+                playerComboBoxes[0].setStyle("-fx-opacity: 0.7;");
+                playerComboBoxes[1].setStyle("-fx-opacity: 0.7;");
+
+                gameTimeLabels[player - 1].setStyle("-fx-opacity: 1;");
+                moveTimeLabels[player - 1].setStyle("-fx-opacity: 1;");
+                playerComboBoxes[player - 1].setStyle("-fx-opacity: 1;");
+
+                switch(player) {
+                    case 1:
+                        player1MoveTimeLabelDesc.setStyle("-fx-opacity: 1");
+                        player1GameTimeLabelDesc.setStyle("-fx-opacity: 1");
+                        player2MoveTimeLabelDesc.setStyle("-fx-opacity: 0.7");
+                        player2GameTimeLabelDesc.setStyle("-fx-opacity: 0.7");
+                        break;
+                    case 2:
+                        player1MoveTimeLabelDesc.setStyle("-fx-opacity: 0.7");
+                        player1GameTimeLabelDesc.setStyle("-fx-opacity: 0.7");
+                        player2MoveTimeLabelDesc.setStyle("-fx-opacity: 1");
+                        player2GameTimeLabelDesc.setStyle("-fx-opacity: 1");
+                        break;
+                }
             }
         });
     }
@@ -226,10 +250,18 @@ public class RightPaneController extends Controller {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                player1Box.setStyle("-fx-background-color:#eee;");
-                player2Box.setStyle("-fx-background-color:#eee;");
                 player1ComboBox.setDisable(false);
                 player2ComboBox.setDisable(false);
+                player1MoveTimeLabelDesc.setStyle("-fx-opacity: 1");
+                player1GameTimeLabelDesc.setStyle("-fx-opacity: 1");
+                player2MoveTimeLabelDesc.setStyle("-fx-opacity: 1");
+                player2GameTimeLabelDesc.setStyle("-fx-opacity: 1");
+                moveTimeLabels[0].setStyle("-fx-opacity: 1;");
+                moveTimeLabels[1].setStyle("-fx-opacity: 1;");
+                gameTimeLabels[0].setStyle("-fx-opacity: 1;");
+                gameTimeLabels[1].setStyle("-fx-opacity: 1;");
+                playerComboBoxes[0].setStyle("-fx-opacity: 1;");
+                playerComboBoxes[1].setStyle("-fx-opacity: 1;");
             }
         });
     }

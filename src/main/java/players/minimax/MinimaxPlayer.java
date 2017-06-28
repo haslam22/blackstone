@@ -36,7 +36,7 @@ public class MinimaxPlayer extends Player {
         this.threatReducer = new MinimaxThreatReducer();
         this.staticEvaluator = new MinimaxEvaluator();
         this.intersections = info.getIntersections();
-        this.time = Math.min(2000, info.getMoveTimeout());
+        this.time = Math.min(1950, info.getMoveTimeout());
         this.opponentIndex = info.getOpponentIndex();
         this.playerIndex = info.getPlayerIndex();
     }

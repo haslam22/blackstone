@@ -42,12 +42,12 @@
         </ComboBox>
         <HBox GridPane.rowIndex="1"
               GridPane.columnIndex="1">
-            <Label text="Time/game: "></Label>
+            <Label fx:id="player1GameTimeLabelDesc" text="Time/game: "></Label>
             <Label fx:id="player1GameTimeLabel" text="20:00"></Label>
         </HBox>
         <HBox GridPane.rowIndex="2"
               GridPane.columnIndex="1">
-            <Label text="Time/move: "></Label>
+            <Label fx:id="player1MoveTimeLabelDesc" text="Time/move: "></Label>
             <Label fx:id="player1MoveTimeLabel" text="00:05"></Label>
         </HBox>
     </GridPane>
@@ -77,12 +77,12 @@
         </ComboBox>
         <HBox GridPane.rowIndex="1"
               GridPane.columnIndex="1">
-            <Label text="Time/game: "></Label>
+            <Label fx:id="player2GameTimeLabelDesc" text="Time/game: "></Label>
             <Label fx:id="player2GameTimeLabel" text="20:00"></Label>
         </HBox>
         <HBox GridPane.rowIndex="2"
               GridPane.columnIndex="1">
-            <Label text="Time/move: "></Label>
+            <Label fx:id="player2MoveTimeLabelDesc" text="Time/move: "></Label>
             <Label fx:id="player2MoveTimeLabel" text="00:05"></Label>
         </HBox>
     </GridPane>
