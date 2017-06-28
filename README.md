@@ -7,7 +7,7 @@ There are two main components in this project:
 * A strong AI player based on Minimax with α-β pruning, alongside many performance optimisations ([/players/Minimax](src/main/java/players/minimax))
 * An interface to setup and create new games, created using JavaFX ([/gui](src/main/java/gui))
 
-![GUI Screenshot](http://imgur.com/sgZ6A1a)
+![GUI Screenshot](http://i.imgur.com/sgZ6A1a.png)
 
 ## Install
 Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn package` to build the project in one step.
