@@ -8,7 +8,8 @@
     <artifactId>gomoku</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
-        <maven.compiler.target>1.8</maven.compiler.target>
+    	<maven.compiler.source>1.8</maven.compiler.source>
+    	<maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <build>
         <plugins>
@@ -21,6 +22,8 @@
                             <addClasspath>true</addClasspath>
                             <mainClass>core.Main</mainClass>
                         </manifest>
+          			<source>1.8</source>
+          			<target>1.8</target>
                     </archive>
                 </configuration>
             </plugin>
