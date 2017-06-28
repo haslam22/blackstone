@@ -1,0 +1,26 @@
+.outer {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-border-color: #ccc;
+    -fx-border-width: 0 1 0 1;
+}
+
+.player-box {
+    -fx-background-color: #eee;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-radius: 3, 2;
+}
+
+.black-stone {
+    -fx-fill: radial-gradient(focus-angle 45deg, focus-distance 58%,
+        center 50% 50% , radius 50% , #A0A0A0 0%, #222 100%);
+}
+.white-stone {
+     -fx-fill: radial-gradient(focus-angle 45deg, focus-distance 58%,
+         center 50% 50% , radius 50% , white 0%, #A0A0A0 100%);
+}
+
+.heading {
+    -fx-font-size: 14;
+}

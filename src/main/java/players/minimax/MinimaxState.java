@@ -1,5 +1,5 @@
 package players.minimax;
-import gomoku.GomokuMove;
+import core.Move;
 
 import java.util.Random;
 
@@ -67,11 +67,11 @@ public class MinimaxState {
      * Apply a move to this state.
      * @param move Move to apply
      */
-    public void makeMove(GomokuMove move) {
+    public void makeMove(Move move) {
         moves++;
-        this.board[move.row][move.col].index = this.currentIndex;
-        this.zobristHash ^= zobristKeys[board[move.row][move.col].index - 1]
-                [move.row][move.col];
+        this.board[move.getRow()][move.getCol()].index = this.currentIndex;
+        this.zobristHash ^= zobristKeys[board[move.getRow()][move.getCol()]
+                .index - 1][move.getRow()][move.getCol()];
         this.currentIndex = this.currentIndex == 1 ? 2 : 1;
     }
     
@@ -79,11 +79,11 @@ public class MinimaxState {
      * Undo a move on this state.
      * @param move Move to undo
      */
-    public void undoMove(GomokuMove move) {
+    public void undoMove(Move move) {
         moves--;
-        this.zobristHash ^= zobristKeys[board[move.row][move.col].index - 1]
-                [move.row][move.col];
-        this.board[move.row][move.col].index = 0;
+        this.zobristHash ^= zobristKeys[board[move.getRow()][move.getCol()]
+                .index - 1][move.getRow()][move.getCol()];
+        this.board[move.getRow()][move.getCol()].index = 0;
         this.currentIndex = this.currentIndex == 1 ? 2 : 1;
     }
     

@@ -1,0 +1,12 @@
+.root {
+    -fx-font-family: "Arial";
+    -fx-border-color: #ccc;
+    -fx-border-width: 0 0 1 0;
+}
+
+.icon {
+    -fx-padding: 2 2 2 2;
+    -fx-font-family: "FontAwesome";
+    -fx-effect: innershadow( gaussian, rgba( 0, 0, 0, 0.2 ), 2, 0, 0, 0 );
+    -fx-text-fill: #555;
+}

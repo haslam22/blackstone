@@ -1,0 +1,96 @@
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+
+<?import javafx.scene.control.Label?>
+<?import java.net.URL?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.shape.Circle?>
+<VBox fx:controller="gui.RightPaneController"
+      xmlns:fx="http://javafx.com/fxml" styleClass="outer" maxWidth="250"
+      spacing="10">
+    <padding>
+        <Insets bottom="10.0" left="10.0" right ="10.0" top="10.0"/>
+    </padding>
+    <GridPane fx:id="player1Box" alignment="center" hgap="5" vgap="5"
+              styleClass="player-box">
+        <padding>
+            <Insets top="10" left="10" right="10" bottom="10"></Insets>
+        </padding>
+        <Circle styleClass="black-stone" radius="15"
+                GridPane.rowIndex="0" GridPane.columnIndex="0"
+                GridPane.rowSpan="2" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER">
+            <GridPane.margin>
+                <Insets bottom="5" left="5" right="5" top="5"></Insets>
+            </GridPane.margin>
+        </Circle>
+        <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Human"
+                  GridPane.rowIndex="0" GridPane.columnIndex="1"
+                  GridPane.hgrow="ALWAYS" onAction="#player1Changed"
+                  fx:id="player1ComboBox">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Human" />
+                    <String fx:value="Computer" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+        <HBox GridPane.rowIndex="1"
+              GridPane.columnIndex="1">
+            <Label text="Time/game: "></Label>
+            <Label fx:id="player1GameTimeLabel" text="20:00"></Label>
+        </HBox>
+        <HBox GridPane.rowIndex="2"
+              GridPane.columnIndex="1">
+            <Label text="Time/move: "></Label>
+            <Label fx:id="player1MoveTimeLabel" text="00:05"></Label>
+        </HBox>
+    </GridPane>
+    <GridPane fx:id="player2Box" alignment="center" hgap="5" vgap="5"
+              styleClass="player-box">
+        <padding>
+            <Insets top="10" left="10" right="10" bottom="10"></Insets>
+        </padding>
+        <Circle styleClass="white-stone" radius="15"
+                GridPane.rowIndex="0" GridPane.columnIndex="0"
+                GridPane.rowSpan="2" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER">
+            <GridPane.margin>
+                <Insets bottom="5" left="5" right="5" top="5"></Insets>
+            </GridPane.margin>
+        </Circle>
+        <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Computer"
+                  GridPane.rowIndex="0" GridPane.columnIndex="1"
+                  GridPane.hgrow="ALWAYS" onAction="#player2Changed"
+                  fx:id="player2ComboBox">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Human" />
+                    <String fx:value="Computer" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+        <HBox GridPane.rowIndex="1"
+              GridPane.columnIndex="1">
+            <Label text="Time/game: "></Label>
+            <Label fx:id="player2GameTimeLabel" text="20:00"></Label>
+        </HBox>
+        <HBox GridPane.rowIndex="2"
+              GridPane.columnIndex="1">
+            <Label text="Time/move: "></Label>
+            <Label fx:id="player2MoveTimeLabel" text="00:05"></Label>
+        </HBox>
+    </GridPane>
+    <TextArea fx:id="textbox" editable="false" wrapText="true"
+              VBox.vgrow="ALWAYS">
+    </TextArea>
+    <stylesheets>
+        <URL value="@Global.css" />
+        <URL value="@RightPane.css" />
+    </stylesheets>
+</VBox>

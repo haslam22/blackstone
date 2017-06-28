@@ -1,6 +1,6 @@
 package players.minimax;
 
-import gomoku.GomokuMove;
+import core.Move;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,11 +100,11 @@ public class MinimaxThreatReducer {
      * @param state MinimaxState
      * @return Reduced list of moves, or null if all moves are possible
      */
-    protected List<GomokuMove> reduceMoves(MinimaxState state) {
+    protected List<Move> reduceMoves(MinimaxState state) {
         int player = state.currentIndex;
         int opponent = player == 1? 2 : 1;
         
-        HashSet<GomokuMove> threatMoves = new HashSet<>();
+        HashSet<Move> threatMoves = new HashSet<>();
         int[] threatCount = new int[2];
         
         // Loop over every field
@@ -122,7 +122,7 @@ public class MinimaxThreatReducer {
                                 for(int square : threat.threatSquares) {
                                     MinimaxField squareField = state.board[i][j]
                                             .directions[k][square];
-                                    threatMoves.add(new GomokuMove(
+                                    threatMoves.add(new Move(
                                             squareField.row, 
                                             squareField.col));
                                 }
@@ -151,9 +151,9 @@ public class MinimaxThreatReducer {
      * @param index
      * @return
      */
-    private HashSet<GomokuMove> searchRefutations(MinimaxState state, 
+    private HashSet<Move> searchRefutations(MinimaxState state,
             int index) {
-        HashSet<GomokuMove> refutationMoves = new HashSet<>();
+        HashSet<Move> refutationMoves = new HashSet<>();
         
         // Loop over every field
         for(int i = 0; i < state.board.length; i++) {
@@ -172,7 +172,7 @@ public class MinimaxThreatReducer {
                                         MinimaxField squareField = 
                                                 state.board[i][j].directions[k]
                                                 [square];
-                                        refutationMoves.add(new GomokuMove(
+                                        refutationMoves.add(new Move(
                                                 squareField.row, 
                                                 squareField.col));
                                     }

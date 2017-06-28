@@ -1,29 +1,31 @@
 package players.human;
 
-import gomoku.GomokuGame;
-import gomoku.GomokuMove;
-import gomoku.GomokuState;
-import players.GomokuPlayer;
+import core.GameInfo;
+import core.GameState;
+import core.Move;
+import players.Player;
 
 /**
- * Class for a non-AI player. Attaches a mouse listener to the board and waits
- * for a valid move. Listener calls notify() to wake this thread up and return a
- * move when the user clicks on the board.
+ * Class for a non-AI player. Sleeps until the game receives a valid move
+ * from the user.
  * @author Hassan
  */
-public class HumanPlayer extends GomokuPlayer {
+public class HumanPlayer extends Player {
 
-    public GomokuMove move;
+    private Move move;
 
-    public HumanPlayer(GomokuGame game, int playerIndex, int opponentIndex) {
-        super(game, playerIndex, opponentIndex);
+    public HumanPlayer(GameInfo info) {
+        super(info);
+    }
+
+    public void setMove(Move move) {
+        this.move = move;
     }
     
     @Override
-    public GomokuMove getMove(GomokuState state) {
-        game.addBoardListener(new HumanListener(this, this.game, state), true);
+    public Move getMove(GameState state) {
+        // Suspend until the user clicks a valid move (handled by the game)
         try {
-            // Wait until the mouse listener calls notify() on this thread
             synchronized(this) {
                 this.wait();
             }

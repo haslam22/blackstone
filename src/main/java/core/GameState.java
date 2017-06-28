@@ -1,96 +1,104 @@
-package gomoku;
+package core;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
- * State representing an ongoing Gomoku game. Modified only by the game process, 
- * AI players can read the state of the game from this object but not modify it.
- * @author Hassan
+ * Contains all the information about the game, including the settings
+ * (time/board size) and the moves made. This object is visible to players
+ * but should not be modified outside this package.
  */
-public class GomokuState {
-    
-    private final int[][] board;
-    private final int intersections;
-    private final Stack<GomokuMove> moveHistory;
-    private int currentIndex;
-    private int movesCount;
-    
-    /**
-     * Create a new GomokuState instance
-     * @param intersections Number of intersections on the board
-     */
-    protected GomokuState(int intersections) {
+public class GameState {
+
+    private int[][] board;
+    private Stack<Move> moves;
+    private int intersections;
+    private int currentIndex = 1;
+
+    protected GameState(int intersections) {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
-        this.currentIndex = 1;
-        this.moveHistory = new Stack<>();
+        this.moves = new Stack<>();
     }
-    
+
     /**
-     * Apply a move to this state. Must be unoccupied.
-     * @param move Move to apply
-     */
-    protected void makeMove(GomokuMove move) {
-        if(board[move.row][move.col] == 0) {
-            movesCount++;
-            this.board[move.row][move.col] = this.currentIndex;
-            this.currentIndex = this.currentIndex == 1 ? 2 : 1;
-            this.moveHistory.push(move);
-        }
-    }
-    
-    /**
-     * Undo a move on this state. Must be the previous move applied to this
-     * state.
-     * @param move Move to undo
-     */
-    protected void undoMove(GomokuMove move) {
-        if(moveHistory.peek().equals(move)) {
-            movesCount--;
-            this.board[move.row][move.col] = 0;
-            this.currentIndex = this.currentIndex == 1 ? 2 : 1;
-            this.moveHistory.pop();
-        }
-    }
-    
-    /**
-     * Check if this state is a terminal state (game is over)
-     * @return Returns 0 (Not terminal), 1 (Player 1 wins), 2 (Player 2 wins) or
-     * 3 (Board is full, draw)
+     * Return the terminal status of the game
+     * @return 0 (game is not terminal), 1/2 if player 1/2 has won, 3 if the
+     * board is full
      */
     public int terminal() {
-        if(isWinner(1)) return 1;
-        else if(isWinner(2)) return 2;
-        else if(movesCount == intersections * intersections) return 3;
-        else return 0;
+        if(isWinner(1)) {
+            return 1;
+        }
+        else if(isWinner(2)) {
+            return 2;
+        }
+        else if(moves.size() == intersections * intersections) {
+            return 3;
+        }
+        else {
+            return 0;
+        }
     }
-    
+
     /**
-     * Return the index of the player who is required to make a move.
-     * @return Player index (1 or 2)
+     * Get the current player index for this state
+     * @return Current player # who has to make a move
      */
-    protected int getCurrentIndex() {
+    public int getCurrentIndex() {
         return this.currentIndex;
     }
-    
-    public int getIntersectionIndex(int row, int col) {
-        return this.board[row][col];
-    }
-    
-    public Stack<GomokuMove> getMoveHistory() {
-        Stack<GomokuMove> moveHistoryTemp = new Stack<>();
-        moveHistoryTemp.addAll(moveHistory);
-        return moveHistoryTemp;
-    }
-    
+
     /**
-     * Return the last move that was made on this state.
-     * @return Move on top of the stack, or null if no moves have been made
+     * Get a list of moves that were made on this state
+     * @return ArrayList of moves, from first move to last move made
      */
-    public GomokuMove getLastMove() {
-        return moveHistory.isEmpty() ? null : moveHistory.peek();
+    public List<Move> getMoves() {
+        List<Move> moveList = new ArrayList(moves);
+        return moveList;
     }
-    
+
+    /**
+     * Return the last move made on this state
+     * @return Previous move that was made
+     */
+    public Move getLastMove() {
+        return moves.peek();
+    }
+
+    /**
+     * Check if a move is valid
+     * @param move Move to check
+     * @return True if position is unoccupied, false otherwise
+     */
+    public boolean isLegalMove(Move move) {
+        return board[move.getRow()][move.getCol()] == 0;
+    }
+
+    /**
+     * Make a move on this state
+     * @param move Move to make
+     */
+    protected void makeMove(Move move) {
+        this.moves.push(move);
+        this.board[move.getRow()][move.getCol()] = currentIndex;
+        this.currentIndex = currentIndex == 1 ? 2 : 1;
+    }
+
+    /**
+     * Undo the last move and return it.
+     */
+    protected Move undo() {
+        if(this.moves.empty()) {
+            return null;
+        }
+        Move move = this.moves.pop();
+        this.board[move.getRow()][move.getCol()] = 0;
+        this.currentIndex = currentIndex == 1 ? 2: 1;
+        return move;
+    }
+
     /**
      * Determine if the specified player has won the game
      * @param index Player index (1 or 2)
@@ -109,7 +117,7 @@ public class GomokuState {
         }
         return false;
     }
-    
+
     /**
      * Search vertically for a sequence of stones belonging to an index
      * @param row Row position
@@ -129,8 +137,8 @@ public class GomokuState {
             return count == amount;
         }
         return false;
-    }    
-    
+    }
+
     /**
      * Search horizontally for a sequence of stones belonging to an index
      * @param row Row position
@@ -150,10 +158,10 @@ public class GomokuState {
             return count == amount;
         }
         return false;
-    }    
-    
+    }
+
     /**
-     * Search diagonally and down to the right for a sequence of stones 
+     * Search diagonally and down to the right for a sequence of stones
      * belonging to an index
      * @param row Row position
      * @param col Column position
@@ -161,8 +169,8 @@ public class GomokuState {
      * @param amount Amount of stones to find
      * @return
      */
-    private boolean searchDiagonalRight(int row, int col, int index, 
-            int amount) {
+    private boolean searchDiagonalRight(int row, int col, int index,
+                                        int amount) {
         if(col + amount < intersections && row + amount < intersections) {
             int count = 0;
             for(int k = 1; k <= amount; k++) {
@@ -174,9 +182,9 @@ public class GomokuState {
         }
         return false;
     }
-    
+
     /**
-     * Search diagonally and down to the left for a sequence of stones 
+     * Search diagonally and down to the left for a sequence of stones
      * belonging to an index
      * @param row Row position
      * @param col Column position
@@ -184,17 +192,17 @@ public class GomokuState {
      * @param amount Amount of stones to find
      * @return
      */
-    private boolean searchDiagonalLeft(int row, int col, int index, int amount) {
+    private boolean searchDiagonalLeft(int row, int col, int index,
+                                       int amount) {
         if(col - amount >= 0 && row + amount < intersections) {
             int count = 0;
             for(int k = 1; k <= amount; k++) {
                 if(board[row+k][col-k] == index) {
                     count++;
                 }
-            }  
+            }
             return count == amount;
         }
         return false;
     }
-    
 }

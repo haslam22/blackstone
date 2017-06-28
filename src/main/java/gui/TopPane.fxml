@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="gui.TopPaneController"
+      prefHeight="15.0" alignment="CENTER_LEFT" spacing="5" styleClass="root">
+    <padding>
+        <Insets>
+            <left>5</left>
+            <right>5</right>
+            <top>5</top>
+            <bottom>5</bottom>
+        </Insets>
+    </padding>
+    <StackPane>
+        <Button text="New Game" onAction="#newGame" fx:id="playButton">
+            <graphic>
+                <Label text="%play" styleClass="icon"></Label>
+            </graphic>
+        </Button>
+        <Button text="Stop Game" onAction="#stopGame" fx:id="stopButton"
+                visible="false">
+            <graphic>
+                <Label text="%stop" styleClass="icon"></Label>
+            </graphic>
+        </Button>
+    </StackPane>
+    <Button text="Undo" onAction="#undo">
+        <graphic>
+            <Label text="%undo" styleClass="icon"></Label>
+        </graphic>
+    </Button>
+    <Pane HBox.hgrow="ALWAYS">
+
+    </Pane>
+    <Button text="Settings" fx:id="settingsButton" onAction="#openSettings">
+        <graphic>
+            <Label text="%gears" styleClass="icon"></Label>
+        </graphic>
+    </Button>
+
+    <stylesheets>
+        <URL value="@Global.css" />
+        <URL value="@TopPane.css" />
+    </stylesheets>
+</HBox>

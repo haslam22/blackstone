@@ -1,0 +1,82 @@
+.outer {
+    -fx-font-family: 'Arial';
+    -fx-font-size: 12;
+}
+
+.heading {
+    -fx-font-size: 14;
+}
+
+.button:focused {
+    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 2;
+}
+
+.button:disabled {
+    -fx-opacity: 0.9;
+}
+
+.combo-box {
+    -fx-background-radius: 2;
+}
+
+.combo-box:disabled, .list-cell:disabled {
+    -fx-opacity: 0.9;
+}
+
+.combo-box:focused {
+    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 2;
+}
+
+.radio-button:focused > .radio {
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border,
+                                -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+}
+
+.radio-button > .radio, .radio-button:focused > .radio  {
+    -fx-background-radius: 1.0em;
+    -fx-padding: 0.333333em;
+}
+
+.radio-button > .radio, .radio-button:disabled {
+     -fx-opacity: 0.8;
+}
+
+.text-input:focused {
+    -fx-text-fill: -fx-text-inner-color;
+    -fx-highlight-fill: derive(-fx-control-inner-background,-20%);
+    -fx-highlight-text-fill: -fx-text-inner-color;
+    -fx-prompt-text-fill: derive(-fx-control-inner-background,-30%);
+    -fx-background-color: linear-gradient(to bottom,
+    derive(-fx-text-box-border, -10%), -fx-text-box-border),
+        linear-gradient(from 0px 0px to 0px 5px,
+        derive(-fx-control-inner-background, -9%),
+        -fx-control-inner-background);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 3, 2;
+    -fx-cursor: text;
+}
+
+.text-area:focused .content {
+    -fx-padding: 0.25em 0.583em 0.25em 0.583em;
+    -fx-cursor: text;
+    -fx-background-color:
+        linear-gradient(from 0px 0px to 0px 4px,
+        derive(-fx-control-inner-background, -8%),
+        -fx-control-inner-background);
+    -fx-background-radius: 2;
+}
+
+.text-area > .scroll-pane {
+    -fx-vbar-policy: always;
+}
+
+.check-box:focused > .box {
+    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-radius: 3, 2, 1;
+    -fx-padding: 0.166667em 0.166667em 0.25em 0.25em; /* 2 2 3 3 */
+}
