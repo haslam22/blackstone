@@ -5,9 +5,9 @@ A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) client feat
 There are two main components in this project:
 
 * A strong AI player based on Minimax with α-β pruning, alongside many performance optimisations ([/players/Minimax](src/main/java/players/minimax))
-* An interface to setup and create new games, created using Java's Swing GUI toolkit ([/gui](src/main/java/gui))
+* An interface to setup and create new games, created using JavaFX ([/gui](src/main/java/gui))
 
-![GUI Screenshot](http://i.imgur.com/sMCavOR.png)
+<p align="center"><img src="http://i.imgur.com/sgZ6A1a.png" width="800" height="600" /></p>
 
 ## Install
 Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn package` to build the project in one step.
