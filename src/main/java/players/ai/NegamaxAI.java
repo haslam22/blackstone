@@ -94,8 +94,8 @@ public class NegamaxAI extends Player {
 
     /**
      * Run the negamax algorithm for a given node in the game tree
-     * @param state Node to searchMoves
-     * @param depth Depth to searchMoves to
+     * @param state Node to search
+     * @param depth Depth to search to
      * @param alpha Alpha bound
      * @param beta Beta bound
      * @return Score of the node
@@ -126,15 +126,15 @@ public class NegamaxAI extends Player {
     }
 
     /**
-     * Run a depth-limited negamax searchMoves on a set of moves, sorting
-     * them by score
+     * Run a depth-limited negamax search on a set of moves, sorting them by
+     * score
      *
      * Note: This is the same as regular negamax, except we take out the
      * first call and hold it inside this function. This way we can save the
      * best move found at the topmost level of the game tree.
      *
      * @param depth Depth to search to
-     * @return Original move list, sorted by best score first
+     * @return Original move list sorted by best score first
      */
     private List<Move> searchMoves(State state, List<Move> moves, int depth)
             throws InterruptedException {
@@ -221,7 +221,7 @@ public class NegamaxAI extends Player {
     }
     
     /**
-     * Print the result of a searchMoves, including the best move found, depth
+     * Print the result of a search, including the best move found, depth
      * searched, and the evaluation score.
      */
     private void printSearchInfo(Move bestMove, int score, int depth) {
