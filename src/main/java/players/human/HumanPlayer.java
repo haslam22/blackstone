@@ -8,7 +8,7 @@ import players.Player;
 /**
  * Class for a non-AI player. Sleeps until the game receives a valid move
  * from the user.
- * @author Hassan
+ * @author Hasan
  */
 public class HumanPlayer extends Player {
 

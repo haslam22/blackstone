@@ -11,7 +11,7 @@ import static core.GameTimer.*;
 /**
  * Controller for the settings pane dialog
  */
-public class SettingsPaneController extends Controller {
+public class SettingsPaneController implements Controller {
 
     public ComboBox<Integer> intersectionsComboBox;
     public ComboBox<Integer> moveTimeComboBox;
@@ -20,7 +20,7 @@ public class SettingsPaneController extends Controller {
     public CheckBox gameTimingCheckBox;
     private GameManager manager;
 
-    public void gameTimingSelected(ActionEvent actionEvent) {
+    public void gameTimingSelected() {
         if(gameTimingCheckBox.isSelected()) {
             gameTimeComboBox.setDisable(false);
         } else {
@@ -28,7 +28,7 @@ public class SettingsPaneController extends Controller {
         }
     }
 
-    public void moveTimingSelected(ActionEvent actionEvent) {
+    public void moveTimingSelected() {
         if(moveTimingCheckBox.isSelected()) {
             moveTimeComboBox.setDisable(false);
         } else {
@@ -64,7 +64,7 @@ public class SettingsPaneController extends Controller {
         intersectionsComboBox.setValue(intersections);
     }
 
-    public void updateSettings(ActionEvent actionEvent) {
+    public void updateSettings() {
         if(moveTimingCheckBox.isSelected()) {
             manager.setMoveTimingEnabled(true);
             manager.updateMoveTime(secondsToMillis(moveTimeComboBox.getValue()));
@@ -84,7 +84,7 @@ public class SettingsPaneController extends Controller {
         window.close();
     }
 
-    public void closeSettings(ActionEvent actionEvent) {
+    public void closeSettings() {
         Stage window = (Stage) intersectionsComboBox.getScene().getWindow();
         window.close();
     }

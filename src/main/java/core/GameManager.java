@@ -3,13 +3,14 @@ package core;
 import gui.BoardPane;
 import players.Player;
 import players.human.HumanPlayer;
-import players.minimax.MinimaxPlayer;
+import players.ai.NegamaxAI;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class used by GUI components to allow control over the current game
+ * Class used by GUI components to control the the current game and receive
+ * events
  */
 public class GameManager {
 
@@ -176,7 +177,7 @@ public class GameManager {
                         gameTime, moveTime, 1, 2));
                 break;
             case "Computer":
-                this.player1 = new MinimaxPlayer(new GameInfo(intersections,
+                this.player1 = new NegamaxAI(new GameInfo(intersections,
                         gameTime, moveTime, 1, 2));
                 break;
         }
@@ -196,7 +197,7 @@ public class GameManager {
                         gameTime, moveTime, 2, 1));
                 break;
             case "Computer":
-                this.player2 = new MinimaxPlayer(new GameInfo(intersections,
+                this.player2 = new NegamaxAI(new GameInfo(intersections,
                         gameTime, moveTime, 2, 1));
                 break;
         }

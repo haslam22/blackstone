@@ -9,7 +9,7 @@ import javafx.scene.layout.GridPane;
 
 import java.util.logging.*;
 
-public class RightPaneController extends Controller {
+public class RightPaneController implements Controller {
 
     public Label player1MoveTimeLabelDesc;
     public Label player1GameTimeLabelDesc;

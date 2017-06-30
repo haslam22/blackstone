@@ -1,4 +1,4 @@
-package players.minimax.util;
+package players.ai.util;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -8,11 +8,10 @@ import java.util.List;
 
 /**
  * Class responsible for generating the text files containing threats and
- * refutations for every possible 9-length pattern. See MinimaxThreatReducer for
- * more details.
- * @author Hassan
+ * refutations for every possible 9-length pattern.
+ * @author Hasan
  */
-public class MinimaxThreatGenerator {
+public class ThreatFileGenerator {
     
     static class ThreatPattern {
         String threatString;
@@ -60,7 +59,7 @@ public class MinimaxThreatGenerator {
         refutations.add(new RefutationPattern("22200", new int[] { 3, 4 }, 2));
         refutations.add(new RefutationPattern("00222", new int[] { 0, 1 }, 2));
         refutations.add(new RefutationPattern("02202", new int[] { 0, 3 }, 2));
-        refutations.add(new RefutationPattern("02220", new int[] { 0, 4 }, 1));
+        refutations.add(new RefutationPattern("02220", new int[] { 0, 4 }, 2));
         
         List<ThreatPattern> threats = new ArrayList<>();
         

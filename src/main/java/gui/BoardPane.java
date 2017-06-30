@@ -1,7 +1,5 @@
 package gui;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -27,7 +25,6 @@ public class BoardPane extends Pane {
     private final Canvas canvas;
     private BoardStone[][] board;
     private int size;
-    private long threadID;
 
     // Board properties
     private double paddingY;
@@ -53,24 +50,14 @@ public class BoardPane extends Pane {
      * @param size Number of intersections (n*n) on the board
      */
     public BoardPane(int size) {
-        this.threadID = Thread.currentThread().getId();
         this.size = size;
         this.board = new BoardStone[size][size];
         this.canvas = new Canvas();
         this.getChildren().add(canvas);
-
-        widthProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> observable,
-                                Number oldValue, Number newValue) {
-                canvas.setWidth(newValue.intValue());
-            }
-        });
-        heightProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> observable,
-                                Number oldValue, Number newValue) {
-                canvas.setHeight(newValue.intValue());
-            }
-        });
+        widthProperty().addListener((observable, oldValue, newValue) ->
+                canvas.setWidth(newValue.intValue()));
+        heightProperty().addListener((observable, oldValue, newValue) ->
+                canvas.setHeight(newValue.intValue()));
     }
 
     /**
@@ -273,13 +260,11 @@ public class BoardPane extends Pane {
      * intersection to the mouse cursor.
      */
     public void enableStonePicker(final int index) {
-        this.mouseListener = new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent e) {
-                int closestRow = getClosestRow(e.getY());
-                int closestCol = getClosestCol(e.getX());
-                if(board[closestRow][closestCol] == null) {
-                    addStone(index, closestRow, closestCol, true);
-                }
+        this.mouseListener = e -> {
+            int closestRow = getClosestRow(e.getY());
+            int closestCol = getClosestCol(e.getX());
+            if(board[closestRow][closestCol] == null) {
+                addStone(index, closestRow, closestCol, true);
             }
         };
         this.addEventHandler(MouseEvent.MOUSE_MOVED, this.mouseListener);

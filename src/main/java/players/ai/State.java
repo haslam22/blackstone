@@ -1,16 +1,16 @@
-package players.minimax;
+package players.ai;
 import core.Move;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Internal state representation for the Minimax player. Provides Zobrist 
  * hashing and fast neighbour lookup.
- * @author Hassan
+ * @author Hasan
  */
-public class MinimaxState {
+public class State {
     
-    protected final MinimaxField[][] board;
+    protected final Field[][] board;
     protected final int intersections;
     protected int currentIndex;
     protected int moves;
@@ -19,15 +19,15 @@ public class MinimaxState {
     private final long[][][] zobristKeys;
     
     /**
-     * Create a new MinimaxState instance.
+     * Create a new State instance.
      * @param intersections Number of intersections on the board
      */
-    public MinimaxState(int intersections) {
+    public State(int intersections) {
         this.intersections = intersections;
-        this.board = new MinimaxField[intersections][intersections];
+        this.board = new Field[intersections][intersections];
         for(int i = 0; i < intersections; i++) {
             for(int j = 0; j < intersections; j++) {
-                board[i][j] = new MinimaxField(i, j);
+                board[i][j] = new Field(i, j);
             }
         }
         setDirections(board);
@@ -53,11 +53,11 @@ public class MinimaxState {
      * every possible state that particular board position can be in.
      */
     private void generateZobristKeys() {
-        Random keyGenerator = new Random();
         for(int i = 0; i < zobristKeys.length; i++) {
             for(int j = 0; j < zobristKeys[0].length; j++) {
                 for(int k = 0; k < zobristKeys[0][0].length; k++) {
-                    zobristKeys[i][j][k] = keyGenerator.nextLong();
+                    zobristKeys[i][j][k] = ThreadLocalRandom.current().nextLong
+                            (Long.MAX_VALUE);
                 }
             }
         }
@@ -136,10 +136,10 @@ public class MinimaxState {
      * the Minimax search.
      * @param board Field array
      */
-    private void setDirections(MinimaxField[][] board) {
+    private void setDirections(Field[][] board) {
         for(int row = 0; row < board.length; row++) {
             for(int col = 0; col < board.length; col++) {
-                MinimaxField field = board[row][col];
+                Field field = board[row][col];
 
                 // [0][0-9] -> Diagonal from top left to bottom right
                 field.directions[0][4] = field; 
@@ -155,56 +155,56 @@ public class MinimaxState {
                     if(row - k >= 0 && col - k >=0) {
                         field.directions[0][4 - k] = board[row - k][col - k];
                     } else {
-                        field.directions[0][4 - k] = new MinimaxField();
+                        field.directions[0][4 - k] = new Field();
                     }
 
                     // Diagonal 1, bottom right
                     if(row + k < board.length && col + k < board.length) {
                         field.directions[0][4 + k] = board[row + k][col + k];
                     } else {
-                        field.directions[0][4 + k] = new MinimaxField();
+                        field.directions[0][4 + k] = new Field();
                     }
 
                     // Diagonal 2, top right
                     if(row - k >= 0 && col + k < board.length) {
                         field.directions[1][4 - k] = board[row - k][col + k];
                     } else {
-                        field.directions[1][4 - k] = new MinimaxField();
+                        field.directions[1][4 - k] = new Field();
                     }
 
                     // Diagonal 2, bottom left
                     if(row + k < board.length && col - k >=0) {
                         field.directions[1][4 + k] = board[row + k][col - k];
                     } else {
-                        field.directions[1][4 + k] = new MinimaxField();
+                        field.directions[1][4 + k] = new Field();
                     }
 
                     // Vertical top
                     if(row - k >= 0) {
                         field.directions[2][4 - k] = board[row - k][col];
                     } else {
-                        field.directions[2][4 - k] = new MinimaxField();
+                        field.directions[2][4 - k] = new Field();
                     }
 
                     // Vertical bottom
                     if(row + k < board.length) {
                         field.directions[2][4 + k] = board[row + k][col];
                     } else {
-                        field.directions[2][4 + k] = new MinimaxField();
+                        field.directions[2][4 + k] = new Field();
                     }
 
                     // Horizontal left
                     if(col - k >= 0) {
                         field.directions[3][4 - k] = board[row][col - k];
                     } else {
-                        field.directions[3][4 - k] = new MinimaxField();
+                        field.directions[3][4 - k] = new Field();
                     }
 
                     // Horizontal right
                     if(col + k < board.length) {
                         field.directions[3][4 + k] = board[row][col + k];
                     } else {
-                        field.directions[3][4 + k] = new MinimaxField();
+                        field.directions[3][4 + k] = new Field();
                     }
                 }
             }

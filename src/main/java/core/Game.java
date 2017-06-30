@@ -40,6 +40,8 @@ public class Game implements Runnable {
      * @param intersections Board size (in intersections)
      * @param moveTime Time per move (ms)
      * @param gameTime Time per game (ms)
+     * @param gameTimingEnabled Game timing enabled
+     * @param moveTimingEnabled Move timing enabled
      */
     protected Game(GameManager manager, BoardPane board, Player player1, Player
             player2, int intersections, int moveTime, int gameTime, boolean
@@ -136,41 +138,21 @@ public class Game implements Runnable {
      * @throws TimeoutException
      */
     private Move requestMove(Player player) throws ExecutionException,
-            InterruptedException, TimeoutException {
-        Callable<Move> callable = new Callable<Move>() {
-            @Override
-            public Move call() {
-                Move move = player.getMove(state);
-                return move;
-            }
-        };
-
+            InterruptedException, TimeoutException, CancellationException {
         // Setup the mouse listener if we're requesting a move from a non-AI
         // player
         if(player instanceof HumanPlayer) {
             addMoveListener((HumanPlayer) player);
         }
 
-        // Grab the current timeout, if any
         int index = state.getCurrentIndex();
         long timeout = gameTimers[index - 1].getTimeout();
+        this.futureMove = executor.submit(() -> player.getMove(state));
 
-        this.futureMove = executor.submit(callable);
-
-        try {
-            if(timeout > 0) {
-                return futureMove.get(timeout, TimeUnit.MILLISECONDS);
-            } else {
-                return futureMove.get();
-            }
-        } catch(ExecutionException e) {
-            throw(e);
-        } catch (InterruptedException e) {
-            throw(e);
-        } catch (TimeoutException e) {
-            throw(e);
-        } catch (CancellationException e) {
-            throw(e);
+        if(timeout > 0) {
+            return futureMove.get(timeout, TimeUnit.MILLISECONDS);
+        } else {
+            return futureMove.get();
         }
     }
 
@@ -246,9 +228,7 @@ public class Game implements Runnable {
         try {
             if(move1 != null) removeStone(move1);
             if(move2 != null) removeStone(move2);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -268,13 +248,12 @@ public class Game implements Runnable {
             // Start the timer for the current player
             gameTimers[state.getCurrentIndex() - 1].startTimer();
 
-            // Depending on which timing is enabled, need to send events to
-            // the GUI, using a single Timer which runs on an interval
+            // Send time events to the GUI
             this.updateSender = new Timer();
             if(gameTimingEnabled) sendGameTimeUpdates(state.getCurrentIndex());
             if(moveTimingEnabled) sendMoveTimeUpdates(state.getCurrentIndex());
 
-            // Request the next move asynchronously and wait here
+            // Request the next move asynchronously and wait
             Move nextMove = requestMove(players[state.getCurrentIndex() - 1]);
 
             // Stop the timer and cancel any event updates

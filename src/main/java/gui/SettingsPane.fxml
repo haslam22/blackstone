@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -20,17 +18,17 @@
             <ColumnConstraints percentWidth="50.0" />
         </columnConstraints>
         <padding>
-            <Insets top="10" bottom="10" left="10" right="10"></Insets>
+            <Insets top="10" bottom="10" left="10" right="10"/>
         </padding>
         <Label styleClass="heading" GridPane.rowIndex="0"
                GridPane.columnSpan="2" text="Timing">
         </Label>
-        <Separator GridPane.rowIndex="1" GridPane.columnSpan="2"></Separator>
+        <Separator GridPane.rowIndex="1" GridPane.columnSpan="2"/>
         <CheckBox text="Game timing enabled" GridPane.rowIndex="3"
                   GridPane.columnSpan="2" onAction="#gameTimingSelected"
-                  fx:id="gameTimingCheckBox"></CheckBox>
+                  fx:id="gameTimingCheckBox"/>
         <Label text="Time/game (minutes):" GridPane.rowIndex="4"
-               GridPane.columnIndex="0"></Label>
+               GridPane.columnIndex="0"/>
         <ComboBox GridPane.rowIndex="4" GridPane.columnIndex="1"
                   maxWidth="Infinity" value="20" fx:id="gameTimeComboBox">
             <items>
@@ -48,9 +46,9 @@
         </ComboBox>
         <CheckBox text="Move timing enabled" GridPane.rowIndex="5"
                   GridPane.columnSpan="2" fx:id="moveTimingCheckBox"
-                  onAction="#moveTimingSelected"></CheckBox>
+                  onAction="#moveTimingSelected"/>
         <Label text="Time/move (seconds):" GridPane.rowIndex="6"
-               GridPane.columnIndex="0"></Label>
+               GridPane.columnIndex="0"/>
         <ComboBox GridPane.rowIndex="6" GridPane.columnIndex="1"
                   maxWidth="Infinity" fx:id="moveTimeComboBox">
             <items>
@@ -70,9 +68,9 @@
         <Label styleClass="heading" GridPane.rowIndex="7"
                GridPane.columnSpan="2" text="Board">
         </Label>
-        <Separator GridPane.rowIndex="8" GridPane.columnSpan="2"></Separator>
+        <Separator GridPane.rowIndex="8" GridPane.columnSpan="2"/>
         <Label text="Intersections (n*n):" GridPane.rowIndex="9"
-               GridPane.columnIndex="0"></Label>
+               GridPane.columnIndex="0"/>
         <ComboBox GridPane.rowIndex="9" GridPane.columnIndex="1"
                   maxWidth="Infinity" fx:id="intersectionsComboBox">
             <items>
@@ -85,10 +83,10 @@
     </GridPane>
     <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS" spacing="5">
         <VBox.margin>
-            <Insets top="10" left="10" right="10" bottom="10"></Insets>
+            <Insets top="10" left="10" right="10" bottom="10"/>
         </VBox.margin>
-        <Button text="OK" onAction="#updateSettings"></Button>
-        <Button text="Cancel" onAction="#closeSettings"></Button>
+        <Button text="OK" onAction="#updateSettings"/>
+        <Button text="Cancel" onAction="#closeSettings"/>
     </HBox>
 
     <stylesheets>

@@ -2,7 +2,6 @@ package gui;
 
 import core.GameEventAdapter;
 import core.GameManager;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,7 +14,7 @@ import java.io.IOException;
 /**
  * Controller for the top pane of the GUI
  */
-public class TopPaneController extends Controller {
+public class TopPaneController implements Controller {
 
     public Button playButton;
     public Button stopButton;
@@ -25,25 +24,22 @@ public class TopPaneController extends Controller {
 
     /**
      * Handle the new game button
-     * @param actionEvent
      */
-    public void newGame(ActionEvent actionEvent) {
+    public void newGame() {
         manager.startGame();
     }
 
     /**
      * Handle the stop game button
-     * @param actionEvent
      */
-    public void stopGame(ActionEvent actionEvent) {
+    public void stopGame() {
         manager.stopGame();
     }
 
     /**
      * Handle the undo button
-     * @param actionEvent
      */
-    public void undo(ActionEvent actionEvent) {
+    public void undo() {
         manager.undo();
     }
 
@@ -70,10 +66,9 @@ public class TopPaneController extends Controller {
 
     /**
      * Open a new window to show the settings
-     * @param actionEvent
      * @throws IOException
      */
-    public void openSettings(ActionEvent actionEvent) throws IOException {
+    public void openSettings() throws IOException {
         if(this.settingsStage == null) {
             this.settingsStage = new Stage();
             settingsStage.setTitle("Settings");

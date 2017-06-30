@@ -21,8 +21,8 @@ public class GameInfo {
      * @param playerIndex Index of this player (1/2)
      * @param opponentIndex Index of the opponent (1/2)
      */
-    protected GameInfo(int intersections, int gameTimeout, int moveTimeout,
-                       int playerIndex, int opponentIndex) {
+    GameInfo(int intersections, int gameTimeout, int moveTimeout,
+             int playerIndex, int opponentIndex) {
         this.intersections = intersections;
         this.gameTimeout = gameTimeout;
         this.moveTimeout = moveTimeout;

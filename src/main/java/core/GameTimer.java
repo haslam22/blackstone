@@ -17,12 +17,12 @@ public class GameTimer {
 
     /**
      * Create a new game timer for two players
-     * @param gameTimeMillis
-     * @param moveTimeMillis
-     * @param gameTimeEnabled
-     * @param moveTimeEnabled
+     * @param gameTimeMillis Max game time in milliseconds
+     * @param moveTimeMillis Max move time in milliseconds
+     * @param gameTimeEnabled Track game timing
+     * @param moveTimeEnabled Track move timing
      */
-    public GameTimer(int gameTimeMillis, int moveTimeMillis, boolean
+    GameTimer(int gameTimeMillis, int moveTimeMillis, boolean
             gameTimeEnabled, boolean moveTimeEnabled) {
         this.moveTimeMillis = moveTimeMillis;
         this.gameTimeMillis = gameTimeMillis;
@@ -35,25 +35,9 @@ public class GameTimer {
     }
 
     /**
-     * Reset the move timer back to the original start time.
-     */
-    public void resetMoveTimer() {
-        long moveTimeNanos = millisToNanos(moveTimeMillis);
-        this.moveTimeRemaining = moveTimeNanos;
-    }
-
-    /**
-     * Reset the game timer back to the original start time.
-     */
-    public void resetGameTimer() {
-        long gameTimeNanos = millisToNanos(gameTimeMillis);
-        this.gameTimeRemaining = gameTimeNanos;
-    }
-
-    /**
      * Start the move timer and game timer
      */
-    public void startTimer() {
+    void startTimer() {
         this.timerStarted = true;
         if(gameTimeEnabled) {
             this.startGameTime = System.nanoTime();
@@ -67,13 +51,13 @@ public class GameTimer {
      * Stop the move timer and game timer, updating the remaining time for
      * the game timer and resetting the move timer
      */
-    public void stopTimer() {
+    void stopTimer() {
         this.timerStarted = false;
         if(gameTimeEnabled) {
             this.gameTimeRemaining -= System.nanoTime() - startGameTime;
         }
         if(moveTimeEnabled) {
-            resetMoveTimer();
+            this.moveTimeRemaining = millisToNanos(moveTimeMillis);
         }
     }
 
@@ -81,7 +65,7 @@ public class GameTimer {
      * Query the current remaining game time
      * @return Remaining game time in milliseconds
      */
-    public long getRemainingGameTime() {
+    long getRemainingGameTime() {
         if(timerStarted && gameTimeEnabled) {
             long elapsed = System.nanoTime() - startGameTime;
             return nanosToMillis(gameTimeRemaining - elapsed);
@@ -94,7 +78,7 @@ public class GameTimer {
      * Query the current remaining game time
      * @return Remaining game time in milliseconds
      */
-    public long getRemainingMoveTime() {
+    long getRemainingMoveTime() {
         if(timerStarted && moveTimeEnabled) {
             long elapsed = System.nanoTime() - startMoveTime;
             return nanosToMillis(moveTimeRemaining - elapsed);
@@ -108,7 +92,7 @@ public class GameTimer {
      * game time remaining and move time.
      * @return Timeout value in milliseconds, or 0 if no timeout
      */
-    public long getTimeout() {
+    long getTimeout() {
         if(this.moveTimeEnabled && this.gameTimeEnabled) {
             return Math.min(nanosToMillis(gameTimeRemaining),
                     nanosToMillis(moveTimeRemaining));

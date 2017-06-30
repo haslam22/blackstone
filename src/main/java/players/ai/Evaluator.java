@@ -1,4 +1,4 @@
-package players.minimax;
+package players.ai;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,10 +7,6 @@ import java.io.InputStreamReader;
 
 /**
  * Static evaluator, providing heuristic evaluations for positions in the game.
- * 
- * In MinimaxState, we store the neighbour fields around a field, up to 
- * 4 intersections in each direction (diagonal backwards, diagonal forward, 
- * vertical, horizontal) forming a star shape:
  * 
  *  *       *       *
  *    *     *     *
@@ -26,24 +22,25 @@ import java.io.InputStreamReader;
  * that can be created passing through the field are counted. Each five is 
  * assigned a score based on how many moves were needed to create it.
  * 
- * @author Hassan
+ * @author Hasan
  */
-public class MinimaxEvaluator {
+public class Evaluator {
     
     private static final int[][][][][][][][][][] SCORES;
     
     /**
-     * Evaluate a state by looking up the evaluation for each stone on the
-     * board.
-     * @param state
-     * @param playerIndex
-     * @param opponentIndex
-     * @return 
+     * Evaluate a state from the perspective of the current player
+     * @param state State to evaluate
+     * @return Score from the current players perspective
      */
-    protected int evaluate(MinimaxState state, int playerIndex, 
-            int opponentIndex) {
+    protected int evaluate(State state, int depth) {
+        int playerIndex = state.currentIndex;
+        int opponentIndex = playerIndex == 1 ? 2 : 1;
+        int terminal = state.terminal();
+        if(terminal == playerIndex) return 10000 + depth;
+        if(terminal == opponentIndex) return -10000 - depth;
+
         int score = 0;
-        
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
                 if(state.board[i][j].index == opponentIndex) {
@@ -64,7 +61,7 @@ public class MinimaxEvaluator {
      * @param index Player index to evaluate for
      * @return Score of this field
      */
-    protected int evaluateField(MinimaxField field, int index) {
+    protected int evaluateField(Field field, int index) {
         int score = 0;
         for(int i = 0; i < 4; i++) {
             score+= SCORES[index - 1]

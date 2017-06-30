@@ -1,11 +1,11 @@
-package players.minimax;
+package players.ai;
 
 /**
  * A class representing a field (intersection) on the Gomoku board. May be
  * occupied by player 1/2, be empty, or be a null field (out of bounds).
- * @author Hassan
+ * @author Hasan
  */
-public class MinimaxField {
+public class Field {
     // Location of the field
     protected final int row;
     protected final int col;
@@ -15,12 +15,12 @@ public class MinimaxField {
     protected int index;
     
     // References to 9 fields in each direction around the field
-    protected final MinimaxField[][] directions;
+    protected final Field[][] directions;
 
     /**
-     * Create a null MinimaxField. Default state is 3 (out of bounds).
+     * Create a null Field. Default state is 3 (out of bounds).
      */
-    protected MinimaxField() {
+    protected Field() {
         this.row = -1;
         this.col = -1;
         this.index = 3;
@@ -28,14 +28,14 @@ public class MinimaxField {
     }
 
     /**
-     * Create a MinimaxField with a specified row/column identifier. Default
+     * Create a Field with a specified row/column identifier. Default
      * state is 0 (empty).
      * @param row
      * @param col
      */
-    protected MinimaxField(int row, int col) {
+    protected Field(int row, int col) {
         this.row = row;
         this.col = col;
-        this.directions = new MinimaxField[4][9];
+        this.directions = new Field[4][9];
     }
 }

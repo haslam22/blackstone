@@ -1,4 +1,4 @@
-package players.minimax.util;
+package players.ai.util;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -6,10 +6,10 @@ import java.io.IOException;
 
 /**
  * Class responsible for generating the sores text file containing scores for 
- * every possible 9-length pattern. See MinimaxEvaluator for more details.
- * @author Hassan
+ * every possible 9-length pattern. See Evaluator for more details.
+ * @author Hasan
  */
-public class MinimaxScoreGenerator {
+public class ScoreFileGenerator {
     
     /**
      * Given some array representing a vertical/horizontal/diagonal direction

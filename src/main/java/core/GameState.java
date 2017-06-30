@@ -16,7 +16,11 @@ public class GameState {
     private int intersections;
     private int currentIndex = 1;
 
-    protected GameState(int intersections) {
+    /**
+     * Create a new game state
+     * @param intersections Number of intersections on the board
+     */
+    GameState(int intersections) {
         this.intersections = intersections;
         this.board = new int[intersections][intersections];
         this.moves = new Stack<>();
@@ -27,26 +31,18 @@ public class GameState {
      * @return 0 (game is not terminal), 1/2 if player 1/2 has won, 3 if the
      * board is full
      */
-    public int terminal() {
-        if(isWinner(1)) {
-            return 1;
-        }
-        else if(isWinner(2)) {
-            return 2;
-        }
-        else if(moves.size() == intersections * intersections) {
-            return 3;
-        }
-        else {
-            return 0;
-        }
+    int terminal() {
+        if(isWinner(1)) return 1;
+        if(isWinner(2)) return 2;
+        if(moves.size() == intersections * intersections) return 3;
+        return 0;
     }
 
     /**
      * Get the current player index for this state
      * @return Current player # who has to make a move
      */
-    public int getCurrentIndex() {
+    int getCurrentIndex() {
         return this.currentIndex;
     }
 
@@ -55,8 +51,7 @@ public class GameState {
      * @return ArrayList of moves, from first move to last move made
      */
     public List<Move> getMoves() {
-        List<Move> moveList = new ArrayList(moves);
-        return moveList;
+        return new ArrayList(moves);
     }
 
     /**
@@ -80,7 +75,7 @@ public class GameState {
      * Make a move on this state
      * @param move Move to make
      */
-    protected void makeMove(Move move) {
+    void makeMove(Move move) {
         this.moves.push(move);
         this.board[move.getRow()][move.getCol()] = currentIndex;
         this.currentIndex = currentIndex == 1 ? 2 : 1;
@@ -89,7 +84,7 @@ public class GameState {
     /**
      * Undo the last move and return it.
      */
-    protected Move undo() {
+    Move undo() {
         if(this.moves.empty()) {
             return null;
         }

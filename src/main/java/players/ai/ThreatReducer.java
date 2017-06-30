@@ -1,4 +1,4 @@
-package players.minimax;
+package players.ai;
 
 import core.Move;
 import java.io.BufferedReader;
@@ -19,7 +19,7 @@ import java.util.List;
  * a four creates a five, and a three creates a straight four (five possible on 
  * both sides).
  * 
- * In MinimaxState, we store the neighbour fields around a field, up to 
+ * In State, we store the neighbour fields around a field, up to
  * 4 intersections in each direction (diagonal backwards, diagonal forward, 
  * vertical, horizontal) forming a star shape:
  * 
@@ -38,9 +38,9 @@ import java.util.List;
  * 2 (white) and 3 (out of bounds). Every arrangement is generated, searched for
  * threats, and then stored in a 9-dimensional array (PATTERNS).
  * 
- * @author Hassan
+ * @author Hasan
  */
-public class MinimaxThreatReducer {
+public class ThreatReducer {
     
     private static final Pattern[][][][][][][][][] PATTERNS;
     
@@ -57,9 +57,6 @@ public class MinimaxThreatReducer {
     /*
      * A refutation instance represents a pattern occuring in some direction
      * around a stone that can form a four. E.g. 120220001 -> four in one move
-     * It is called a "refutation" because it can refute an offensive threat
-     * in some cases, and must be accounted for when we reduce the search space
-     * to threats.
      */
     private static class RefutationInstance {
         // Squares to create the refutation
@@ -74,7 +71,7 @@ public class MinimaxThreatReducer {
     }
     
     /*
-     * A threat instance is a threat occuring in some direction around a stone
+     * A threat instance is a threat occurring in some direction around a stone
      * (e.g. 122220111 -> four). The defensive squares are stored so they can be 
      * mapped to a defensive move.
      */
@@ -97,15 +94,17 @@ public class MinimaxThreatReducer {
     /**
      * Reduce the moves for this state if threats exist, focusing only on the
      * possible defensive moves.
-     * @param state MinimaxState
+     * @param state State
      * @return Reduced list of moves, or null if all moves are possible
      */
-    protected List<Move> reduceMoves(MinimaxState state) {
+    protected List<Move> reduceMoves(State state) {
         int player = state.currentIndex;
-        int opponent = player == 1? 2 : 1;
+        int opponent = player == 1 ? 2 : 1;
         
         HashSet<Move> threatMoves = new HashSet<>();
+        HashSet<Move> fourMoves = new HashSet<>();
         int[] threatCount = new int[2];
+        int[] fourCount = new int[2];
         
         // Loop over every field
         for(int i = 0; i < state.board.length; i++) {
@@ -120,20 +119,32 @@ public class MinimaxThreatReducer {
                             // Convert the threat squares to threat moves
                             for(ThreatInstance threat : threats) {
                                 for(int square : threat.threatSquares) {
-                                    MinimaxField squareField = state.board[i][j]
+                                    Field squareField = state.board[i][j]
                                             .directions[k][square];
                                     threatMoves.add(new Move(
                                             squareField.row, 
                                             squareField.col));
+                                    if(threat.threatClass == 1) {
+                                        threatMoves.add(new Move(
+                                                squareField.row,
+                                                squareField.col));
+                                    }
                                 }
                                 threatCount[threat.playerIndex - 1]++;
+                                if(threat.threatClass == 1) {
+                                    fourCount[threat.playerIndex - 1]++;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        
+
+        // If fours exist, we can ignore everything else
+        if(fourCount[player - 1] > 0 || fourCount[opponent - 1] > 0) {
+            return new ArrayList(fourMoves);
+        }
         // Threat from the opponent exists, reduce moves to refutations and
         // threat squares
         if(threatCount[opponent - 1] > 0) {
@@ -151,8 +162,7 @@ public class MinimaxThreatReducer {
      * @param index
      * @return
      */
-    private HashSet<Move> searchRefutations(MinimaxState state,
-            int index) {
+    private HashSet<Move> searchRefutations(State state, int index) {
         HashSet<Move> refutationMoves = new HashSet<>();
         
         // Loop over every field
@@ -169,7 +179,7 @@ public class MinimaxThreatReducer {
                             for(RefutationInstance ref : refutations) {
                                 if(ref.playerIndex == index) {
                                     for(int square : ref.refutationSquares) {
-                                        MinimaxField squareField = 
+                                        Field squareField =
                                                 state.board[i][j].directions[k]
                                                 [square];
                                         refutationMoves.add(new Move(
@@ -191,7 +201,7 @@ public class MinimaxThreatReducer {
      * @param field Field to search
      * @return Array of threats found around this field
      */
-    private List<ThreatInstance> getThreats(MinimaxField field, int direction) {
+    private List<ThreatInstance> getThreats(Field field, int direction) {
         Pattern pattern = PATTERNS
                     [field.directions[direction][0].index]
                     [field.directions[direction][1].index]
@@ -210,7 +220,7 @@ public class MinimaxThreatReducer {
      * @param field Field to search
      * @return Array of threats found around this field
      */
-    private List<RefutationInstance> getRefutations(MinimaxField field, 
+    private List<RefutationInstance> getRefutations(Field field,
             int direction) {
         Pattern pattern = PATTERNS
                     [field.directions[direction][0].index]

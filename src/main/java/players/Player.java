@@ -7,7 +7,7 @@ import core.Move;
 /**
  * Abstract class for a Gomoku player. Players are constructed with a game
  * information object containing timeouts, board size, etc.
- * @author Hassan
+ * @author Hasan
  */
 public abstract class Player {
 

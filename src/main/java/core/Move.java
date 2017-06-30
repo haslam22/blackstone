@@ -3,7 +3,7 @@ package core;
 import java.util.Objects;
 
 /**
- * Class representing a move/position on the Gomoku board.
+ * Class representing a move/position on the Gomoku board
  */
 public class Move {
 

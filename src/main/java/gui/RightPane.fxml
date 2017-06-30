@@ -19,14 +19,14 @@
     <GridPane fx:id="player1Box" alignment="center" hgap="5" vgap="5"
               styleClass="player-box">
         <padding>
-            <Insets top="10" left="10" right="10" bottom="10"></Insets>
+            <Insets top="10" left="10" right="10" bottom="10"/>
         </padding>
         <Circle styleClass="black-stone" radius="15"
                 GridPane.rowIndex="0" GridPane.columnIndex="0"
                 GridPane.rowSpan="2" GridPane.halignment="CENTER"
                 GridPane.valignment="CENTER">
             <GridPane.margin>
-                <Insets bottom="5" left="5" right="5" top="5"></Insets>
+                <Insets bottom="5" left="5" right="5" top="5"/>
             </GridPane.margin>
         </Circle>
         <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Human"
@@ -40,28 +40,26 @@
                 </FXCollections>
             </items>
         </ComboBox>
-        <HBox GridPane.rowIndex="1"
-              GridPane.columnIndex="1">
-            <Label fx:id="player1GameTimeLabelDesc" text="Time/game: "></Label>
-            <Label fx:id="player1GameTimeLabel" text="20:00"></Label>
+        <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label fx:id="player1GameTimeLabelDesc" text="Time/game: "/>
+            <Label fx:id="player1GameTimeLabel" text="20:00"/>
         </HBox>
-        <HBox GridPane.rowIndex="2"
-              GridPane.columnIndex="1">
-            <Label fx:id="player1MoveTimeLabelDesc" text="Time/move: "></Label>
-            <Label fx:id="player1MoveTimeLabel" text="00:05"></Label>
+        <HBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Label fx:id="player1MoveTimeLabelDesc" text="Time/move: "/>
+            <Label fx:id="player1MoveTimeLabel" text="00:05"/>
         </HBox>
     </GridPane>
     <GridPane fx:id="player2Box" alignment="center" hgap="5" vgap="5"
               styleClass="player-box">
         <padding>
-            <Insets top="10" left="10" right="10" bottom="10"></Insets>
+            <Insets top="10" left="10" right="10" bottom="10"/>
         </padding>
         <Circle styleClass="white-stone" radius="15"
                 GridPane.rowIndex="0" GridPane.columnIndex="0"
                 GridPane.rowSpan="2" GridPane.halignment="CENTER"
                 GridPane.valignment="CENTER">
             <GridPane.margin>
-                <Insets bottom="5" left="5" right="5" top="5"></Insets>
+                <Insets bottom="5" left="5" right="5" top="5"/>
             </GridPane.margin>
         </Circle>
         <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Computer"
@@ -75,15 +73,13 @@
                 </FXCollections>
             </items>
         </ComboBox>
-        <HBox GridPane.rowIndex="1"
-              GridPane.columnIndex="1">
-            <Label fx:id="player2GameTimeLabelDesc" text="Time/game: "></Label>
-            <Label fx:id="player2GameTimeLabel" text="20:00"></Label>
+        <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label fx:id="player2GameTimeLabelDesc" text="Time/game: "/>
+            <Label fx:id="player2GameTimeLabel" text="20:00"/>
         </HBox>
-        <HBox GridPane.rowIndex="2"
-              GridPane.columnIndex="1">
-            <Label fx:id="player2MoveTimeLabelDesc" text="Time/move: "></Label>
-            <Label fx:id="player2MoveTimeLabel" text="00:05"></Label>
+        <HBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Label fx:id="player2MoveTimeLabelDesc" text="Time/move: "/>
+            <Label fx:id="player2MoveTimeLabel" text="00:05"/>
         </HBox>
     </GridPane>
     <TextArea fx:id="textbox" editable="false" wrapText="true"

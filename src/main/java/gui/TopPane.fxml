@@ -20,19 +20,19 @@
     <StackPane>
         <Button text="New Game" onAction="#newGame" fx:id="playButton">
             <graphic>
-                <Label text="%play" styleClass="icon"></Label>
+                <Label text="%play" styleClass="icon"/>
             </graphic>
         </Button>
         <Button text="Stop Game" onAction="#stopGame" fx:id="stopButton"
                 visible="false">
             <graphic>
-                <Label text="%stop" styleClass="icon"></Label>
+                <Label text="%stop" styleClass="icon"/>
             </graphic>
         </Button>
     </StackPane>
     <Button text="Undo" onAction="#undo">
         <graphic>
-            <Label text="%undo" styleClass="icon"></Label>
+            <Label text="%undo" styleClass="icon"/>
         </graphic>
     </Button>
     <Pane HBox.hgrow="ALWAYS">
@@ -40,7 +40,7 @@
     </Pane>
     <Button text="Settings" fx:id="settingsButton" onAction="#openSettings">
         <graphic>
-            <Label text="%gears" styleClass="icon"></Label>
+            <Label text="%gears" styleClass="icon"/>
         </graphic>
     </Button>
 
