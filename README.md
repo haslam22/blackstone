@@ -4,8 +4,8 @@ A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) client feat
 
 There are two main components in this project:
 
-* A strong AI player based on Minimax with α-β pruning, alongside many performance optimisations ([/players/Minimax](src/main/java/players/minimax))
-* An interface to setup and create new games, created using JavaFX ([/gui](src/main/java/gui))
+* A strong AI player based on Minimax with α-β pruning, alongside many performance optimisations ([players/ai](src/main/java/players/ai))
+* An interface to setup and create new games, created using JavaFX ([gui](src/main/java/gui))
 
 <p align="center"><img src="http://i.imgur.com/XRh8hDB.png" /></p>
 
