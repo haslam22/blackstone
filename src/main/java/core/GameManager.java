@@ -20,8 +20,8 @@ public class GameManager {
     private Game currentGame;
     private Thread currentThread;
 
-    private Player player1;
-    private Player player2;
+    private String player1;
+    private String player2;
 
     private int intersections;
     private int moveTime;
@@ -93,13 +93,27 @@ public class GameManager {
      * Start a new game with the current settings.
      */
     public void startGame() {
-        this.currentGame = new Game(this, board, player1, player2,
+        this.currentGame = new Game(this, board, createPlayer(player1, 1),
+                createPlayer(player2, 2),
                 intersections, moveTime, gameTime, moveTimingEnabled,
                 gameTimingEnabled);
         this.currentThread = new Thread(currentGame);
         currentThread.start();
         for(GameEventListener listener : listeners) {
             listener.gameStarted();
+        }
+    }
+
+    private Player createPlayer(String player, int index) {
+        switch (player) {
+            case "Human":
+                return new HumanPlayer(new GameInfo(intersections,
+                        gameTime, moveTime, index, index == 1? 2 : 1));
+            case "Computer":
+                return new NegamaxAI(new GameInfo(intersections,
+                        gameTime, moveTime, index, index == 1? 2 : 1));
+            default:
+                return null;
         }
     }
 
@@ -171,16 +185,7 @@ public class GameManager {
      * @param playerString Player value (Human/Computer)
      */
     public void updatePlayer1(String playerString) {
-        switch (playerString) {
-            case "Human":
-                this.player1 = new HumanPlayer(new GameInfo(intersections,
-                        gameTime, moveTime, 1, 2));
-                break;
-            case "Computer":
-                this.player1 = new NegamaxAI(new GameInfo(intersections,
-                        gameTime, moveTime, 1, 2));
-                break;
-        }
+        this.player1 = playerString;
         for (GameEventListener listener : listeners) {
             listener.playersChanged();
         }
@@ -191,16 +196,7 @@ public class GameManager {
      * @param playerString Player value (Human/Computer)
      */
     public void updatePlayer2(String playerString) {
-        switch(playerString) {
-            case "Human":
-                this.player2 = new HumanPlayer(new GameInfo(intersections,
-                        gameTime, moveTime, 2, 1));
-                break;
-            case "Computer":
-                this.player2 = new NegamaxAI(new GameInfo(intersections,
-                        gameTime, moveTime, 2, 1));
-                break;
-        }
+        this.player2 = playerString;
         for(GameEventListener listener : listeners) {
             listener.playersChanged();
         }
