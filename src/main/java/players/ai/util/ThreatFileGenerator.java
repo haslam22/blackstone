@@ -54,6 +54,7 @@ public class ThreatFileGenerator {
         refutations.add(new RefutationPattern("00111", new int[] { 0, 1 }, 1));
         refutations.add(new RefutationPattern("01101", new int[] { 0, 3 }, 1));
         refutations.add(new RefutationPattern("01110", new int[] { 0, 4 }, 1));
+        refutations.add(new RefutationPattern("11010", new int[] { 2, 4 }, 1));
         
         refutations.add(new RefutationPattern("20022", new int[] { 1, 2 }, 2));
         refutations.add(new RefutationPattern("22002", new int[] { 2, 3 }, 2));
@@ -61,6 +62,7 @@ public class ThreatFileGenerator {
         refutations.add(new RefutationPattern("00222", new int[] { 0, 1 }, 2));
         refutations.add(new RefutationPattern("02202", new int[] { 0, 3 }, 2));
         refutations.add(new RefutationPattern("02220", new int[] { 0, 4 }, 2));
+        refutations.add(new RefutationPattern("22020", new int[] { 2, 4 }, 2));
         
         List<ThreatPattern> threats = new ArrayList<>();
         
