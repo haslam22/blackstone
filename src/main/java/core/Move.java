@@ -15,6 +15,8 @@ public class Move {
         this.col = col;
     }
 
+    public Move() {}
+
     public int getRow() {
         return row;
     }

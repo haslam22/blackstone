@@ -3,9 +3,8 @@ package players.ai;
 import core.GameInfo;
 import core.GameState;
 import core.Move;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import players.Player;
@@ -20,12 +19,16 @@ public class NegamaxAI extends Player {
 
     private final ThreatReducer threatReducer;
     private final Evaluator staticEvaluator;
+    private final LRUCache<Long, MoveEntry> moveTable;
     private State state;
 
     private final int intersections;
     private final long time;
     private long startTime;
     private int nodes;
+    private int averageCutoff;
+    private int hashMoveCutoff;
+    private int fullNodes;
 
     public NegamaxAI(GameInfo info) {
         super(info);
@@ -33,8 +36,18 @@ public class NegamaxAI extends Player {
         this.threatReducer = new ThreatReducer();
         this.staticEvaluator = new Evaluator();
         this.intersections = info.getIntersections();
-        this.time = Math.min((long) 1995 * 1000000, (long) info.getGameTimeout
-                () * 1000000);
+        this.time = (long) 2000 * 1000000;
+        this.moveTable = new LRUCache<>(200000);
+    }
+
+    private class MoveEntry {
+        Move move;
+        int depth;
+
+        public MoveEntry(Move move, int depth) {
+            this.move = move;
+            this.depth = depth;
+        }
     }
     
     @Override
@@ -52,18 +65,17 @@ public class NegamaxAI extends Player {
                             [move1.getCol()], state.currentIndex);
         }
     };
-    
+
     /**
-     * Generate a list of moves for a state. Only look at moves close to other
-     * stones on the board and reduce moves when threats from the opponent
-     * are found.
-     *
-     * Note: Should avoid calling this for every node. Maybe try killer moves
-     * or a hash table move from a previous depth of the same position
+     * Generate a list of sorted and pruned moves for this state. Moves are
+     * pruned when they are too far away from existing stones, and also when
+     * threats are found which require an immediate response. Moves are
+     * sorted using an evaluation applied to a single field
+     * @see Evaluator
      * @param state State to get moves for
-     * @return A list of moves
+     * @return A list of moves, sorted and pruned
      */
-    private List<Move> getMoves(State state) {
+    private List<Move> getSortedMoves(State state) {
         // Board is empty, return a move in the middle of the board
         if(state.moves == 0) {
             List<Move> moves = new ArrayList<>();
@@ -103,26 +115,70 @@ public class NegamaxAI extends Player {
      */
     private int negamax(State state, int depth, int alpha, int beta)
             throws InterruptedException {
-        int value;
-        nodes++;
+        fullNodes++;
         if(Thread.interrupted() || (System.nanoTime() - startTime) > time) {
             throw new InterruptedException();
         }
         if(depth == 0 || state.terminal() != 0) {
             return staticEvaluator.evaluate(state, depth);
         }
-        List<Move> moves = getMoves(state);
+        nodes++;
+
+        int value;
         int best = Integer.MIN_VALUE;
+        int count = 0;
+
+        Move bestMove = new Move();
+
+        // Try the move from a previous search
+        MoveEntry hashMoveEntry = moveTable.get(state.getZobristHash());
+        if (hashMoveEntry != null) {
+            state.makeMove(hashMoveEntry.move);
+            value = -negamax(state, depth - 1, -beta, -alpha);
+            state.undoMove(hashMoveEntry.move);
+            if (value > best) {
+                bestMove = hashMoveEntry.move;
+                best = value;
+            }
+            if (best > alpha) alpha = best;
+            if (best >= beta) {
+                hashMoveCutoff++;
+                return best;
+            }
+        }
+
+        // No cut-off from hash move, get sorted moves
+        List<Move> moves = getSortedMoves(state);
 
         for (Move move : moves) {
+            count++;
             state.makeMove(move);
             value = -negamax(state, depth - 1, -beta, -alpha);
             state.undoMove(move);
-            if(value > best) best = value;
+            if(value > best) {
+                bestMove = move;
+                best = value;
+            }
             if(best > alpha) alpha = best;
-            if(best >= beta) break;
+            if(best >= beta) {
+                break;
+            }
         }
+        averageCutoff += count;
+        putMoveEntry(state.getZobristHash(), bestMove, depth);
         return best;
+    }
+
+    public void putMoveEntry(long key, Move move, int depth) {
+        MoveEntry moveEntry = moveTable.get(key);
+        if(moveEntry == null) {
+            moveTable.put(key, new MoveEntry(move, depth));
+            return;
+        } else {
+            if(depth >= moveEntry.depth) {
+                moveTable.put(key, new MoveEntry(move, depth));
+            }
+        }
     }
 
     /**
@@ -183,7 +239,8 @@ public class NegamaxAI extends Player {
      */
     public Move iterativeDeepening(int startDepth, int endDepth)  {
         this.startTime = System.nanoTime();
-        List<Move> moves = getMoves(state);
+        List<Move> moves = getSortedMoves(state);
+        if(moves.size() == 1) return moves.get(0);
         for(int i = startDepth; i <= endDepth; i++) {
             try {
                 moves = searchMoves(state, moves, i);
@@ -197,6 +254,11 @@ public class NegamaxAI extends Player {
     @Override
     public Move getMove(GameState gameState) {
         this.nodes = 0;
+        this.fullNodes = 0;
+        this.averageCutoff = 0;
+        this.hashMoveCutoff = 0;
+        System.out.println(moveTable.size());
+        moveTable.clear();
         // Create a new internal state object, sync with the game state
         this.state = new State(info.getIntersections());
         List<Move> moves = gameState.getMoves();
@@ -213,11 +275,17 @@ public class NegamaxAI extends Player {
      * in the game tree and the nodes traversed per millisecond.
      */
     private void printPerformanceInfo() {
-        long duration = (System.nanoTime() - startTime) / 1000000;
-        LOGGER.log(Level.INFO, "Time: {0}ms", duration);
-        LOGGER.log(Level.INFO, "Nodes: {0}", nodes);
-        LOGGER.log(Level.INFO, "Nodes/ms: {0}", 
-                nodes / (duration > 0 ? duration : 1));
+        if(nodes > 0) {
+            long duration = (System.nanoTime() - startTime) / 1000000;
+            LOGGER.log(Level.INFO, "Time: {0}ms", duration);
+            LOGGER.log(Level.INFO, "Nodes: {0}", fullNodes);
+            LOGGER.log(Level.INFO, "Nodes/ms: {0}",
+                    fullNodes / (duration > 0 ? duration : 1));
+            LOGGER.log(Level.INFO, String.format("Branches explored (avg): %.2f ",
+                    (double) averageCutoff / (double) nodes));
+            LOGGER.log(Level.INFO, "Non-leaf nodes: " + nodes);
+            LOGGER.log(Level.INFO, "Hash move cut-offs: " + hashMoveCutoff);
+        }
     }
     
     /**
@@ -248,5 +316,4 @@ public class NegamaxAI extends Player {
     private String convertCol(int col) {
         return String.valueOf((char)((col + 1) + 'A' - 1));
     }
-    
 }

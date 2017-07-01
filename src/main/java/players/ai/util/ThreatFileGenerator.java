@@ -24,6 +24,7 @@ public class ThreatFileGenerator {
             this.threatString = threatString;
             this.threatSquares = threatSquares;
             this.playerIndex = playerIndex;
+            this.threatClass = threatClass;
         }
     }
 

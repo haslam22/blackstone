@@ -58,7 +58,7 @@ public class ThreatReducer {
      * A refutation instance represents a pattern occuring in some direction
      * around a stone that can form a four. E.g. 120220001 -> four in one move
      */
-    private static class RefutationInstance {
+     static class RefutationInstance {
         // Squares to create the refutation
         private final int[] refutationSquares;
         // Who the refutation belongs to (player 1/2)
@@ -75,7 +75,7 @@ public class ThreatReducer {
      * (e.g. 122220111 -> four). The defensive squares are stored so they can be 
      * mapped to a defensive move.
      */
-    private static class ThreatInstance {
+    static class ThreatInstance {
         // The defensive/offensive squares to create/defend against the threat
         private final int[] threatSquares;
         // Who the threat belongs to (player 1/2)
@@ -125,7 +125,7 @@ public class ThreatReducer {
                                             squareField.row, 
                                             squareField.col));
                                     if(threat.threatClass == 1) {
-                                        threatMoves.add(new Move(
+                                        fourMoves.add(new Move(
                                                 squareField.row,
                                                 squareField.col));
                                     }
@@ -195,13 +195,13 @@ public class ThreatReducer {
         }
         return refutationMoves;
     }
-    
+
     /**
      * Lookup and return the threat patterns for a field.
      * @param field Field to search
      * @return Array of threats found around this field
      */
-    private List<ThreatInstance> getThreats(Field field, int direction) {
+    public List<ThreatInstance> getThreats(Field field, int direction) {
         Pattern pattern = PATTERNS
                     [field.directions[direction][0].index]
                     [field.directions[direction][1].index]
@@ -220,7 +220,7 @@ public class ThreatReducer {
      * @param field Field to search
      * @return Array of threats found around this field
      */
-    private List<RefutationInstance> getRefutations(Field field,
+    public List<RefutationInstance> getRefutations(Field field,
             int direction) {
         Pattern pattern = PATTERNS
                     [field.directions[direction][0].index]

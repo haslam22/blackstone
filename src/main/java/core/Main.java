@@ -18,6 +18,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
+import players.ai.util.ThreatFileGenerator;
 
 import javax.imageio.ImageIO;
 import java.io.File;
