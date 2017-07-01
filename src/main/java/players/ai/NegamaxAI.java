@@ -40,6 +40,15 @@ public class NegamaxAI extends Player {
         this.moveTable = new LRUCache<>(200000);
     }
 
+    private class ScoredMove {
+        public Move move;
+        public int score;
+        public ScoredMove(Move move, int score) {
+            this.move = move;
+            this.score = score;
+        }
+    }
+
     private class MoveEntry {
         Move move;
         int depth;
@@ -54,17 +63,6 @@ public class NegamaxAI extends Player {
     public String toString() {
         return "AI";
     }
-
-    // Compare two moves based on the evaluation of the field
-    Comparator<Move> fieldComparator = new Comparator<Move>() {
-        @Override
-        public int compare(Move move1, Move move2) {
-            return staticEvaluator.evaluateField(state.board[move2.getRow()]
-                            [move2.getCol()], state.currentIndex) -
-                    staticEvaluator.evaluateField(state.board[move1.getRow()]
-                            [move1.getCol()], state.currentIndex);
-        }
-    };
 
     /**
      * Generate a list of sorted and pruned moves for this state. Moves are
@@ -87,20 +85,33 @@ public class NegamaxAI extends Player {
         List<Move> threatResponses = threatReducer.reduceMoves(state);
         if(threatResponses != null) return threatResponses;
 
+        List<ScoredMove> scoredMoves = new ArrayList<>();
+
+        MoveEntry entry = moveTable.get(state.getZobristHash());
         // Grab closest moves
         List<Move> moves = new ArrayList<>();
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
+                // Ignore hash move
+                if(entry != null &&
+                        (i == entry.move.getRow() && j == entry.move.getCol())) {
+                    continue;
+                }
                 if(state.board[i][j].index == 0) {
                     if(state.hasAdjacent(i, j, 2)) {
-                        moves.add(new Move(i, j));
+                        int score = staticEvaluator.evaluateField(state
+                                .board[i][j], state.currentIndex);
+                        scoredMoves.add(new ScoredMove(new Move(i, j), score));
                     }
                 }
             }
         }
 
         // Sort based on move evaluation
-        moves.sort(fieldComparator);
+        scoredMoves.sort((move1, move2) -> move2.score - move1.score);
+        for(ScoredMove move : scoredMoves) {
+            moves.add(move.move);
+        }
         return moves;
     }
 
@@ -169,13 +180,20 @@ public class NegamaxAI extends Player {
         return best;
     }
 
-    public void putMoveEntry(long key, Move move, int depth) {
+    /**
+     * Place the best move found from a state into the hash table, replacing
+     * an existing entry if the state was searched to a higher depth
+     * @param key Hash key of the state
+     * @param move Move to save
+     * @param depth Depth of the search
+     */
+    private void putMoveEntry(long key, Move move, int depth) {
         MoveEntry moveEntry = moveTable.get(key);
         if(moveEntry == null) {
             moveTable.put(key, new MoveEntry(move, depth));
             return;
         } else {
-            if(depth >= moveEntry.depth) {
+            if(depth > moveEntry.depth) {
                 moveTable.put(key, new MoveEntry(move, depth));
             }
         }
@@ -194,14 +212,6 @@ public class NegamaxAI extends Player {
      */
     private List<Move> searchMoves(State state, List<Move> moves, int depth)
             throws InterruptedException {
-        class ScoredMove {
-            public Move move;
-            public int score;
-            public ScoredMove(Move move, int score) {
-                this.move = move;
-                this.score = score;
-            }
-        }
 
         List<ScoredMove> scoredMoves = new ArrayList<>();
         for(Move move : moves) {
