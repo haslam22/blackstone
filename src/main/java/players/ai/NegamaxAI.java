@@ -144,6 +144,7 @@ public class NegamaxAI extends Player {
         // Try the move from a previous search
         MoveEntry hashMoveEntry = moveTable.get(state.getZobristHash());
         if (hashMoveEntry != null) {
+            count++;
             state.makeMove(hashMoveEntry.move);
             value = -negamax(state, depth - 1, -beta, -alpha);
             state.undoMove(hashMoveEntry.move);
