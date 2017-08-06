@@ -7,7 +7,6 @@ import core.Move;
 /**
  * Abstract class for a Gomoku player. Players are constructed with a game
  * information object containing timeouts, board size, etc.
- * @author Hasan
  */
 public abstract class Player {
 
@@ -22,16 +21,10 @@ public abstract class Player {
     }
     
     /**
-     * Get the move from this player.
+     * Request a move from this player.
      * @param state Current game state
-     * @return A valid move
+     * @return Move the player wants to make
      */
     public abstract Move getMove(GameState state);
-    
-    @Override
-    /*
-     * Get the name identifier for this player.
-     */
-    public abstract String toString();
     
 }

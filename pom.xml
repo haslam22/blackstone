@@ -33,13 +33,21 @@
         		<directory>src/main/resources</directory>
         	</resource>
             <resource>
-                <directory>src/main/java/gui</directory>
+                <directory>src/main/java</directory>
                 <includes>
-                    <include>**/*.fxml</include>
                     <include>**/*.css</include>
+                    <include>**/*.fxml</include>
                 </includes>
             </resource>
         </resources>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

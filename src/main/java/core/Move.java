@@ -3,26 +3,21 @@ package core;
 import java.util.Objects;
 
 /**
- * Class representing a move/position on the Gomoku board
+ * Represents a move or position on the Gomoku board.
  */
 public class Move {
 
-    private int row;
-    private int col;
+    public final int row;
+    public final int col;
 
+    /**
+     * Create a new move.
+     * @param row Row identifer
+     * @param col Column identifier
+     */
     public Move(int row, int col) {
         this.row = row;
         this.col = col;
-    }
-
-    public Move() {}
-
-    public int getRow() {
-        return row;
-    }
-
-    public int getCol() {
-        return col;
     }
 
     @Override
@@ -30,6 +25,7 @@ public class Move {
         return Objects.hash(this.row, this.col);
     }
 
+    @Override
     public boolean equals(Object obj) {
         if(obj instanceof Move) {
             Move move = (Move) obj;

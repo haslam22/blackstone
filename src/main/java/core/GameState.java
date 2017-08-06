@@ -5,36 +5,34 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * Contains all the information about the game, including the settings
- * (time/board size) and the moves made. This object is visible to players
- * but should not be modified outside this package.
+ * State for a Gomoku game.
  */
 public class GameState {
 
+    private int size;
     private int[][] board;
     private Stack<Move> moves;
-    private int intersections;
     private int currentIndex = 1;
 
     /**
-     * Create a new game state
-     * @param intersections Number of intersections on the board
+     * Create a new game state.
+     * @param size Board size
      */
-    GameState(int intersections) {
-        this.intersections = intersections;
-        this.board = new int[intersections][intersections];
+    protected GameState(int size) {
+        this.size = size;
+        this.board = new int[size][size];
         this.moves = new Stack<>();
     }
 
     /**
-     * Return the terminal status of the game
-     * @return 0 (game is not terminal), 1/2 if player 1/2 has won, 3 if the
-     * board is full
+     * Return the terminal status of the game.
+     * @return 0 if not terminal, the player index of the winning player, or
+     * 3 if the game ended in a draw.
      */
-    int terminal() {
+    protected int terminal() {
         if(isWinner(1)) return 1;
         if(isWinner(2)) return 2;
-        if(moves.size() == intersections * intersections) return 3;
+        if(moves.size() == size * size) return 3;
         return 0;
     }
 
@@ -42,162 +40,122 @@ public class GameState {
      * Get the current player index for this state
      * @return Current player # who has to make a move
      */
-    int getCurrentIndex() {
+    protected int getCurrentIndex() {
         return this.currentIndex;
     }
 
     /**
-     * Get a list of moves that were made on this state
-     * @return ArrayList of moves, from first move to last move made
+     * Get an ordered list of moves that were made on this state.
+     * @return ArrayList of moves, ordered from first move to last move made
      */
     public List<Move> getMoves() {
         return new ArrayList(moves);
     }
 
     /**
-     * Return the last move made on this state
+     * Return the last move made on this state.
      * @return Previous move that was made
      */
     public Move getLastMove() {
-        return moves.peek();
+        return !moves.isEmpty() ? moves.peek() : null;
     }
 
     /**
-     * Check if a move is valid
-     * @param move Move to check
-     * @return True if position is unoccupied, false otherwise
-     */
-    public boolean isLegalMove(Move move) {
-        return board[move.getRow()][move.getCol()] == 0;
-    }
-
-    /**
-     * Make a move on this state
+     * Make a move on this state.
      * @param move Move to make
      */
-    void makeMove(Move move) {
+    protected void makeMove(Move move) {
         this.moves.push(move);
-        this.board[move.getRow()][move.getCol()] = currentIndex;
+        this.board[move.row][move.col] = currentIndex;
         this.currentIndex = currentIndex == 1 ? 2 : 1;
     }
 
     /**
      * Undo the last move and return it.
+     * @return Move that was removed from the state, or null if no moves exist
      */
-    Move undo() {
+    protected Move undo() {
         if(this.moves.empty()) {
             return null;
         }
         Move move = this.moves.pop();
-        this.board[move.getRow()][move.getCol()] = 0;
+        this.board[move.row][move.col] = 0;
         this.currentIndex = currentIndex == 1 ? 2: 1;
         return move;
     }
 
     /**
      * Determine if the specified player has won the game
-     * @param index Player index (1 or 2)
+     * @param playerIndex Player index (1 or 2)
      * @return True if the index has won
      */
-    private boolean isWinner(int index) {
-        for(int i = 0; i < intersections; i++) {
-            for(int j = 0; j < intersections; j++) {
-                if(board[i][j] == index) {
-                    if(searchVertical(i, j, index, 4)) return true;
-                    if(searchHorizontal(i, j, index, 4)) return true;
-                    if(searchDiagonalLeft(i, j, index, 4)) return true;
-                    if(searchDiagonalRight(i, j, index, 4)) return true;
-                }
+    private boolean isWinner(int playerIndex) {
+        if(moves.size() < 5) return false;
+        Move lastMove = getLastMove();
+        int row = lastMove.row;
+        int col = lastMove.col;
+        if(board[row][col] == playerIndex) {
+            // Diagonal from the bottom left to the top right
+            if(countConsecutiveStones(row, col, 1, -1) +
+                    countConsecutiveStones(row, col, -1, 1) == 4) {
+                return true;
+            }
+            // Diagonal from the top left to the bottom right
+            if(countConsecutiveStones(row, col, -1, -1) +
+                    countConsecutiveStones(row, col, 1, 1) == 4) {
+                return true;
+            }
+            // Horizontal
+            if(countConsecutiveStones(row, col, 0, 1) +
+                    countConsecutiveStones(row, col, 0, -1) == 4) {
+                return true;
+            }
+            // Vertical
+            if(countConsecutiveStones(row, col, 1, 0) +
+                    countConsecutiveStones(row, col, -1, 0) == 4) {
+                return true;
             }
         }
         return false;
     }
 
     /**
-     * Search vertically for a sequence of stones belonging to an index
-     * @param row Row position
-     * @param col Column position
-     * @param index Player index
-     * @param amount Amount of stones to find
-     * @return
+     * Helper method to check if an index lies within the bounds of the board.
+     * @param index Value to check
+     * @return True if this value lies between the bounds of the board (0 to
+     * size - 1)
      */
-    private boolean searchVertical(int row, int col, int index, int amount) {
-        if(row + amount < intersections) {
-            int count = 0;
-            for(int k = 1; k <= amount; k++) {
-                if(board[row+k][col] == index) {
-                    count++;
-                }
-            }
-            return count == amount;
-        }
-        return false;
+    private boolean inBounds(int index) {
+        return index >= 0 && index < size;
     }
 
     /**
-     * Search horizontally for a sequence of stones belonging to an index
-     * @param row Row position
-     * @param col Column position
-     * @param index Player index
-     * @param amount Amount of stones to find
-     * @return
+     * Iterates along the board from a start position and counts the
+     * consecutive stones belonging to a player. The row/column increment
+     * defines the direction of the iteration - e.g. +1, -1 would iterate
+     * diagonally down to the right. The start position must be occupied by
+     * the player in question.
+     * @param row Row start pos
+     * @param col Column start pos
+     * @param rowIncrement Row increment
+     * @param colIncrement Column increment
+     * @return The number of consecutive unbroken stones found
      */
-    private boolean searchHorizontal(int row, int col, int index, int amount) {
-        if(col + amount < intersections) {
-            int count = 0;
-            for(int k = 1; k <= amount; k++) {
-                if(board[row][col+k] == index) {
+    private int countConsecutiveStones(int row, int col, int rowIncrement,
+                                       int colIncrement) {
+        int count = 0;
+        int index = board[row][col];
+        for(int i = 1; i <= 4; i++) {
+            if(inBounds(row + (rowIncrement*i)) && inBounds(col +
+                    (colIncrement*i))) {
+                if(board[row + (rowIncrement*i)][col + (colIncrement*i)] ==
+                        index) {
                     count++;
+                } else {
+                    break;
                 }
             }
-            return count == amount;
         }
-        return false;
-    }
-
-    /**
-     * Search diagonally and down to the right for a sequence of stones
-     * belonging to an index
-     * @param row Row position
-     * @param col Column position
-     * @param index Player index
-     * @param amount Amount of stones to find
-     * @return
-     */
-    private boolean searchDiagonalRight(int row, int col, int index,
-                                        int amount) {
-        if(col + amount < intersections && row + amount < intersections) {
-            int count = 0;
-            for(int k = 1; k <= amount; k++) {
-                if(board[row+k][col+k] == index) {
-                    count++;
-                }
-            }
-            return count == amount;
-        }
-        return false;
-    }
-
-    /**
-     * Search diagonally and down to the left for a sequence of stones
-     * belonging to an index
-     * @param row Row position
-     * @param col Column position
-     * @param index Player index
-     * @param amount Amount of stones to find
-     * @return
-     */
-    private boolean searchDiagonalLeft(int row, int col, int index,
-                                       int amount) {
-        if(col - amount >= 0 && row + amount < intersections) {
-            int count = 0;
-            for(int k = 1; k <= amount; k++) {
-                if(board[row+k][col-k] == index) {
-                    count++;
-                }
-            }
-            return count == amount;
-        }
-        return false;
+        return count;
     }
 }

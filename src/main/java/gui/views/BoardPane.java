@@ -1,4 +1,4 @@
-package gui;
+package gui.views;
 
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
@@ -15,8 +15,6 @@ import javafx.scene.text.TextAlignment;
 
 /*
  * A dynamic pane which draws a Gomoku board to fill the available space.
- * NOTE: May be better to draw the board with circle/line nodes on a
- * StackPane instead of a canvas, for performance reasons
  */
 public class BoardPane extends Pane {
 
@@ -26,27 +24,13 @@ public class BoardPane extends Pane {
     private BoardStone[][] board;
     private int size;
 
-    // Board properties
     private double paddingY;
     private double paddingX;
     private double cellSize;
     private EventHandler<MouseEvent> mouseListener;
 
     /**
-     * Class representing a stone on the board
-     */
-    private class BoardStone {
-        private int index;
-        private boolean transparent;
-
-        public BoardStone(int index, boolean transparent) {
-            this.index = index;
-            this.transparent = transparent;
-        }
-    }
-
-    /**
-     * Create a new Gomoku Board with a specified number of intersections
+     * Create a new Gomoku Board with a specified number of intersections.
      * @param size Number of intersections (n*n) on the board
      */
     public BoardPane(int size) {
@@ -100,7 +84,7 @@ public class BoardPane extends Pane {
     }
 
     /**
-     * Draw a grid on some given graphics context
+     * Draw a grid on some given graphics context.
      * @param gc Graphics context
      * @param startX Start point on x axis
      * @param startY Start point on y axis
@@ -325,4 +309,32 @@ public class BoardPane extends Pane {
             }
         }
     }
+
+    /**
+     * Represents a stone on the board.
+     */
+    private class BoardStone {
+        private int index;
+        private boolean transparent;
+
+        public BoardStone(int index, boolean transparent) {
+            this.index = index;
+            this.transparent = transparent;
+        }
+    }
+
+    /**
+     * Convert a position on the board to its algebraic representation on a
+     * board of a given size
+     * @param row Zero indexed row
+     * @param col Zero indexed column
+     * @param size Board size (intersections)
+     * @return Algebraic string, e.g. 0, 0 -> 15A
+     */
+    public static String convertMoveAlgebraic(int row, int col, int size) {
+        int rowAlgebraic = size - row;
+        char colAlgebraic = (char) ('A' + col);
+        return new String(Character.toString(colAlgebraic) + rowAlgebraic);
+    }
+
 }

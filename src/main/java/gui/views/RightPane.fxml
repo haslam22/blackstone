@@ -1,38 +1,33 @@
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.GridPane?>
-
-<?import javafx.scene.control.Label?>
-<?import java.net.URL?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.ComboBox?>
+<?import core.*?>
 <?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
-<VBox fx:controller="gui.RightPaneController"
+<?import java.lang.String?>
+<?import java.net.URL?>
+<VBox fx:controller="gui.controllers.RightPaneController"
       xmlns:fx="http://javafx.com/fxml" styleClass="outer" maxWidth="250"
       spacing="10">
     <padding>
         <Insets bottom="10.0" left="10.0" right ="10.0" top="10.0"/>
     </padding>
-    <GridPane fx:id="player1Box" alignment="center" hgap="5" vgap="5"
+    <GridPane alignment="center" hgap="5" vgap="5"
               styleClass="player-box">
         <padding>
             <Insets top="10" left="10" right="10" bottom="10"/>
         </padding>
-        <Circle styleClass="black-stone" radius="15"
-                GridPane.rowIndex="0" GridPane.columnIndex="0"
-                GridPane.rowSpan="2" GridPane.halignment="CENTER"
-                GridPane.valignment="CENTER">
+        <Circle styleClass="black-stone" radius="15" GridPane.rowIndex="0"
+                GridPane.columnIndex="0" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER" GridPane.rowSpan="2">
             <GridPane.margin>
-                <Insets bottom="5" left="5" right="5" top="5"/>
+                <Insets top="5" left="5" right="5" bottom="5"/>
             </GridPane.margin>
         </Circle>
         <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Human"
                   GridPane.rowIndex="0" GridPane.columnIndex="1"
-                  GridPane.hgrow="ALWAYS" onAction="#player1Changed"
-                  fx:id="player1ComboBox">
+                  GridPane.hgrow="ALWAYS" fx:id="player1Selector"
+                  onAction="#updatePlayer1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Human" />
@@ -41,31 +36,35 @@
             </items>
         </ComboBox>
         <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
-            <Label fx:id="player1GameTimeLabelDesc" text="Time/game: "/>
+            <Label text="Time/game: "/>
             <Label fx:id="player1GameTimeLabel" text="20:00"/>
         </HBox>
         <HBox GridPane.rowIndex="2" GridPane.columnIndex="1">
-            <Label fx:id="player1MoveTimeLabelDesc" text="Time/move: "/>
+            <Label text="Time/move: "/>
             <Label fx:id="player1MoveTimeLabel" text="00:05"/>
         </HBox>
     </GridPane>
-    <GridPane fx:id="player2Box" alignment="center" hgap="5" vgap="5"
+    <GridPane alignment="center" hgap="5" vgap="5"
               styleClass="player-box">
         <padding>
             <Insets top="10" left="10" right="10" bottom="10"/>
         </padding>
-        <Circle styleClass="white-stone" radius="15"
-                GridPane.rowIndex="0" GridPane.columnIndex="0"
-                GridPane.rowSpan="2" GridPane.halignment="CENTER"
-                GridPane.valignment="CENTER">
+        <Circle styleClass="white-stone" radius="15" GridPane.rowIndex="0"
+                GridPane.columnIndex="0" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER" GridPane.rowSpan="2">
             <GridPane.margin>
-                <Insets bottom="5" left="5" right="5" top="5"/>
+                <Insets top="5" left="5" right="5" bottom="5"/>
             </GridPane.margin>
+        </Circle>
+        <Circle radius="4" styleClass="green-circle" GridPane.rowIndex="2"
+                GridPane.columnIndex="0" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER" fx:id="player2StatusCircle"
+                visible="false">
         </Circle>
         <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Computer"
                   GridPane.rowIndex="0" GridPane.columnIndex="1"
-                  GridPane.hgrow="ALWAYS" onAction="#player2Changed"
-                  fx:id="player2ComboBox">
+                  GridPane.hgrow="ALWAYS" fx:id="player2Selector"
+                  onAction="#updatePlayer2">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Human" />
@@ -74,19 +73,19 @@
             </items>
         </ComboBox>
         <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
-            <Label fx:id="player2GameTimeLabelDesc" text="Time/game: "/>
+            <Label text="Time/game: "/>
             <Label fx:id="player2GameTimeLabel" text="20:00"/>
         </HBox>
         <HBox GridPane.rowIndex="2" GridPane.columnIndex="1">
-            <Label fx:id="player2MoveTimeLabelDesc" text="Time/move: "/>
+            <Label text="Time/move: "/>
             <Label fx:id="player2MoveTimeLabel" text="00:05"/>
         </HBox>
     </GridPane>
-    <TextArea fx:id="textbox" editable="false" wrapText="true"
+    <TextArea fx:id="textBox" editable="false" wrapText="true"
               VBox.vgrow="ALWAYS">
     </TextArea>
     <stylesheets>
-        <URL value="@Global.css" />
-        <URL value="@RightPane.css" />
+        <URL value="@../css/Global.css" />
+        <URL value="@../css/RightPane.css" />
     </stylesheets>
 </VBox>

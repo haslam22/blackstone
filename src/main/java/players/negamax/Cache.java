@@ -1,18 +1,18 @@
-package players.ai;
+package players.negamax;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Extension of LinkedHashMap, which keeps elements in access order. Elements
- * are removed after the capacity is exceeded
+ * Simple extension of LinkedHashMap which keeps elements in access order.
+ * Elements are removed after the capacity is exceeded.
  * @param <K> Key type
  * @param <V> Value type
  */
-public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+public class Cache<K, V> extends LinkedHashMap<K, V> {
     private final int maxEntries;
 
-    public LRUCache(final int maxEntries) {
+    public Cache(final int maxEntries) {
         super(maxEntries + 1, 1.0f, true);
         this.maxEntries = maxEntries;
     }

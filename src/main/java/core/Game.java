@@ -1,12 +1,12 @@
 package core;
 
-import gui.BoardPane;
-import javafx.application.Platform;
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
+import events.GameListener;
+import events.SettingsListener;
 import players.Player;
 import players.human.HumanPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
@@ -14,305 +14,275 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Main game loop for the program, asynchronously requests moves from each
- * player and draws moves to the board.
+ * Main game loop responsible for running the game from start to finish.
  */
-public class Game implements Runnable {
+public class Game {
 
-    private final Player[] players;
-    private final GameState state;
+    private static Logger LOGGER = Logger.getGlobal();
+
+    private final List<GameListener> listeners;
+    private final GameSettings settings;
     private final ExecutorService executor;
-    private final BoardPane board;
-    private final GameManager manager;
-    private final GameTimer[] gameTimers;
-    private final boolean moveTimingEnabled;
-    private final boolean gameTimingEnabled;
+    private final Player[] players;
+    private final long[] times;
+    private final Timer timer;
     private Future<Move> futureMove;
-    private EventHandler<MouseEvent> moveListener;
-    private Timer updateSender;
+    private Thread gameThread;
+    private TimerTask timeUpdateSender;
+    private GameState state;
 
     /**
-     * Create a new game instance
-     * @param manager Manager object to control this game
-     * @param board Board pane
-     * @param player1 Player 1 (Black)
-     * @param player2 Player 2 (White)
-     * @param intersections Board size (in intersections)
-     * @param moveTime Time per move (ms)
-     * @param gameTime Time per game (ms)
-     * @param gameTimingEnabled Game timing enabled
-     * @param moveTimingEnabled Move timing enabled
+     * Create a new game instance.
      */
-    protected Game(GameManager manager, BoardPane board, Player player1, Player
-            player2, int intersections, int moveTime, int gameTime, boolean
-            moveTimingEnabled, boolean gameTimingEnabled) {
-        this.board = board;
-        this.manager = manager;
-        this.players = new Player[] { player1, player2 };
-        this.state = new GameState(intersections);
+    protected Game() {
+        this.settings = new GameSettings();
+        this.times = new long[2];
+        this.players = new Player[2];
         this.executor = Executors.newSingleThreadExecutor();
-        this.moveTimingEnabled = moveTimingEnabled;
-        this.gameTimingEnabled = gameTimingEnabled;
-        this.gameTimers = new GameTimer[] {
-                new GameTimer(gameTime, moveTime, gameTimingEnabled,
-                        moveTimingEnabled),
-                new GameTimer(gameTime, moveTime, gameTimingEnabled,
-                        moveTimingEnabled)
-        };
-        this.manager.addListener(new GameEventAdapter(){
+        this.listeners = new ArrayList<>();
+        this.gameThread = new Thread(getRunnable());
+        this.timer = new Timer();
+        this.state = new GameState(settings.getSize());
+        this.settings.addListener(new SettingsListener() {
             @Override
-            public void undo() {
-                if(futureMove != null) {
-                    futureMove.cancel(true);
-                }
+            public void settingsChanged() {
+                // State is no longer valid if settings change
+                // TODO: Only invalidate state if size changes
+                state = new GameState(settings.getSize());
             }
         });
     }
 
     /**
-     * Schedule a game time update task to fire a gameTimeChanged() update to
-     * any listening components
-     * @param player Player who is currently moving
+     * Start the game. Reads the game settings and launches a new game thread.
+     * Has no effect if the game thread is already running.
      */
-    private void sendGameTimeUpdates(int player) {
-        TimerTask updateTask = new TimerTask() {
-            @Override
-            public void run() {
-                manager.gameTimeChanged(player, gameTimers[player - 1]
-                        .getRemainingGameTime());
-            }
-        };
-        updateSender.scheduleAtFixedRate(updateTask, 0, 100);
+    public void start() {
+        if(!this.gameThread.isAlive()) {
+            this.state = new GameState(settings.getSize());
+            players[0] = settings.getPlayer1();
+            players[1] = settings.getPlayer2();
+            times[0] = settings.getGameTimeMillis();
+            times[1] = settings.getGameTimeMillis();
+            this.gameThread = new Thread(getRunnable());
+            this.gameThread.start();
+        }
     }
 
     /**
-     * Schedule a move time update task to fire a moveTimeChanged() update to
-     * any listening components
-     * @param player Player who is currently moving
+     * Stop the game. Safely interrupts the thread and cancels any pending
+     * moves and calls join() to wait for the thread to resolve. Has no
+     * effect if the game thread is not running.
      */
-    private void sendMoveTimeUpdates(int player) {
-        TimerTask updateTask = new TimerTask() {
-            @Override
-            public void run() {
-                manager.moveTimeChanged(player, gameTimers[player - 1]
-                        .getRemainingMoveTime());
+    public void stop() {
+        if(this.gameThread.isAlive()) {
+            this.gameThread.interrupt();
+            try {
+                this.gameThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        };
-        updateSender.scheduleAtFixedRate(updateTask, 0, 100);
+            if(!futureMove.isDone()) {
+                futureMove.cancel(true);
+            }
+            timeUpdateSender.cancel();
+        }
     }
 
     /**
-     * Add a mouse click listener to the board if we need to request a move
-     * from the user, set and call notify() on the HumanPlayer instance upon
-     * completion
-     * @param player HumanPlayer instance
+     * Undo the last two moves. This stops the game, removes the last two
+     * moves from the game state and emits an event to let the board update.
+     * The game is restarted immediately after.
      */
-    private void addMoveListener(HumanPlayer player) {
-        this.moveListener = new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                int closestRow = board.getClosestRow(event.getY());
-                int closestCol = board.getClosestCol(event.getX());
-                Move closestMove = new Move(closestRow, closestCol);
-                if(state.isLegalMove(closestMove)) {
-                    synchronized(player) {
-                        player.setMove(closestMove);
-                        player.notify();
-                    }
-                    board.removeEventHandler(MouseEvent.MOUSE_CLICKED,
-                            this);
-                    board.disableStonePicker();
+    public void undo() {
+        if(state.getMoves().size() > 0) {
+            stop();
+            for (int i = 0; i < 2; i++) {
+                Move move = state.undo();
+                if (move != null) {
+                    listeners.forEach(listener -> listener.moveRemoved(move));
                 }
             }
-        };
-        board.enableStonePicker(state.getCurrentIndex());
-        board.addEventHandler(MouseEvent.MOUSE_CLICKED, moveListener);
+            this.gameThread = new Thread(getRunnable());
+            this.gameThread.start();
+        }
     }
 
     /**
-     * Request a move from a player asynchronously
-     * @param player Player to request from
+     * Get the game settings.
+     * @retun GameSettings instance
+     */
+    public GameSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Register a listener with this game instance.
+     * @param listener GameListener to register
+     */
+    public void addListener(GameListener listener) {
+        this.listeners.add(listener);
+    }
+
+    /**
+     * Request a move from a player.
      * @return Players move
      * @throws ExecutionException
      * @throws InterruptedException
      * @throws TimeoutException
      */
-    private Move requestMove(Player player) throws ExecutionException,
-            InterruptedException, TimeoutException, CancellationException {
-        // Setup the mouse listener if we're requesting a move from a non-AI
-        // player
+    private Move requestMove(int playerIndex) throws
+            InterruptedException, ExecutionException, TimeoutException {
+        Player player = players[playerIndex - 1];
+        long timeout = calculateTimeoutMillis(playerIndex);
+        this.futureMove = executor.submit(() -> player.getMove(state));
         if(player instanceof HumanPlayer) {
-            addMoveListener((HumanPlayer) player);
+            listeners.forEach(listener -> listener.userMoveRequested
+                    (playerIndex));
         }
 
-        int index = state.getCurrentIndex();
-        long timeout = gameTimers[index - 1].getTimeout();
-        this.futureMove = executor.submit(() -> player.getMove(state));
-
-        if(timeout > 0) {
-            return futureMove.get(timeout, TimeUnit.MILLISECONDS);
+        if (timeout > 0) {
+            try {
+                return futureMove.get(timeout, TimeUnit.MILLISECONDS);
+            } catch(TimeoutException ex) {
+                futureMove.cancel(true);
+                throw(ex);
+            }
         } else {
             return futureMove.get();
         }
     }
 
     /**
-     * Draw a move on the board pane for the current player
-     * @param move Move to draw
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * Called by the GUI to set a user's move for the game.
+     * @param move Move from the user
+     * @return True if the move was accepted
      */
-    private void drawStone(Move move) throws InterruptedException,
-            ExecutionException {
-        FutureTask<Void> drawStoneTask = new FutureTask<>(() -> {
-            board.addStone(state.getCurrentIndex(), move.getRow(),
-                    move.getCol(), false);
-        }, null);
-        Platform.runLater(drawStoneTask);
-        drawStoneTask.get();
-    }
-
-    /**
-     * Remove a stone from the board
-     * @param move Move to remove
-     * @throws InterruptedException
-     * @throws ExecutionException
-     */
-    private void removeStone(Move move) throws InterruptedException,
-            ExecutionException {
-        FutureTask<Void> removeStoneTask = new FutureTask<>(() -> {
-            board.removeStone(move.getRow(), move.getCol());
-        }, null);
-        Platform.runLater(removeStoneTask);
-        removeStoneTask.get();
-    }
-
-    /**
-     * Clear the board completely, removing all stones.
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    private void clearBoard() throws ExecutionException, InterruptedException {
-        FutureTask<Void> clearBoardTask = new FutureTask<>(() -> {
-            board.clear();
-        }, null);
-        Platform.runLater(clearBoardTask);
-        clearBoardTask.get();
-    }
-
-    /**
-     * Disable the stone picker and remove the mouse listener from the board.
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    private void disableListener() throws ExecutionException,
-            InterruptedException {
-        FutureTask<Void> removeListenerTask = new FutureTask<>(() -> {
-            board.disableStonePicker();
-        }, null);
-        Platform.runLater(removeListenerTask);
-        removeListenerTask.get();
-        if(moveListener != null) {
-            board.removeEventHandler(MouseEvent.MOUSE_CLICKED, moveListener);
-            this.moveListener = null;
-        }
-    }
-
-    /**
-     * Perform an undo on the current game state, removing stones from the
-     * board and updating the state
-     */
-    private void undo() {
-        Move move1 = state.undo();
-        Move move2 = state.undo();
-        try {
-            if(move1 != null) removeStone(move1);
-            if(move2 != null) removeStone(move2);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void run() {
-        try {
-            clearBoard();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        // Continue to request moves until the state is terminal
-        while(state.terminal() == 0) try {
-            // Send a turn changed event
-            manager.turn(state.getCurrentIndex());
-
-            // Start the timer for the current player
-            gameTimers[state.getCurrentIndex() - 1].startTimer();
-
-            // Send time events to the GUI
-            this.updateSender = new Timer();
-            if(gameTimingEnabled) sendGameTimeUpdates(state.getCurrentIndex());
-            if(moveTimingEnabled) sendMoveTimeUpdates(state.getCurrentIndex());
-
-            // Request the next move asynchronously and wait
-            Move nextMove = requestMove(players[state.getCurrentIndex() - 1]);
-
-            // Stop the timer and cancel any event updates
-            gameTimers[state.getCurrentIndex() - 1].stopTimer();
-            this.updateSender.cancel();
-
-            // Draw the stone, update the internal states and output the move to
-            // the log
-            drawStone(nextMove);
-            Logger.getGlobal().log(Level.INFO, MessageConstants
-                    .playerMoved(state.getCurrentIndex(), nextMove));
-            state.makeMove(nextMove);
-
-        } catch (ExecutionException e) {
-            // Execution exception should not occur. Means a player instance
-            // has thrown an unhandled exception somewhere
-            gameTimers[state.getCurrentIndex() - 1].stopTimer();
-            this.updateSender.cancel();
-            e.printStackTrace();
-            break;
-        } catch (InterruptedException e) {
-            // Game was stopped by the user
-            gameTimers[state.getCurrentIndex() - 1].stopTimer();
-            this.updateSender.cancel();
-            Logger.getGlobal().log(Level.INFO, MessageConstants
-                    .gameInterrupted());
-            break;
-        } catch (TimeoutException e) {
-            // Player ran out of time, async requestMove() wasn't returned
-            gameTimers[state.getCurrentIndex() - 1].stopTimer();
-            this.updateSender.cancel();
-            Logger.getGlobal().log(Level.INFO, MessageConstants
-                    .timeout(state.getCurrentIndex()));
-            break;
-        } catch (CancellationException e) {
-            // Player requested an undo
-            gameTimers[state.getCurrentIndex() - 1].stopTimer();
-            this.updateSender.cancel();
-            try {
-                undo();
-                disableListener();
-            } catch (InterruptedException | ExecutionException ex) {
-                ex.printStackTrace();
+    public boolean setUserMove(Move move) {
+        Player currentPlayer = players[state.getCurrentIndex() - 1];
+        if(currentPlayer instanceof HumanPlayer) {
+            if(!state.getMoves().contains(move)) {
+                synchronized(currentPlayer) {
+                    ((HumanPlayer) currentPlayer).setMove(move);
+                    players[state.getCurrentIndex() - 1].notify();
+                }
+                return true;
             }
         }
+        return false;
+    }
 
-        // Output the winner to the log
-        if(state.terminal() == 1 || state.terminal() == 2) {
-            Logger.getGlobal().log(Level.INFO, MessageConstants.gameOver
-                    (state.terminal()));
+    /**
+     * Calculate the timeout value for a player or return 0 if timing is not
+     * enabled for this game.
+     * @param player Player index
+     * @return Timeout value in milliseconds
+     */
+    private long calculateTimeoutMillis(int player) {
+        if(settings.moveTimingEnabled() && settings.gameTimingEnabled()) {
+            // Both move timing and game timing are enabled
+            return Math.min(settings.getMoveTimeMillis(), times[player - 1]);
+        } else if(settings.gameTimingEnabled()) {
+            // Only game timing is enabled
+            return times[player - 1];
+        } else if(settings.moveTimingEnabled()) {
+            // Only move timing is enabled
+            return settings.getMoveTimeMillis();
+        } else {
+            // No timing is enabled
+            return 0;
         }
+    }
 
-        // Cleanup and shutdown
-        try {
-            disableListener();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        executor.shutdownNow();
-        manager.stopGame();
+    /**
+     * Get the runnable game loop for this game.
+     */
+    private Runnable getRunnable() {
+        return () -> {
+            if(state.getMoves().size() == 0) {
+                listeners.forEach(listener -> listener.gameStarted());
+            } else {
+                listeners.forEach(listener -> listener.gameResumed());
+            }
+            while(state.terminal() == 0) {
+                try {
+                    listeners.forEach(listener -> listener.turnStarted(
+                            state.getCurrentIndex()));
+
+                    sendTimeUpdates(state.getCurrentIndex());
+                    long startTime = System.currentTimeMillis();
+
+                    Move move = requestMove(state.getCurrentIndex());
+
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    stopTimeUpdates();
+
+                    times[state.getCurrentIndex() - 1] -= elapsedTime;
+                    listeners.forEach(listener -> listener.moveAdded(
+                            state.getCurrentIndex(), move));
+                    state.makeMove(move);
+
+                } catch (InterruptedException ex) {
+                    stopTimeUpdates();
+                    break;
+                } catch (ExecutionException ex) {
+                    stopTimeUpdates();
+                    ex.printStackTrace();
+                    break;
+                } catch (TimeoutException ex) {
+                    stopTimeUpdates();
+                    LOGGER.log(Level.INFO, timeout(state.getCurrentIndex()));
+                    break;
+                }
+            }
+            listeners.forEach(listener -> listener.gameFinished());
+            if(state.terminal() != 0) {
+                LOGGER.log(Level.INFO, gameOver(state.terminal()));
+            }
+        };
+    }
+
+    /**
+     * Start sending time events to listeners.
+     * @param playerIndex Player index to send times for
+     */
+    private void sendTimeUpdates(int playerIndex) {
+        this.timeUpdateSender = new TimerTask() {
+            long startTime = System.currentTimeMillis();
+            long moveTime = settings.getMoveTimeMillis();
+            long gameTime = times[playerIndex - 1];
+            @Override
+            public void run() {
+                long elapsed = System.currentTimeMillis() - startTime;
+                gameTime -= elapsed;
+                moveTime -= elapsed;
+                // Broadcast the elapsed times since the last TimerTask
+                if(settings.gameTimingEnabled()) {
+                    listeners.forEach(listener -> listener.gameTimeChanged
+                            (playerIndex, gameTime));
+                }
+                if(settings.moveTimingEnabled()) {
+                    listeners.forEach(listener -> listener.moveTimeChanged
+                            (playerIndex, moveTime));
+                }
+                startTime = System.currentTimeMillis();
+            }
+        };
+        timer.scheduleAtFixedRate(timeUpdateSender, 0, 100);
+    }
+
+    /**
+     * Stop sending time updates.
+     */
+    private void stopTimeUpdates() {
+        timeUpdateSender.cancel();
+    }
+
+    private static String gameOver(int index) {
+        return String.format("Game over, winner: Player %d.", index);
+    }
+
+    private static String timeout(int index) {
+        return String.format("Player %d ran out of time.", index);
     }
 }

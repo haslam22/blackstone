@@ -7,7 +7,7 @@
 <?import javafx.geometry.Insets?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="gui.TopPaneController"
+      fx:controller="gui.controllers.TopPaneController"
       prefHeight="15.0" alignment="CENTER_LEFT" spacing="5" styleClass="root">
     <padding>
         <Insets>
@@ -18,12 +18,12 @@
         </Insets>
     </padding>
     <StackPane>
-        <Button text="New Game" onAction="#newGame" fx:id="playButton">
+        <Button text="New Game" fx:id="playButton" onAction="#newGame">
             <graphic>
                 <Label text="%play" styleClass="icon"/>
             </graphic>
         </Button>
-        <Button text="Stop Game" onAction="#stopGame" fx:id="stopButton"
+        <Button text="Stop Game"  fx:id="stopButton" onAction="#stopGame"
                 visible="false">
             <graphic>
                 <Label text="%stop" styleClass="icon"/>
@@ -35,9 +35,7 @@
             <Label text="%undo" styleClass="icon"/>
         </graphic>
     </Button>
-    <Pane HBox.hgrow="ALWAYS">
-
-    </Pane>
+    <Pane HBox.hgrow="ALWAYS"/>
     <Button text="Settings" fx:id="settingsButton" onAction="#openSettings">
         <graphic>
             <Label text="%gears" styleClass="icon"/>
@@ -45,7 +43,7 @@
     </Button>
 
     <stylesheets>
-        <URL value="@Global.css" />
-        <URL value="@TopPane.css" />
+        <URL value="@../css/Global.css" />
+        <URL value="@../css/TopPane.css" />
     </stylesheets>
 </HBox>

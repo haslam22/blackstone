@@ -7,6 +7,10 @@
     -fx-font-size: 14;
 }
 
+.button {
+    -fx-fill: #fff;
+}
+
 .button:focused {
     -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
     -fx-background-insets: 0, 1, 2;

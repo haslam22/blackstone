@@ -34,10 +34,5 @@ public class HumanPlayer extends Player {
         }
         return move;
     }
-
-    @Override
-    public String toString() {
-        return "Human";
-    }
     
 }

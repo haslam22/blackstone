@@ -1,14 +1,13 @@
 package core;
 
-import gui.BoardPane;
-import gui.RightPaneController;
-import gui.TopPaneController;
+import gui.Controller;
+import gui.controllers.BoardPaneController;
+import gui.views.BoardPane;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.Image;
@@ -18,43 +17,44 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
-import players.ai.util.ThreatFileGenerator;
+import javafx.stage.WindowEvent;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+/**
+ * Entry point of the application.
+ */
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        System.setProperty("prism.lcdtext", "false");
         Font.loadFont(getClass().getClassLoader().getResource
                 ("FontAwesome.otf").toExternalForm(), 10);
 
-        BoardPane boardPane = new BoardPane(15);
-        GameManager manager = new GameManager(boardPane);
+        Game game = new Game();
 
-        Parent topPane = loadTopPane(manager);
-        Parent rightPane = loadRightPane(manager);
+        Pane boardPane = loadBoardPane(game);
+        Pane topPane = loadTopPane(game);
+        Pane rightPane = loadRightPane(game);
 
         BorderPane root = new BorderPane();
         root.setRight(rightPane);
-        root.setTop(topPane);
         root.setCenter(boardPane);
+        root.setTop(topPane);
 
         primaryStage.setTitle("Gomoku");
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.setMinWidth(800);
         primaryStage.setMinHeight(600);
-        primaryStage.setOnCloseRequest(windowEvent -> {
-            manager.stopGame();
-            Platform.exit();
-        });
         primaryStage.getIcons().add(new Image(getClass().getClassLoader()
                 .getResource("AppIcon.png").toExternalForm()));
         primaryStage.show();
+        primaryStage.setOnCloseRequest(event -> {
+            game.stop();
+        });
     }
 
     /**
@@ -85,37 +85,49 @@ public class Main extends Application {
     }
 
     /**
-     * Load the right pane for the main stage
-     * @param manager Game manager
-     * @return Right pane component
+     * Load the right pane for the main stage.
+     * @param game Game instance
+     * @return Right pane
      * @throws IOException
      */
-    private Parent loadRightPane(GameManager manager) throws IOException {
+    private Pane loadRightPane(Game game) throws IOException {
         FXMLLoader loader = new FXMLLoader();
         loader.setResources(ResourceBundle.getBundle("FontAwesome"));
         loader.setLocation(getClass().getClassLoader().getResource
-                ("RightPane.fxml"));
-        Parent rightPane = loader.load();
-        RightPaneController controller = loader.getController();
-        controller.initialise(manager);
+                ("gui/views/RightPane.fxml"));
+        Pane rightPane = loader.load();
+        Controller controller = loader.getController();
+        controller.initialise(game);
         return rightPane;
     }
 
     /**
-     * Load the top pane for the main stage
-     * @param manager Game manager
-     * @return Top pane component
+     * Load the top pane for the main stage.
+     * @param game Game instance
+     * @return Top pane
      * @throws IOException
      */
-    private Parent loadTopPane(GameManager manager) throws IOException {
+    private Pane loadTopPane(Game game) throws IOException {
         FXMLLoader loader = new FXMLLoader();
         loader.setResources(ResourceBundle.getBundle("FontAwesome"));
         loader.setLocation(getClass().getClassLoader().getResource
-                ("TopPane.fxml"));
-        Parent topPane = loader.load();
-        TopPaneController controller = loader.getController();
-        controller.initialise(manager);
+                ("gui/views/TopPane.fxml"));
+        Pane topPane = loader.load();
+        Controller controller = loader.getController();
+        controller.initialise(game);
         return topPane;
+    }
+
+    /**
+     * Load the board pane for the main stage.
+     * @param game Game instance
+     * @return Board pane
+     */
+    private Pane loadBoardPane(Game game) {
+        BoardPane boardPane = new BoardPane(15);
+        Controller controller = new BoardPaneController(boardPane);
+        controller.initialise(game);
+        return boardPane;
     }
 
     public static void main(String[] args) {

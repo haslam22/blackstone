@@ -9,7 +9,7 @@
 <?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="gui.SettingsPaneController"
+      fx:controller="gui.controllers.SettingsPaneController"
       prefHeight="300.0" prefWidth="300.0" styleClass="outer">
 
     <GridPane hgap="5" vgap="5">
@@ -25,12 +25,13 @@
         </Label>
         <Separator GridPane.rowIndex="1" GridPane.columnSpan="2"/>
         <CheckBox text="Game timing enabled" GridPane.rowIndex="3"
-                  GridPane.columnSpan="2" onAction="#gameTimingSelected"
-                  fx:id="gameTimingCheckBox"/>
+                  GridPane.columnSpan="2" fx:id="gameTimingCheckBox"
+                  onAction="#gameTimingEnabled"/>
         <Label text="Time/game (minutes):" GridPane.rowIndex="4"
                GridPane.columnIndex="0"/>
         <ComboBox GridPane.rowIndex="4" GridPane.columnIndex="1"
-                  maxWidth="Infinity" value="20" fx:id="gameTimeComboBox">
+                  maxWidth="Infinity" value="20" fx:id="gameTimeComboBox"
+                  disable="true">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <Integer fx:value="40" />
@@ -46,11 +47,11 @@
         </ComboBox>
         <CheckBox text="Move timing enabled" GridPane.rowIndex="5"
                   GridPane.columnSpan="2" fx:id="moveTimingCheckBox"
-                  onAction="#moveTimingSelected"/>
+                  onAction="#moveTimingEnabled"/>
         <Label text="Time/move (seconds):" GridPane.rowIndex="6"
                GridPane.columnIndex="0"/>
         <ComboBox GridPane.rowIndex="6" GridPane.columnIndex="1"
-                  maxWidth="Infinity" fx:id="moveTimeComboBox">
+                  maxWidth="Infinity" fx:id="moveTimeComboBox" disable="true">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <Integer fx:value="40" />
@@ -69,10 +70,10 @@
                GridPane.columnSpan="2" text="Board">
         </Label>
         <Separator GridPane.rowIndex="8" GridPane.columnSpan="2"/>
-        <Label text="Intersections (n*n):" GridPane.rowIndex="9"
+        <Label text="Board Size (n*n):" GridPane.rowIndex="9"
                GridPane.columnIndex="0"/>
         <ComboBox GridPane.rowIndex="9" GridPane.columnIndex="1"
-                  maxWidth="Infinity" fx:id="intersectionsComboBox">
+                  maxWidth="Infinity" fx:id="sizeComboBox">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <Integer fx:value="15" />
@@ -90,6 +91,6 @@
     </HBox>
 
     <stylesheets>
-        <URL value="@Global.css" />
+        <URL value="@../css/Global.css" />
     </stylesheets>
 </VBox>

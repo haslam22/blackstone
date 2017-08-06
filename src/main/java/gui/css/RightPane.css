@@ -15,6 +15,7 @@
 .black-stone {
     -fx-fill: radial-gradient(focus-angle 45deg, focus-distance 58%,
         center 50% 50% , radius 50% , #A0A0A0 0%, #222 100%);
+
 }
 .white-stone {
      -fx-fill: radial-gradient(focus-angle 45deg, focus-distance 58%,

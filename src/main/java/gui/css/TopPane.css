@@ -1,7 +1,8 @@
 .root {
     -fx-font-family: "Arial";
     -fx-border-color: #ccc;
-    -fx-border-width: 0 0 1 0;
+    -fx-border-width: 1 0 1 0;
+    -fx-background-color: #ebebeb;
 }
 
 .icon {

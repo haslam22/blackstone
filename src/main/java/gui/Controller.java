@@ -1,17 +1,15 @@
 package gui;
 
-import core.GameManager;
+import core.Game;
+import core.GameSettings;
 
 /**
- * Abstract superclass for all GUI controllers.
+ * Interface for a controller. Provides the controller with access to the game.
  */
 public interface Controller {
 
     /**
-     * Initialise the controller with a game manager object, allowing it to
-     * receive events from the current game and perform game related actions.
-     * @param manager GameManager object
+     * Initialise the controller with a game instance.
      */
-    void initialise(GameManager manager);
-
+    void initialise(Game game);
 }
