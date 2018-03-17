@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/haslm/gomoku.svg?branch=master)](https://travis-ci.org/haslm/gomoku)
+[![Build Status](https://travis-ci.org/haslam22/gomoku.svg?branch=master)](https://travis-ci.org/haslm/gomoku)
 
 A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) client featuring a powerful AI written in `Java`. Download the latest build [here](target/gomoku-2.0.jar).
 
