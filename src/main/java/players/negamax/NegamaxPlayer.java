@@ -18,7 +18,6 @@ public class NegamaxPlayer extends Player {
 
     private final ThreatUtils reducer;
     private final Evaluator evaluator;
-    private final Cache<Long, MoveEntry> moveTable;
 
     private long time;
     private long startTime;
@@ -34,7 +33,6 @@ public class NegamaxPlayer extends Player {
         this.reducer = new ThreatUtils();
         this.evaluator = Evaluator.getInstance();
         this.time = (long) 2000 * 1000000;
-        this.moveTable = new Cache<>(1000000);
     }
 
     /**
@@ -83,10 +81,12 @@ public class NegamaxPlayer extends Player {
         if(!fours.isEmpty()) {
             return new ArrayList<>(fours);
         }
+
         // Opponent has a four, defend against it
         if(!opponentFours.isEmpty()) {
             return new ArrayList<>(opponentFours);
         }
+
         // Opponent has a three, defend against it and add refutation moves
         if(!opponentThrees.isEmpty()) {
             opponentThrees.addAll(refutations);
@@ -95,16 +95,10 @@ public class NegamaxPlayer extends Player {
 
         List<ScoredMove> scoredMoves = new ArrayList<>();
 
-        MoveEntry entry = moveTable.get(state.getZobristHash());
         // Grab closest moves
         List<Move> moves = new ArrayList<>();
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
-                // Ignore hash move
-                if(entry != null &&
-                        (i == entry.move.row && j == entry.move.col)) {
-                    continue;
-                }
                 if(state.board[i][j].index == 0) {
                     if(state.hasAdjacent(i, j, 2)) {
                         int score = evaluator.evaluateField(state, i, j,
@@ -145,35 +139,16 @@ public class NegamaxPlayer extends Player {
 
         int value;
         int best = Integer.MIN_VALUE;
-        int count = 0;
+        int countBranches = 0;
 
-        Move bestMove = null;
-
-        // Try the move from a previous search
-        MoveEntry hashMoveEntry = moveTable.get(state.getZobristHash());
-        if (hashMoveEntry != null) {
-            count++;
-            state.makeMove(hashMoveEntry.move);
-            value = -negamax(state, depth - 1, -beta, -alpha);
-            state.undoMove(hashMoveEntry.move);
-            if (value > best) {
-                bestMove = hashMoveEntry.move;
-                best = value;
-            }
-            if (best > alpha) alpha = best;
-            if (best >= beta) return best;
-        }
-
-        // No cut-off from hash move, get sorted moves
         List<Move> moves = getSortedMoves(state);
 
         for (Move move : moves) {
-            count++;
+            countBranches++;
             state.makeMove(move);
             value = -negamax(state, depth - 1, -beta, -alpha);
             state.undoMove(move);
             if(value > best) {
-                bestMove = move;
                 best = value;
             }
             if(best > alpha) alpha = best;
@@ -181,26 +156,8 @@ public class NegamaxPlayer extends Player {
                 break;
             }
         }
-        branchesExploredSum += count;
-        putMoveEntry(state.getZobristHash(), bestMove, depth);
+        branchesExploredSum += countBranches;
         return best;
-    }
-
-    /**
-     * Place the best move found from a state into the hash table, replacing
-     * an existing entry if the state was searched to a higher depth
-     * @param key Hash key of the state
-     * @param move Move to save
-     * @param depth Depth of the search
-     */
-    private void putMoveEntry(long key, Move move, int depth) {
-        MoveEntry moveEntry = moveTable.get(key);
-        if(moveEntry == null) {
-            moveTable.put(key, new MoveEntry(move, depth));
-        }
-        else if(depth > moveEntry.depth) {
-            moveTable.put(key, new MoveEntry(move, depth));
-        }
     }
 
     /**
@@ -266,7 +223,6 @@ public class NegamaxPlayer extends Player {
         this.totalNodeCount = 0;
         this.nonLeafCount = 0;
         this.branchesExploredSum = 0;
-        moveTable.clear();
 
         // Create a new internal state object, sync with the game state
         this.state = new State(info.getSize());
@@ -276,7 +232,7 @@ public class NegamaxPlayer extends Player {
         });
 
         // Run a depth increasing search
-        Move best = iterativeDeepening(2, 10);
+        Move best = iterativeDeepening(2, 8);
         printPerformanceInfo();
         return best;
     }
@@ -322,16 +278,6 @@ public class NegamaxPlayer extends Player {
         @Override
         public int compareTo(ScoredMove move) {
             return move.score - this.score;
-        }
-    }
-
-    private class MoveEntry {
-        Move move;
-        int depth;
-
-        public MoveEntry(Move move, int depth) {
-            this.move = move;
-            this.depth = depth;
         }
     }
 }
