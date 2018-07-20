@@ -27,7 +27,7 @@ public class NegamaxPlayer extends Player {
 
     public NegamaxPlayer(GameInfo info) {
         super(info);
-        this.time = (long) 2000 * 1000000;
+        this.time = (2000 - 100) * 1000000;
     }
 
     /**
