@@ -16,14 +16,14 @@ import java.util.List;
  */
 public class ThreatUtils {
 
-    List<ThreatPattern> REFUTATIONS;
-    List<ThreatPattern> THREES;
-    List<ThreatPattern> FOURS;
+    private static final List<ThreatPattern> REFUTATIONS;
+    private static final List<ThreatPattern> THREES;
+    private static final List<ThreatPattern> FOURS;
 
-    public ThreatUtils() {
-        this.THREES = new ArrayList<>();
-        this.FOURS = new ArrayList<>();
-        this.REFUTATIONS = new ArrayList<>();
+    static {
+        THREES = new ArrayList<>();
+        FOURS = new ArrayList<>();
+        REFUTATIONS = new ArrayList<>();
 
         THREES.add(new ThreatPattern(new int[] {0, 1, 1, 1, 0, 0}, new int[]
                 {0, 4, 5}));
@@ -57,7 +57,8 @@ public class ThreatUtils {
      * @return List of moves corresponding to the offensive squares of the
      * threat
      */
-    public List<Move> getThrees(State state, Field field, int playerIndex) {
+    public static List<Move> getThrees(State state, Field field, int
+            playerIndex) {
         return getThreatMoves(THREES, state, field, playerIndex);
     }
 
@@ -68,7 +69,8 @@ public class ThreatUtils {
      * @return List of moves corresponding to the offensive/defensive squares of
      * the threat
      */
-    public List<Move> getFours(State state, Field field, int playerIndex) {
+    public static List<Move> getFours(State state, Field field, int
+            playerIndex) {
         return getThreatMoves(FOURS, state, field, playerIndex);
     }
     /**
@@ -77,7 +79,7 @@ public class ThreatUtils {
      * @return List of moves corresponding to the offensive/defensive squares of
      * the refutation
      */
-    public List<Move> getRefutations(State state, Field field, int
+    public static List<Move> getRefutations(State state, Field field, int
             playerIndex) {
         return getThreatMoves(REFUTATIONS, state, field, playerIndex);
     }
@@ -91,8 +93,11 @@ public class ThreatUtils {
      * @param playerIndex Player index to search for
      * @return
      */
-    private List<Move> getThreatMoves(List<ThreatPattern> patternList, State
-            state, Field field, int playerIndex) {
+    private static List<Move> getThreatMoves(
+            List<ThreatPattern> patternList,
+            State state,
+            Field field,
+            int playerIndex) {
         List<Move> threatMoves = new ArrayList<>();
         // Loop around the field in every direction
         // (diagonal/horizontal/vertical)
@@ -124,7 +129,7 @@ public class ThreatUtils {
      * @param pattern Pattern to match e.g. [2 0 2 2]
      * @return The starting index if found, or -1 if not found
      */
-    private int matchPattern(Field[] direction, int[] pattern) {
+    private static int matchPattern(Field[] direction, int[] pattern) {
         for(int i = 0; i < direction.length; i++) {
             // Check if the pattern lies within the bounds of the direction
             if(i + (pattern.length - 1) < direction.length) {

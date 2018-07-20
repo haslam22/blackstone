@@ -16,9 +16,6 @@ import static gui.views.BoardPane.convertMoveAlgebraic;
  */
 public class NegamaxPlayer extends Player {
 
-    private final ThreatUtils reducer;
-    private final Evaluator evaluator;
-
     private long time;
     private long startTime;
 
@@ -30,8 +27,6 @@ public class NegamaxPlayer extends Player {
 
     public NegamaxPlayer(GameInfo info) {
         super(info);
-        this.reducer = new ThreatUtils();
-        this.evaluator = Evaluator.getInstance();
         this.time = (long) 2000 * 1000000;
     }
 
@@ -63,15 +58,15 @@ public class NegamaxPlayer extends Player {
         for(int i = 0; i < state.board.length; i++) {
             for(int j = 0; j < state.board.length; j++) {
                 if(state.board[i][j].index == opponentIndex) {
-                    opponentFours.addAll(reducer.getFours(state,
+                    opponentFours.addAll(ThreatUtils.getFours(state,
                             state.board[i][j], opponentIndex));
-                    opponentThrees.addAll(reducer.getThrees(state,
+                    opponentThrees.addAll(ThreatUtils.getThrees(state,
                             state.board[i][j], opponentIndex));
                 }
                 else if(state.board[i][j].index == playerIndex) {
-                    fours.addAll(reducer.getFours(state, state.board[i][j],
+                    fours.addAll(ThreatUtils.getFours(state, state.board[i][j],
                             playerIndex));
-                    refutations.addAll(reducer.getRefutations(state, state
+                    refutations.addAll(ThreatUtils.getRefutations(state, state
                             .board[i][j], playerIndex));
                 }
             }
@@ -101,7 +96,7 @@ public class NegamaxPlayer extends Player {
             for(int j = 0; j < state.board.length; j++) {
                 if(state.board[i][j].index == 0) {
                     if(state.hasAdjacent(i, j, 2)) {
-                        int score = evaluator.evaluateField(state, i, j,
+                        int score = Evaluator.evaluateField(state, i, j,
                                 state.currentIndex);
                         scoredMoves.add(new ScoredMove(new Move(i, j), score));
                     }
@@ -133,7 +128,7 @@ public class NegamaxPlayer extends Player {
             throw new InterruptedException();
         }
         if(state.terminal() != 0 || depth == 0) {
-            return evaluator.evaluateState(state, depth);
+            return Evaluator.evaluateState(state, depth);
         }
         nonLeafCount++;
 

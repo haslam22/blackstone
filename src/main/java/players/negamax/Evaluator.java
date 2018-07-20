@@ -36,16 +36,6 @@ public class Evaluator {
     private static final Evaluator INSTANCE = new Evaluator();
     private static final int[] SCORES = {19, 15, 11, 7, 3};
 
-    private Evaluator() {}
-
-    /**
-     * Get the evaluator instance.
-     * @return Evaluator
-     */
-    public static Evaluator getInstance() {
-        return INSTANCE;
-    }
-
     /**
      * Given some array representing a vertical/horizontal/diagonal direction
      * on the board, calculate a score based on how many possible fives can be
@@ -89,7 +79,7 @@ public class Evaluator {
      * @param state State to evaluate
      * @return Score from the current players perspective
      */
-    protected int evaluateState(State state, int depth) {
+    public static int evaluateState(State state, int depth) {
         int playerIndex = state.currentIndex;
         int opponentIndex = playerIndex == 1 ? 2 : 1;
 
@@ -113,7 +103,7 @@ public class Evaluator {
         return score;
     }
 
-    protected int evaluateField(State state, int row, int col, int index) {
+    public static int evaluateField(State state, int row, int col, int index) {
         int score = 0;
         for(int direction = 0; direction < 4; direction++) {
             score += scoreDirection(state.directions[row][col][direction],
