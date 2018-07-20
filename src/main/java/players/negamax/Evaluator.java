@@ -33,7 +33,6 @@ package players.negamax;
  */
 public class Evaluator {
 
-    private static final Evaluator INSTANCE = new Evaluator();
     private static final int[] SCORES = {19, 15, 11, 7, 3};
 
     /**
