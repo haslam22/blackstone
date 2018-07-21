@@ -10,12 +10,12 @@ There are two main components in this project:
 <p align="center"><img width="80%" src="http://i.imgur.com/XRh8hDB.png" /></p>
 
 ## Install
-Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn package` to build the project in one step.
+Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn install` to build the project in one step.
 
 ## Adding your own AI
 Adding your own AI is really simple. Follow these steps:
 
-### Create a new Player class
+### 1. Create a new Player class
 Add a new class which extends [Player](src/main/java/players/Player.java). Look at [RandomPlayer](src/main/java/players/RandomPlayer.java) for a simple implementation which only makes a random move on the board:
 
 ```
@@ -43,7 +43,7 @@ When a move is requested, a state object is given to the player containing a few
 
 ### 2. Register your player 
 
-Now register your player name and class in [PlayerRegistry](src/main/java/players/PlayerRegistry). PlayerRegistry contains two methods, one for retrieving available players, and one for mapping each player to a class:
+Now register your player name and class in [PlayerRegistry](src/main/java/players/PlayerRegistry.java). PlayerRegistry contains two methods, one for retrieving available players, and one for mapping each player to a class:
 
 ```
     public static List<String> getAvailablePlayers() {
