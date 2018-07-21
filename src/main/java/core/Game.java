@@ -13,6 +13,8 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static gui.views.BoardPane.convertMoveAlgebraic;
+
 /**
  * Main game loop responsible for running the game from start to finish.
  */
@@ -24,7 +26,7 @@ public class Game {
     private final GameSettings settings;
     private final ExecutorService executor;
     private final Player[] players;
-    private final long[] times;
+    private final long[] gameTimes;
     private final Timer timer;
     private Future<Move> futureMove;
     private Thread gameThread;
@@ -36,7 +38,7 @@ public class Game {
      */
     protected Game() {
         this.settings = new GameSettings();
-        this.times = new long[2];
+        this.gameTimes = new long[2];
         this.players = new Player[2];
         this.executor = Executors.newSingleThreadExecutor();
         this.listeners = new ArrayList<>();
@@ -62,8 +64,8 @@ public class Game {
             this.state = new GameState(settings.getSize());
             players[0] = settings.getPlayer1();
             players[1] = settings.getPlayer2();
-            times[0] = settings.getGameTimeMillis();
-            times[1] = settings.getGameTimeMillis();
+            gameTimes[0] = settings.getGameTimeMillis();
+            gameTimes[1] = settings.getGameTimeMillis();
             this.gameThread = new Thread(getRunnable());
             this.gameThread.start();
         }
@@ -134,12 +136,13 @@ public class Game {
     private Move requestMove(int playerIndex) throws
             InterruptedException, ExecutionException, TimeoutException {
         Player player = players[playerIndex - 1];
-        long timeout = calculateTimeoutMillis(playerIndex);
         this.futureMove = executor.submit(() -> player.getMove(state));
         if(player instanceof HumanPlayer) {
             listeners.forEach(listener -> listener.userMoveRequested
                     (playerIndex));
         }
+
+        long timeout = calculateTimeoutMillis(playerIndex);
 
         if (timeout > 0) {
             try {
@@ -181,10 +184,10 @@ public class Game {
     private long calculateTimeoutMillis(int player) {
         if(settings.moveTimingEnabled() && settings.gameTimingEnabled()) {
             // Both move timing and game timing are enabled
-            return Math.min(settings.getMoveTimeMillis(), times[player - 1]);
+            return Math.min(settings.getMoveTimeMillis(), gameTimes[player - 1]);
         } else if(settings.gameTimingEnabled()) {
             // Only game timing is enabled
-            return times[player - 1];
+            return gameTimes[player - 1];
         } else if(settings.moveTimingEnabled()) {
             // Only move timing is enabled
             return settings.getMoveTimeMillis();
@@ -217,10 +220,14 @@ public class Game {
                     long elapsedTime = System.currentTimeMillis() - startTime;
                     stopTimeUpdates();
 
-                    times[state.getCurrentIndex() - 1] -= elapsedTime;
+                    LOGGER.log(Level.INFO, getMoveMessage(move, state
+                            .getCurrentIndex(), settings.getSize()));
+
+                    gameTimes[state.getCurrentIndex() - 1] -= elapsedTime;
                     listeners.forEach(listener -> listener.moveAdded(
                             state.getCurrentIndex(), move));
                     state.makeMove(move);
+
 
                 } catch (InterruptedException ex) {
                     stopTimeUpdates();
@@ -231,13 +238,14 @@ public class Game {
                     break;
                 } catch (TimeoutException ex) {
                     stopTimeUpdates();
-                    LOGGER.log(Level.INFO, timeout(state.getCurrentIndex()));
+                    LOGGER.log(Level.INFO,
+                            getTimeoutMessage(state.getCurrentIndex()));
                     break;
                 }
             }
             listeners.forEach(listener -> listener.gameFinished());
             if(state.terminal() != 0) {
-                LOGGER.log(Level.INFO, gameOver(state.terminal()));
+                LOGGER.log(Level.INFO, getGameWinnerMessage(state.terminal()));
             }
         };
     }
@@ -250,7 +258,7 @@ public class Game {
         this.timeUpdateSender = new TimerTask() {
             long startTime = System.currentTimeMillis();
             long moveTime = settings.getMoveTimeMillis();
-            long gameTime = times[playerIndex - 1];
+            long gameTime = gameTimes[playerIndex - 1];
             @Override
             public void run() {
                 long elapsed = System.currentTimeMillis() - startTime;
@@ -278,11 +286,16 @@ public class Game {
         timeUpdateSender.cancel();
     }
 
-    private static String gameOver(int index) {
+    private static String getGameWinnerMessage(int index) {
         return String.format("Game over, winner: Player %d.", index);
     }
 
-    private static String timeout(int index) {
+    private static String getTimeoutMessage(int index) {
         return String.format("Player %d ran out of time.", index);
+    }
+
+    private static String getMoveMessage(Move move, int index, int boardSize) {
+        return String.format("Player %d move: %s", index,
+                convertMoveAlgebraic(move.row, move.col, boardSize));
     }
 }
