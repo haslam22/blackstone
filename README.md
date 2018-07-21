@@ -67,6 +67,4 @@ Now register your player name and class in [PlayerRegistry](src/main/java/player
     }
 ```
 
-Add an entry to `getAvailablePlayer()` and then add another entry to `getPlayer()` mapping the name to the Player class you created.
-
-And that's it. Your player will now be available in the GUI.
+Add an entry to `getAvailablePlayers()` and then add another entry to `getPlayer()` mapping the name to the Player class you created.
