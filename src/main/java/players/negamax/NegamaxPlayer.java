@@ -31,20 +31,12 @@ public class NegamaxPlayer extends Player {
     }
 
     /**
-     * Generate a list of sorted and pruned moves for this state. Moves are
-     * pruned when they are too far away from existing stones, and also when
-     * threats are found which require an immediate response.
-     * @param state State to get moves for
-     * @return A list of moves, sorted and pruned
+     * Determines if we need to respond to any threats on the board, if so,
+     * we use a reduced set of moves in the search.
+     * @param state State to check
+     * @return List of defensive threat moves
      */
-    private List<Move> getSortedMoves(State state) {
-        // Board is empty, return a move in the middle of the board
-        if(state.getMoves() == 0) {
-            List<Move> moves = new ArrayList<>();
-            moves.add(new Move(state.board.length / 2, state.board.length / 2));
-            return moves;
-        }
-
+    private List<Move> getThreatResponses(State state) {
         int playerIndex = state.currentIndex;
         int opponentIndex = state.currentIndex == 2 ? 1 : 2;
 
@@ -86,6 +78,29 @@ public class NegamaxPlayer extends Player {
         if(!opponentThrees.isEmpty()) {
             opponentThrees.addAll(refutations);
             return new ArrayList<>(opponentThrees);
+        }
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * Generate a list of sorted and pruned moves for this state. Moves are
+     * pruned when they are too far away from existing stones, and also when
+     * threats are found which require an immediate response.
+     * @param state State to get moves for
+     * @return A list of moves, sorted and pruned
+     */
+    private List<Move> getSortedMoves(State state) {
+        // Board is empty, return a move in the middle of the board
+        if(state.getMoves() == 0) {
+            List<Move> moves = new ArrayList<>();
+            moves.add(new Move(state.board.length / 2, state.board.length / 2));
+            return moves;
+        }
+
+        List<Move> threatResponses = getThreatResponses(state);
+        if(!threatResponses.isEmpty()) {
+            return threatResponses;
         }
 
         List<ScoredMove> scoredMoves = new ArrayList<>();
