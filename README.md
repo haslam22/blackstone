@@ -10,7 +10,7 @@ There are two main components in this project:
 <p align="center"><img width="80%" src="http://i.imgur.com/XRh8hDB.png" /></p>
 
 ## Install
-Open in any IDE that supports Maven projects (such as IntelliJ) or install [Maven](https://maven.apache.org/download.cgi) yourself and use `mvn install` from the command line in the root of the project to build the project in one step. The build outputs a runnable jar in the target directory, containing the latest code: ([target/gomoku-2.0.jar](target/gomoku-2.0.jar).
+Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) yourself and use `mvn install` from the command line in the root of the project to build the project in one step. The output can be found in the target directory.
 
 ## Adding your own AI
 Adding your own AI is really simple. Follow these steps:
