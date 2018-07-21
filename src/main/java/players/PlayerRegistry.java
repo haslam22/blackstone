@@ -1,0 +1,43 @@
+package players;
+
+import core.GameInfo;
+import players.human.HumanPlayer;
+import players.negamax.NegamaxPlayer;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * A class holding available players. This is used by the GUI to determine which
+ * players are available, and for the game to instantiate player objects.
+ *
+ * To add a new player, simply create a class which extends Player, and place it
+ * in the "players" package. Then add an entry to getAvailablePlayers() and
+ * add an entry to the switch statement in getPlayer(), mapping the player name
+ * to a Player object.
+ */
+public class PlayerRegistry {
+
+    public static List<String> getAvailablePlayers() {
+        return Arrays.asList(
+                "Negamax",
+                "Human",
+                "Random"
+        );
+    }
+
+    public static Player getPlayer(GameInfo gameInfo, String playerClassName) {
+        switch(playerClassName) {
+            case "Negamax":
+                return new NegamaxPlayer(gameInfo);
+            case "Human":
+                return new HumanPlayer(gameInfo);
+            case "Random":
+                return new RandomPlayer(gameInfo);
+            default:
+                throw new RuntimeException("Could not find player: " +
+                        playerClassName);
+        }
+    }
+
+}

@@ -95,7 +95,7 @@ public class Game {
      * The game is restarted immediately after.
      */
     public void undo() {
-        if(state.getMoves().size() > 0) {
+        if(state.getMovesMade().size() > 0) {
             stop();
             for (int i = 0; i < 2; i++) {
                 Move move = state.undo();
@@ -161,7 +161,7 @@ public class Game {
     public boolean setUserMove(Move move) {
         Player currentPlayer = players[state.getCurrentIndex() - 1];
         if(currentPlayer instanceof HumanPlayer) {
-            if(!state.getMoves().contains(move)) {
+            if(!state.getMovesMade().contains(move)) {
                 synchronized(currentPlayer) {
                     ((HumanPlayer) currentPlayer).setMove(move);
                     players[state.getCurrentIndex() - 1].notify();
@@ -199,7 +199,7 @@ public class Game {
      */
     private Runnable getRunnable() {
         return () -> {
-            if(state.getMoves().size() == 0) {
+            if(state.getMovesMade().size() == 0) {
                 listeners.forEach(listener -> listener.gameStarted());
             } else {
                 listeners.forEach(listener -> listener.gameResumed());

@@ -2,6 +2,7 @@ package core;
 
 import events.SettingsListener;
 import players.Player;
+import players.PlayerRegistry;
 import players.negamax.NegamaxPlayer;
 import players.human.HumanPlayer;
 
@@ -13,10 +14,8 @@ import java.util.List;
  */
 public class GameSettings {
 
-    public enum PlayerType { HUMAN, COMPUTER }
-
-    private PlayerType player1;
-    private PlayerType player2;
+    private String player1;
+    private String player2;
     private int size;
     private boolean gameTimingEnabled;
     private boolean moveTimingEnabled;
@@ -28,8 +27,8 @@ public class GameSettings {
      * Create a new GameSettings instance with default values.
      */
     public GameSettings() {
-        this.player1 = PlayerType.HUMAN;
-        this.player2 = PlayerType.COMPUTER;
+        this.player1 = "Human";
+        this.player2 = "Negamax";
         this.gameTimingEnabled = true;
         this.moveTimingEnabled = false;
         this.gameTimeMillis = 1200000;
@@ -47,41 +46,20 @@ public class GameSettings {
     }
 
     /**
-     * Map a PlayerType to a Player instance, given the index of the player
-     * in the game.
-     * @param type PlayerType
-     * @param playerIndex Player identifier
-     * @return Player instance corresponding to the PlayerType
+     * Update player 1
+     * @param playerName Name of the player
      */
-    private Player getPlayer(PlayerType type, int playerIndex) {
-        int opponentIndex = playerIndex == 2 ? 1 : 2;
-        switch(type) {
-            case HUMAN:
-                return new HumanPlayer(new GameInfo(this, playerIndex,
-                        opponentIndex));
-            case COMPUTER:
-                return new NegamaxPlayer(new GameInfo(this, playerIndex,
-                        opponentIndex));
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * Update player 1's type.
-     * @param type PlayerType
-     */
-    public void setPlayer1(PlayerType type) {
-        this.player1 = type;
+    public void setPlayer1(String playerName) {
+        this.player1 = playerName;
         listeners.forEach(listener -> listener.settingsChanged());
     }
 
     /**
-     * Update player 2's type.
-     * @param type PlayerType
+     * Update player 2
+     * @param playerName Name of the player
      */
-    public void setPlayer2(PlayerType type) {
-        this.player2 = type;
+    public void setPlayer2(String playerName) {
+        this.player2 = playerName;
         listeners.forEach(listener -> listener.settingsChanged());
     }
 
@@ -89,14 +67,29 @@ public class GameSettings {
      * Get the player instance for player 1.
      */
     public Player getPlayer1() {
-        return getPlayer(player1, 1);
+        GameInfo gameInfo = new GameInfo(this, 1, 2);
+        return PlayerRegistry.getPlayer(gameInfo, player1);
     }
 
     /**
      * Get the player instance for player 2.
      */
     public Player getPlayer2() {
-        return getPlayer(player2, 2);
+        GameInfo gameInfo = new GameInfo(this, 2, 1);
+        return PlayerRegistry.getPlayer(gameInfo, player2);
+    }
+
+    /**
+     * @return Player name for player 1
+     */
+    public String getPlayer1Name() {
+        return player1;
+    }
+    /**
+     * @return Player name for player 2
+     */
+    public String getPlayer2Name() {
+        return player2;
     }
 
     /**

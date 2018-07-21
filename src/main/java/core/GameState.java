@@ -48,8 +48,23 @@ public class GameState {
      * Get an ordered list of moves that were made on this state.
      * @return ArrayList of moves, ordered from first move to last move made
      */
-    public List<Move> getMoves() {
+    public List<Move> getMovesMade() {
         return new ArrayList(moves);
+    }
+
+    /**
+     * @return List of available moves, i.e. spots not occupied on the board
+     */
+    public List<Move> getAvailableMoves() {
+        List<Move> availableMoves = new ArrayList<>();
+        for(int i = 0; i < size; i++) {
+            for(int j = 0; j < size; j++) {
+                if(board[i][j] == 0) {
+                    availableMoves.add(new Move(i, j));
+                }
+            }
+        }
+        return availableMoves;
     }
 
     /**

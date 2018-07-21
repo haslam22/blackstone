@@ -221,7 +221,7 @@ public class NegamaxPlayer extends Player {
 
         // Create a new internal state object, sync with the game state
         this.state = new State(info.getSize());
-        List<Move> moves = gameState.getMoves();
+        List<Move> moves = gameState.getMovesMade();
         moves.forEach((move) -> {
             state.makeMove(move);
         });

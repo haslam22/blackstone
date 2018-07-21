@@ -28,12 +28,6 @@
                   GridPane.rowIndex="0" GridPane.columnIndex="1"
                   GridPane.hgrow="ALWAYS" fx:id="player1Selector"
                   onAction="#updatePlayer1">
-            <items>
-                <FXCollections fx:factory="observableArrayList">
-                    <String fx:value="Human" />
-                    <String fx:value="Computer" />
-                </FXCollections>
-            </items>
         </ComboBox>
         <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
             <Label text="Time/game: "/>
@@ -65,12 +59,6 @@
                   GridPane.rowIndex="0" GridPane.columnIndex="1"
                   GridPane.hgrow="ALWAYS" fx:id="player2Selector"
                   onAction="#updatePlayer2">
-            <items>
-                <FXCollections fx:factory="observableArrayList">
-                    <String fx:value="Human" />
-                    <String fx:value="Computer" />
-                </FXCollections>
-            </items>
         </ComboBox>
         <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
             <Label text="Time/game: "/>

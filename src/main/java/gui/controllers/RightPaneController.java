@@ -2,21 +2,14 @@ package gui.controllers;
 
 import core.Game;
 import core.GameSettings;
-import core.GameSettings.PlayerType;
-import core.Move;
 import events.GameEventAdapter;
 import events.SettingsListener;
 import gui.Controller;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
+import players.PlayerRegistry;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
@@ -75,6 +68,14 @@ public class RightPaneController implements Controller {
         });
         loadSettings();
         setupLog();
+
+        // Load in available players
+        for(String player : PlayerRegistry.getAvailablePlayers()) {
+            player1Selector.getItems().add(player);
+            player2Selector.getItems().add(player);
+        }
+        player1Selector.setValue(game.getSettings().getPlayer1Name());
+        player2Selector.setValue(game.getSettings().getPlayer2Name());
     }
 
     /**
@@ -202,20 +203,18 @@ public class RightPaneController implements Controller {
     }
 
     /**
-     * Update player 1's type. (Computer/Human)
+     * Update player 1 from the GUI
      */
     public void updatePlayer1() {
-        PlayerType type = PlayerType.valueOf(player1Selector.getValue()
-                .toUpperCase());
-        game.getSettings().setPlayer1(type);
+        String playerName = player1Selector.getValue();
+        game.getSettings().setPlayer1(playerName);
     }
 
     /**
-     * Update player 2's type. (Computer/Human)
+     * Update player 2 from the GUI
      */
     public void updatePlayer2() {
-        PlayerType type = PlayerType.valueOf(player2Selector.getValue()
-                .toUpperCase());
-        game.getSettings().setPlayer2(type);
+        String playerName = player2Selector.getValue();
+        game.getSettings().setPlayer2(playerName);
     }
 }
