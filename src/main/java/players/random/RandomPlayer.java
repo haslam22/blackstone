@@ -1,8 +1,9 @@
-package players;
+package players.random;
 
 import core.GameInfo;
 import core.GameState;
 import core.Move;
+import players.Player;
 
 import java.util.List;
 import java.util.Random;

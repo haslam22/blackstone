@@ -3,6 +3,7 @@ package players;
 import core.GameInfo;
 import players.human.HumanPlayer;
 import players.negamax.NegamaxPlayer;
+import players.random.RandomPlayer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,9 @@ import java.util.List;
  */
 public class PlayerRegistry {
 
+    /**
+     * @return List of available player names
+     */
     public static List<String> getAvailablePlayers() {
         return Arrays.asList(
                 "Negamax",
@@ -26,8 +30,13 @@ public class PlayerRegistry {
         );
     }
 
-    public static Player getPlayer(GameInfo gameInfo, String playerClassName) {
-        switch(playerClassName) {
+    /**
+     * @param gameInfo Game information
+     * @param playerName Player class to get
+     * @return Player instance corresponding to the given player name
+     */
+    public static Player getPlayer(GameInfo gameInfo, String playerName) {
+        switch(playerName) {
             case "Negamax":
                 return new NegamaxPlayer(gameInfo);
             case "Human":
@@ -36,7 +45,7 @@ public class PlayerRegistry {
                 return new RandomPlayer(gameInfo);
             default:
                 throw new RuntimeException("Could not find player: " +
-                        playerClassName);
+                        playerName);
         }
     }
 
