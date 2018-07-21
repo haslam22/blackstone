@@ -16,7 +16,7 @@ Open in any IDE that supports Maven projects or install [Maven](https://maven.ap
 Adding your own AI is really simple. Follow these steps:
 
 ### 1. Create a new Player class
-Add a new class which extends [Player](src/main/java/players/Player.java). Look at [RandomPlayer](src/main/java/players/RandomPlayer.java) for a simple implementation which only makes a random move on the board:
+Add a new class which extends [Player](src/main/java/players/Player.java). Look at [RandomPlayer](src/main/java/players/random/RandomPlayer.java) for a simple implementation which only makes a random move on the board:
 
 ```
     private Random random;
