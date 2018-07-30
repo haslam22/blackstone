@@ -19,4 +19,4 @@ There are two main components in this project:
 Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn install` from the command line in the root of the project to build the project in one step. The output can be found in the target directory.
 
 ## Adding your own AI
-Adding your own AI is really simple. Follow these [steps](https://github.com/haslam22/gomoku/wiki/Adding-your-own-AI).
+Follow these [steps](https://github.com/haslam22/gomoku/wiki/Adding-your-own-AI). External engines using the Piskvork protcol are not currently supported (this is coming soon). 
