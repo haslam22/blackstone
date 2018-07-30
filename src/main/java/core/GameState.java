@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * State for a Gomoku game.
+ * Simple state object for a Gomoku game.
  */
-public class GameState {
+public class GameState implements Cloneable {
 
     private int size;
     private int[][] board;
@@ -18,7 +18,7 @@ public class GameState {
      * Create a new game state.
      * @param size Board size
      */
-    protected GameState(int size) {
+    public GameState(int size) {
         this.size = size;
         this.board = new int[size][size];
         this.moves = new Stack<>();
@@ -29,7 +29,7 @@ public class GameState {
      * @return 0 if not terminal, the player index of the winning player, or
      * 3 if the game ended in a draw.
      */
-    protected int terminal() {
+    public int terminal() {
         if(isWinner(1)) return 1;
         if(isWinner(2)) return 2;
         if(moves.size() == size * size) return 3;
@@ -40,8 +40,15 @@ public class GameState {
      * Get the current player index for this state
      * @return Current player # who has to make a move
      */
-    protected int getCurrentIndex() {
+    public int getCurrentIndex() {
         return this.currentIndex;
+    }
+
+    /**
+     * @return Size of the board for this state
+     */
+    public int getSize() {
+        return size;
     }
 
     /**
@@ -79,7 +86,7 @@ public class GameState {
      * Make a move on this state.
      * @param move Move to make
      */
-    protected void makeMove(Move move) {
+    public void makeMove(Move move) {
         this.moves.push(move);
         this.board[move.row][move.col] = currentIndex;
         this.currentIndex = currentIndex == 1 ? 2 : 1;
@@ -89,7 +96,7 @@ public class GameState {
      * Undo the last move and return it.
      * @return Move that was removed from the state, or null if no moves exist
      */
-    protected Move undo() {
+    public Move undo() {
         if(this.moves.empty()) {
             return null;
         }
@@ -97,6 +104,15 @@ public class GameState {
         this.board[move.row][move.col] = 0;
         this.currentIndex = currentIndex == 1 ? 2: 1;
         return move;
+    }
+
+    @Override
+    public GameState clone() {
+        GameState newState = new GameState(this.size);
+        for(Move move : this.getMovesMade()) {
+            newState.makeMove(move);
+        }
+        return newState;
     }
 
     /**

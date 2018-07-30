@@ -13,8 +13,6 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static gui.views.BoardPane.convertMoveAlgebraic;
-
 /**
  * Main game loop responsible for running the game from start to finish.
  */
@@ -32,6 +30,7 @@ public class Game {
     private Thread gameThread;
     private TimerTask timeUpdateSender;
     private GameState state;
+    private GameState loadedState;
 
     /**
      * Create a new game instance.
@@ -61,7 +60,14 @@ public class Game {
      */
     public void start() {
         if(!this.gameThread.isAlive()) {
-            this.state = new GameState(settings.getSize());
+            listeners.forEach(listener -> listener.gameStarted());
+            if(this.loadedState != null) {
+                this.state = copyState(loadedState);
+                listeners.forEach(listener -> listener.positionLoaded(
+                        loadedState.getMovesMade()));
+            } else {
+                this.state = new GameState(settings.getSize());
+            }
             players[0] = settings.getPlayer1();
             players[1] = settings.getPlayer2();
             gameTimes[0] = settings.getGameTimeMillis();
@@ -69,6 +75,14 @@ public class Game {
             this.gameThread = new Thread(getRunnable());
             this.gameThread.start();
         }
+    }
+
+    private GameState copyState(GameState otherState) {
+        GameState state = new GameState(otherState.getSize());
+        for(Move otherStateMove : otherState.getMovesMade()) {
+            state.makeMove(otherStateMove);
+        }
+        return state;
     }
 
     /**
@@ -107,6 +121,7 @@ public class Game {
             }
             this.gameThread = new Thread(getRunnable());
             this.gameThread.start();
+            listeners.forEach(listener -> listener.gameResumed());
         }
     }
 
@@ -136,7 +151,7 @@ public class Game {
     private Move requestMove(int playerIndex) throws
             InterruptedException, ExecutionException, TimeoutException {
         Player player = players[playerIndex - 1];
-        this.futureMove = executor.submit(() -> player.getMove(state));
+        this.futureMove = executor.submit(() -> player.getMove(state.clone()));
         if(player instanceof HumanPlayer) {
             listeners.forEach(listener -> listener.userMoveRequested
                     (playerIndex));
@@ -176,6 +191,31 @@ public class Game {
     }
 
     /**
+     * Load in a state to use for this game.
+     * @param state GameState object to use
+     */
+    public void setLoadedState(GameState state) {
+        if(this.gameThread.isAlive()) {
+            this.stop();
+        }
+        this.loadedState = state;
+        settings.setSize(loadedState.getSize());
+        listeners.forEach(listener -> listener.positionLoaded(
+                state.getMovesMade()));
+    }
+
+    /**
+     * Clear the loaded state.
+     */
+    public void clearLoadedState() {
+        this.loadedState = null;
+    }
+
+    public GameState getState() {
+        return this.state;
+    }
+
+    /**
      * Calculate the timeout value for a player or return 0 if timing is not
      * enabled for this game.
      * @param player Player index
@@ -202,11 +242,6 @@ public class Game {
      */
     private Runnable getRunnable() {
         return () -> {
-            if(state.getMovesMade().size() == 0) {
-                listeners.forEach(listener -> listener.gameStarted());
-            } else {
-                listeners.forEach(listener -> listener.gameResumed());
-            }
             while(state.terminal() == 0) {
                 try {
                     listeners.forEach(listener -> listener.turnStarted(
@@ -296,6 +331,6 @@ public class Game {
 
     private static String getMoveMessage(Move move, int index, int boardSize) {
         return String.format("Player %d move: %s", index,
-                convertMoveAlgebraic(move.row, move.col, boardSize));
+                move.getAlgebraicString(boardSize));
     }
 }

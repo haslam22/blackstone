@@ -1,3 +1,24 @@
+.root {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-accent: #1a7dc4;
+    -fx-selection-bar: #1a7dc4;
+    -fx-cell-hover-color: #1a7dc4;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected, .combo-box-popup .list-view .list-cell:filled:selected:hover
+{
+    -fx-background: #1a7dc4;
+    -fx-background-color: #1a7dc4;
+    -fx-text-fill: #fff;
+}
+
+.combo-box-popup .list-view .list-cell:filled:hover
+{
+    -fx-background-color: #1a7dc4;
+    -fx-text-fill: #fff;
+}
+
 .outer {
     -fx-font-family: "Arial";
     -fx-font-size: 12;

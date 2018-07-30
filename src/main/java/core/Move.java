@@ -20,6 +20,20 @@ public class Move {
         this.col = col;
     }
 
+    /**
+     * @param boardSize Size of the board (15, 19..)
+     * @return Algebraic representation of this move (e.g. 0,0 -> A15)
+     */
+    public String getAlgebraicString(int boardSize) {
+        int rowAlgebraic = boardSize - row;
+        char colAlgebraic = (char) ('A' + col);
+        return new String(Character.toString(colAlgebraic) + rowAlgebraic);
+    }
+
+    public String toString() {
+        return String.format("[%d, %d]", row, col);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(this.row, this.col);

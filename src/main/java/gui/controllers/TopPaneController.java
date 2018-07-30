@@ -1,20 +1,22 @@
 package gui.controllers;
 
 import core.Game;
+import core.GameStateSerializer;
 import events.GameEventAdapter;
 import gui.Controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -81,5 +83,38 @@ public class TopPaneController implements Controller {
                 .getResource("AppIcon.png").toExternalForm()));
         stage.setResizable(false);
         stage.show();
+    }
+
+    public void savePosition(ActionEvent actionEvent) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Gomoku State File (.txt)",
+                        "*.txt"));
+        Stage stage = (Stage) settingsButton.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            GameStateSerializer.serializeState(game.getState(),
+                    new FileWriter(file));
+        }
+    }
+
+    public void loadPosition(ActionEvent actionEvent) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Gomoku State File (.txt)",
+                        "*.txt"));
+        Stage stage = (Stage) settingsButton.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            game.setLoadedState(GameStateSerializer.loadState(new FileReader(file)));
+        }
+    }
+
+    public void exit(ActionEvent actionEvent) {
+        System.exit(0);
+    }
+
+    public void clearPosition(ActionEvent actionEvent) {
+        game.clearLoadedState();
     }
 }

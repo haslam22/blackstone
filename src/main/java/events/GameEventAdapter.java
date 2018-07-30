@@ -2,6 +2,8 @@ package events;
 
 import core.Move;
 
+import java.util.List;
+
 /**
  * Convenience class to allow components to only implement handler methods
  * for game events they are interested in.
@@ -43,5 +45,10 @@ public class GameEventAdapter implements GameListener {
 
     @Override
     public void gameFinished() {
+    }
+
+    @Override
+    public void positionLoaded(List<Move> orderedMoves) {
+
     }
 }

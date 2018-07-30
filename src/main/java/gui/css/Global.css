@@ -1,3 +1,11 @@
+.root {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-accent: #1a7dc4;
+    -fx-selection-bar: #1a7dc4;
+    -fx-cell-hover-color: #1a7dc4;
+}
+
 .outer {
     -fx-font-family: 'Arial';
     -fx-font-size: 12;
@@ -7,18 +15,23 @@
     -fx-font-size: 14;
 }
 
-.button {
+.button, .menu-button {
     -fx-fill: #fff;
+    -fx-text-fill:#000;
 }
 
-.button:focused {
+.button:focused, .menu-button:focused {
     -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
     -fx-background-insets: 0, 1, 2;
     -fx-background-radius: 2;
 }
 
-.button:disabled {
+.button:disabled, .menu-button:disabled {
     -fx-opacity: 0.9;
+}
+
+.menu-button:disabled > .label {
+    -fx-opacity: 1;
 }
 
 .combo-box {

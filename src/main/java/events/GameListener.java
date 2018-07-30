@@ -2,6 +2,8 @@ package events;
 
 import core.Move;
 
+import java.util.List;
+
 /**
  * Listener interface for receiving interesting game events.
  */
@@ -58,5 +60,12 @@ public interface GameListener {
      * Called when the game requests a move from the user.
      */
     void userMoveRequested(int playerIndex);
+
+    /**
+     * Called when a new position is loaded by the user.
+     * @param orderedMoves A list of moves made, in order, to assemble the new
+     * position.
+     */
+    void positionLoaded(List<Move> orderedMoves);
 
 }

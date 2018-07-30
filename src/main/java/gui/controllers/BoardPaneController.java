@@ -10,6 +10,8 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
+import java.util.List;
+
 public class BoardPaneController implements Controller {
 
     private EventHandler<MouseEvent> mouseListener;
@@ -49,6 +51,10 @@ public class BoardPaneController implements Controller {
             public void userMoveRequested(int playerIndex) {
                 handleUserMoveRequested(playerIndex);
             }
+            @Override
+            public void positionLoaded(List<Move> orderedMoves) {
+                handlePositionLoaded(orderedMoves);
+            }
         });
         game.getSettings().addListener(new SettingsListener() {
             @Override
@@ -56,6 +62,21 @@ public class BoardPaneController implements Controller {
                 handleSettingsChanged();
             }
         });
+    }
+
+    /**
+     * Handle a position being loaded.
+     * @param orderedMoves
+     */
+    private void handlePositionLoaded(List<Move> orderedMoves) {
+        Platform.runLater(() -> boardView.clear());
+        int playerIndex = 1;
+        for(Move move : orderedMoves) {
+            int finalPlayerIndex = playerIndex;
+            Platform.runLater(() -> boardView.addStone(
+                    finalPlayerIndex, move.row, move.col, false));
+            playerIndex = playerIndex == 1 ? 2 : 1;
+        }
     }
 
     /**

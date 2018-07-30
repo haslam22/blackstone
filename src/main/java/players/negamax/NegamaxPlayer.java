@@ -9,8 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import players.Player;
 
-import static gui.views.BoardPane.convertMoveAlgebraic;
-
 /**
  * Negamax player, with alpha-beta pruning and further optimisations
  */
@@ -41,10 +39,12 @@ public class NegamaxPlayer extends Player {
         int opponentIndex = state.currentIndex == 2 ? 1 : 2;
 
         HashSet<Move> fours = new HashSet<>();
+        HashSet<Move> threes = new HashSet<>();
         HashSet<Move> refutations = new HashSet<>();
 
         HashSet<Move> opponentFours = new HashSet<>();
         HashSet<Move> opponentThrees = new HashSet<>();
+        HashSet<Move> opponentRefutations = new HashSet<>();
 
         // Check for threats first and respond to them if they exist
         for(int i = 0; i < state.board.length; i++) {
@@ -54,10 +54,14 @@ public class NegamaxPlayer extends Player {
                             state.board[i][j], opponentIndex));
                     opponentThrees.addAll(ThreatUtils.getThrees(state,
                             state.board[i][j], opponentIndex));
+                    opponentRefutations.addAll(ThreatUtils.getRefutations
+                            (state, state.board[i][j], opponentIndex));
                 }
                 else if(state.board[i][j].index == playerIndex) {
                     fours.addAll(ThreatUtils.getFours(state, state.board[i][j],
                             playerIndex));
+                    threes.addAll(ThreatUtils.getThrees(state, state
+                            .board[i][j], playerIndex));
                     refutations.addAll(ThreatUtils.getRefutations(state, state
                             .board[i][j], playerIndex));
                 }
@@ -72,6 +76,15 @@ public class NegamaxPlayer extends Player {
         // Opponent has a four, defend against it
         if(!opponentFours.isEmpty()) {
             return new ArrayList<>(opponentFours);
+        }
+
+        // We have a three that we can play to win.
+        // Either we play the three and win, or our opponent has a refutation
+        // that leads to their win. So we only consider our three and the
+        // opponents refutations.
+        if(!threes.isEmpty()) {
+            opponentRefutations.addAll(threes);
+            return new ArrayList<>(threes);
         }
 
         // Opponent has a three, defend against it and add refutation moves
@@ -270,8 +283,7 @@ public class NegamaxPlayer extends Player {
      * searched, and the evaluation score.
      */
     private void printSearchInfo(Move bestMove, int score, int depth) {
-        String moveAlgebraic = convertMoveAlgebraic(bestMove.row,
-                bestMove.col, info.getSize());
+        String moveAlgebraic = bestMove.getAlgebraicString(info.getSize());
         Logger.getGlobal().log(Level.INFO,
                 String.format("Depth: %d, Evaluation: %d, "
                 + "Best move: %s", depth, score, moveAlgebraic));

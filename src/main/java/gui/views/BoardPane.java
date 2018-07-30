@@ -323,18 +323,4 @@ public class BoardPane extends Pane {
         }
     }
 
-    /**
-     * Convert a position on the board to its algebraic representation on a
-     * board of a given size
-     * @param row Zero indexed row
-     * @param col Zero indexed column
-     * @param size Board size (intersections)
-     * @return Algebraic string, e.g. 0, 0 -> 15A
-     */
-    public static String convertMoveAlgebraic(int row, int col, int size) {
-        int rowAlgebraic = size - row;
-        char colAlgebraic = (char) ('A' + col);
-        return new String(Character.toString(colAlgebraic) + rowAlgebraic);
-    }
-
 }

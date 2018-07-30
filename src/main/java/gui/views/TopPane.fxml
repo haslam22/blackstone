@@ -5,10 +5,33 @@
 
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
-<HBox xmlns="http://javafx.com/javafx"
+<VBox styleClass="root" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="gui.controllers.TopPaneController"
-      prefHeight="15.0" alignment="CENTER_LEFT" spacing="5" styleClass="root">
+      fx:controller="gui.controllers.TopPaneController">
+    <MenuBar>
+        <Menu text="File">
+            <items>
+                <MenuItem text="Open position..." onAction="#loadPosition">
+                    <graphic>
+                        <Label text="%open" styleClass="icon"/>
+                    </graphic>
+                </MenuItem>
+                <MenuItem text="Save position..." onAction="#savePosition">
+                    <graphic>
+                        <Label text="%save" styleClass="icon"/>
+                    </graphic>
+                </MenuItem>
+                <MenuItem text="Clear position" onAction="#clearPosition">
+                    <graphic>
+                        <Label text="%clear" styleClass="icon"/>
+                    </graphic>
+                </MenuItem>
+                <SeparatorMenuItem  />
+                <MenuItem text="Exit" onAction="#exit" />
+            </items>
+        </Menu>
+    </MenuBar>
+<HBox prefHeight="15.0" alignment="CENTER_LEFT" spacing="5">
     <padding>
         <Insets>
             <left>5</left>
@@ -41,9 +64,10 @@
             <Label text="%gears" styleClass="icon"/>
         </graphic>
     </Button>
+</HBox>
 
     <stylesheets>
         <URL value="@../css/Global.css" />
         <URL value="@../css/TopPane.css" />
     </stylesheets>
-</HBox>
+</VBox>

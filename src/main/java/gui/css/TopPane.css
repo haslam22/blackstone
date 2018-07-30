@@ -11,3 +11,19 @@
     -fx-effect: innershadow( gaussian, rgba( 0, 0, 0, 0.2 ), 2, 0, 0, 0 );
     -fx-text-fill: #555;
 }
+
+.context-menu {
+    -fx-padding: 0em 0em 0em 0em;
+}
+
+.menu-bar {
+    -fx-padding: 0 0 0 0;
+    -fx-background-color: #ebebeb;
+    -fx-border-color: #ccc;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill:#000;
+}
+
+.menu-bar .menu {
+    -fx-text-fill:#000;
+}

@@ -9,7 +9,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class ThreatReducerTest {
+public class ThreatUtilsTest {
 
     @Test
     public void testStraightThreePatterns() {
