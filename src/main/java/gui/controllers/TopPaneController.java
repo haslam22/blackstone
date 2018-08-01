@@ -2,7 +2,6 @@ package gui.controllers;
 
 import core.Game;
 import core.GameState;
-import core.GameStateSerializer;
 import events.GameEventAdapter;
 import gui.Controller;
 import javafx.event.ActionEvent;
