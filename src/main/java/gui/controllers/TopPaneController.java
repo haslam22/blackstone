@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -27,6 +28,8 @@ public class TopPaneController implements Controller {
     public Button stopButton;
     @FXML
     public Button settingsButton;
+    @FXML
+    public MenuItem clearPositionMenuItem;
 
     private Game game;
 
@@ -106,6 +109,7 @@ public class TopPaneController implements Controller {
             ObjectInputStream in =
                     new ObjectInputStream(new FileInputStream(file));
             game.setLoadedState((GameState) in.readObject());
+            clearPositionMenuItem.setDisable(false);
         }
     }
 
@@ -115,5 +119,6 @@ public class TopPaneController implements Controller {
 
     public void clearPosition(ActionEvent actionEvent) {
         game.clearLoadedState();
+        clearPositionMenuItem.setDisable(true);
     }
 }

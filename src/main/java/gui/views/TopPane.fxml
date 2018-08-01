@@ -21,7 +21,8 @@
                         <Label text="%save" styleClass="icon"/>
                     </graphic>
                 </MenuItem>
-                <MenuItem text="Clear position" onAction="#clearPosition">
+                <MenuItem text="Clear position" onAction="#clearPosition"
+                          disable="true" fx:id="clearPositionMenuItem">
                     <graphic>
                         <Label text="%clear" styleClass="icon"/>
                     </graphic>
