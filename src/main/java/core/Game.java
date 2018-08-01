@@ -62,7 +62,7 @@ public class Game {
         if(!this.gameThread.isAlive()) {
             listeners.forEach(listener -> listener.gameStarted());
             if(this.loadedState != null) {
-                this.state = copyState(loadedState);
+                this.state = loadedState.clone();
                 listeners.forEach(listener -> listener.positionLoaded(
                         loadedState.getMovesMade()));
             } else {
@@ -75,14 +75,6 @@ public class Game {
             this.gameThread = new Thread(getRunnable());
             this.gameThread.start();
         }
-    }
-
-    private GameState copyState(GameState otherState) {
-        GameState state = new GameState(otherState.getSize());
-        for(Move otherStateMove : otherState.getMovesMade()) {
-            state.makeMove(otherStateMove);
-        }
-        return state;
     }
 
     /**
@@ -212,7 +204,7 @@ public class Game {
     }
 
     public GameState getState() {
-        return this.state;
+        return this.state.clone();
     }
 
     /**
