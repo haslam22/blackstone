@@ -7,3 +7,4 @@ deploy:
   file: target/gomoku-2.0.jar
   on:
     repo: haslam22/gomoku
+    tags: true
