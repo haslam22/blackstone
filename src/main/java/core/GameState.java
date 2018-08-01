@@ -1,5 +1,6 @@
 package core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -7,7 +8,7 @@ import java.util.Stack;
 /**
  * Simple state object for a Gomoku game.
  */
-public class GameState implements Cloneable {
+public class GameState implements Cloneable, Serializable {
 
     private int size;
     private int[][] board;

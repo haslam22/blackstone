@@ -1,11 +1,12 @@
 package core;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Represents a move or position on the Gomoku board.
  */
-public class Move {
+public class Move implements Serializable {
 
     public final int row;
     public final int col;

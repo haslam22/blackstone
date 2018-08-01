@@ -203,6 +203,9 @@ public class Game {
         this.loadedState = null;
     }
 
+    /**
+     * @return Current game state
+     */
     public GameState getState() {
         return this.state.clone();
     }

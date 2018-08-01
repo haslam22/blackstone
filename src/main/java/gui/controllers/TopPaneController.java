@@ -1,6 +1,7 @@
 package gui.controllers;
 
 import core.Game;
+import core.GameState;
 import core.GameStateSerializer;
 import events.GameEventAdapter;
 import gui.Controller;
@@ -14,10 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Controller for the top pane of the GUI.
@@ -88,25 +86,27 @@ public class TopPaneController implements Controller {
     public void savePosition(ActionEvent actionEvent) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Gomoku State File (.txt)",
-                        "*.txt"));
+                new FileChooser.ExtensionFilter("Gomoku State File", "*.gomoku"));
         Stage stage = (Stage) settingsButton.getScene().getWindow();
         File file = fileChooser.showSaveDialog(stage);
-        if (file != null) {
-            GameStateSerializer.serializeState(game.getState(),
-                    new FileWriter(file));
+        if(file != null) {
+            ObjectOutputStream out =
+                    new ObjectOutputStream(new FileOutputStream(file));
+            out.writeObject(game.getState());
         }
     }
 
-    public void loadPosition(ActionEvent actionEvent) throws IOException {
+    public void loadPosition(ActionEvent actionEvent) throws IOException,
+            ClassNotFoundException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Gomoku State File (.txt)",
-                        "*.txt"));
+                new FileChooser.ExtensionFilter("Gomoku State File", "*.gomoku"));
         Stage stage = (Stage) settingsButton.getScene().getWindow();
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            game.setLoadedState(GameStateSerializer.loadState(new FileReader(file)));
+            ObjectInputStream in =
+                    new ObjectInputStream(new FileInputStream(file));
+            game.setLoadedState((GameState) in.readObject());
         }
     }
 
