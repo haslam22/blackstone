@@ -1,2 +1,9 @@
 language: java
 jdk: oraclejdk8
+deploy:
+  provider: releases
+  api_key:
+    secure: B7CFN7caTkSYX+7dQU52t8PYr4Rf7gZrvt3aePGisMgG7hkGThFtLTUDMcM1QxJAn0dDI/tJLbJaanFcfAzSOESV8ng17Wg1oyQ2jNFfjL5E9BcjU7xsv9F7oweB0sZpxy8p1/1/0e496rErZ7EQQanWl5cgkmiblH4/3dpJJbzjojPqGLw3yboCuzVkJJpWufLAJCXQtGIZAEE3bGpZlq9xm3AVE4vLg5uRIGvHvJuq19z2CUJ/wePbYE5o1fSuSkI6RZHgdOJDE6y6k2z/wZdwPX97zdVL9Qd/ejdhaE7YaN4H/mos69V/XKGsOvNeFfv+5ynzRILfD5Xel0DRRfkW5w/cNPcYMoWqzlKhXJxgytV5/6qexMpurY8jB5MYc4k9JzXzZWyYrl9YGJXiXi/IoJjAm3m5XrP3iszW+dBNNIyj6+JsWebnW9aboFOILntCAwYHzsozW6wrk1YTGTXyZq6/QR6nFtfv+ZX8Bia10Wpoi2UWPXcNxYjjloaiSeES71SK9kHHLxyp9E7vCZ8sT54K/l1ZSLdYJPm3YF0qbEkFXhtDj2scDzHBzkMwn9XZISlS3YsGYU+btUazxaPP6W2wV0f63f3LH9QX9C1N+SdwJSC36NBZMjBn83ZAXqeSg/q/IAHkaVUcwG+Fps314zUUicDKZUTd8KtIiHA=
+  file: target/gomoku-2.0.jar
+  on:
+    repo: haslam22/gomoku
