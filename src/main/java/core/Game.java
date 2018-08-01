@@ -201,6 +201,8 @@ public class Game {
      */
     public void clearLoadedState() {
         this.loadedState = null;
+        listeners.forEach(listener -> listener.positionLoaded(
+                state.getMovesMade()));
     }
 
     /**
