@@ -1,6 +1,6 @@
 package gui.controllers;
 
-import core.Game;
+import core.GameController;
 import core.Move;
 import events.GameEventAdapter;
 import events.SettingsListener;
@@ -16,7 +16,7 @@ public class BoardPaneController implements Controller {
 
     private EventHandler<MouseEvent> mouseListener;
     private final BoardPane boardView;
-    private Game game;
+    private GameController game;
 
     /**
      * Create a new BoardPaneController.
@@ -27,7 +27,7 @@ public class BoardPaneController implements Controller {
     }
 
     @Override
-    public void initialise(Game game) {
+    public void initialise(GameController game) {
         this.game = game;
         game.addListener(new GameEventAdapter() {
             EventHandler<MouseEvent> mouseListener;
@@ -55,6 +55,10 @@ public class BoardPaneController implements Controller {
             public void positionLoaded(List<Move> orderedMoves) {
                 handlePositionLoaded(orderedMoves);
             }
+            @Override
+            public void positionCleared() {
+                handlePositionCleared();
+            }
         });
         game.getSettings().addListener(new SettingsListener() {
             @Override
@@ -77,6 +81,13 @@ public class BoardPaneController implements Controller {
                     finalPlayerIndex, move.row, move.col, false));
             playerIndex = playerIndex == 1 ? 2 : 1;
         }
+    }
+
+    /**
+     * Handle a position being cleared.
+     */
+    private void handlePositionCleared() {
+        Platform.runLater(() -> boardView.clear());
     }
 
     /**

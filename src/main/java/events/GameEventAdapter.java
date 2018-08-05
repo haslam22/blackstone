@@ -20,14 +20,6 @@ public class GameEventAdapter implements GameListener {
     }
 
     @Override
-    public void gameTimeChanged(int playerIndex, long timeMillis) {
-    }
-
-    @Override
-    public void moveTimeChanged(int playerIndex, long timeMillis) {
-    }
-
-    @Override
     public void turnStarted(int playerIndex) {
     }
 
@@ -49,6 +41,9 @@ public class GameEventAdapter implements GameListener {
 
     @Override
     public void positionLoaded(List<Move> orderedMoves) {
+    }
 
+    @Override
+    public void positionCleared() {
     }
 }

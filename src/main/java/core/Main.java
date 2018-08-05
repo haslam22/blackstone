@@ -6,7 +6,6 @@ import gui.views.BoardPane;
 
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -17,7 +16,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -34,7 +32,7 @@ public class Main extends Application {
         Font.loadFont(getClass().getClassLoader().getResource
                 ("FontAwesome.otf").toExternalForm(), 10);
 
-        Game game = new Game(new GameSettings(
+        GameController game = new GameController(new GameSettings(
                 Defaults.PLAYER_1,
                 Defaults.PLAYER_2,
                 Defaults.GAME_TIMING_ENABLED,
@@ -97,7 +95,7 @@ public class Main extends Application {
      * @return Right pane
      * @throws IOException
      */
-    private Pane loadRightPane(Game game) throws IOException {
+    private Pane loadRightPane(GameController game) throws IOException {
         FXMLLoader loader = new FXMLLoader();
         loader.setResources(ResourceBundle.getBundle("FontAwesome"));
         loader.setLocation(getClass().getClassLoader().getResource
@@ -114,7 +112,7 @@ public class Main extends Application {
      * @return Top pane
      * @throws IOException
      */
-    private Pane loadTopPane(Game game) throws IOException {
+    private Pane loadTopPane(GameController game) throws IOException {
         FXMLLoader loader = new FXMLLoader();
         loader.setResources(ResourceBundle.getBundle("FontAwesome"));
         loader.setLocation(getClass().getClassLoader().getResource
@@ -130,7 +128,7 @@ public class Main extends Application {
      * @param game Game instance
      * @return Board pane
      */
-    private Pane loadBoardPane(Game game) {
+    private Pane loadBoardPane(GameController game) {
         BoardPane boardPane = new BoardPane(15);
         Controller controller = new BoardPaneController(boardPane);
         controller.initialise(game);

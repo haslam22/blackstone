@@ -22,20 +22,6 @@ public interface GameListener {
     void moveRemoved(Move move);
 
     /**
-     * Called when the game time changes for a player.
-     * @param playerIndex Player identifier
-     * @param timeMillis New game time in milliseconds
-     */
-    void gameTimeChanged(int playerIndex, long timeMillis);
-
-    /**
-     * Called when the game time changes for a player.
-     * @param playerIndex Player identifier
-     * @param timeMillis New move time in milliseconds
-     */
-    void moveTimeChanged(int playerIndex, long timeMillis);
-
-    /**
      * Called when a players turn has started.
      * @param playerIndex Player identifier
      */
@@ -67,5 +53,10 @@ public interface GameListener {
      * position.
      */
     void positionLoaded(List<Move> orderedMoves);
+
+    /**
+     * Called when a position is cleared by the user.
+     */
+    void positionCleared();
 
 }

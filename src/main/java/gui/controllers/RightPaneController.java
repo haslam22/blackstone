@@ -1,6 +1,6 @@
 package gui.controllers;
 
-import core.Game;
+import core.GameController;
 import core.GameSettings;
 import events.GameEventAdapter;
 import events.SettingsListener;
@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import players.PlayerRegistry;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
@@ -33,11 +35,15 @@ public class RightPaneController implements Controller {
     @FXML
     public Label player2MoveTimeLabel;
 
-    private Game game;
+    private GameController game;
+    private Timer timer;
+    private TimerTask playerTimeUpdater;
 
     @Override
-    public void initialise(Game game) {
+    public void initialise(GameController game) {
         this.game = game;
+        this.timer = new Timer();
+        this.playerTimeUpdater = null;
         game.addListener(new GameEventAdapter() {
             @Override
             public void gameStarted() {
@@ -48,16 +54,12 @@ public class RightPaneController implements Controller {
                 handleGameResumed();
             }
             @Override
-            public void gameTimeChanged(int playerIndex, long timeMillis) {
-                handleGameTimeChanged(playerIndex, timeMillis);
-            }
-            @Override
-            public void moveTimeChanged(int playerIndex, long timeMillis) {
-                handleMoveTimeChanged(playerIndex, timeMillis);
-            }
-            @Override
             public void gameFinished() {
                 handleGameFinished();
+            }
+            @Override
+            public void turnStarted(int playerIndex) {
+                handleTurnStarted(playerIndex);
             }
         });
         game.getSettings().addListener(new SettingsListener() {
@@ -76,6 +78,15 @@ public class RightPaneController implements Controller {
         }
         player1Selector.setValue(game.getSettings().getPlayer1Name());
         player2Selector.setValue(game.getSettings().getPlayer2Name());
+    }
+
+    private void handleTurnStarted(int playerIndex) {
+        if(playerTimeUpdater != null) {
+            this.playerTimeUpdater.cancel();
+        }
+        this.playerTimeUpdater = new PlayerTimeUpdater(playerIndex,
+                game);
+        this.timer.scheduleAtFixedRate(playerTimeUpdater, 0, 100);
     }
 
     /**
@@ -101,6 +112,9 @@ public class RightPaneController implements Controller {
      * Handle a gameFinished() event from the game.
      */
     private void handleGameFinished() {
+        if(playerTimeUpdater != null) {
+            this.playerTimeUpdater.cancel();
+        }
         Platform.runLater(() -> {
             player1Selector.setDisable(false);
             player2Selector.setDisable(false);
@@ -131,6 +145,7 @@ public class RightPaneController implements Controller {
      * @param timeMillis New time
      */
     private void handleGameTimeChanged(int playerIndex, long timeMillis) {
+        long moveTime = game.getSettings().getMoveTimeMillis() - timeMillis;
         Platform.runLater(() -> {
             switch(playerIndex) {
                 case 1:
@@ -217,4 +232,38 @@ public class RightPaneController implements Controller {
         String playerName = player2Selector.getValue();
         game.getSettings().setPlayer2(playerName);
     }
+
+    private class PlayerTimeUpdater extends TimerTask {
+        private final GameSettings settings;
+        private final int playerIndex;
+        private final GameController controller;
+        private long gameTime;
+        private long moveTime;
+        private long startTime;
+        private long elapsedTime;
+
+        public PlayerTimeUpdater(int playerIndex, GameController controller) {
+            this.startTime = System.currentTimeMillis();
+            this.settings = game.getSettings();
+            this.playerIndex = playerIndex;
+            this.controller = controller;
+            this.gameTime = controller.getGameTime(playerIndex);
+            this.moveTime = controller.getSettings().getMoveTimeMillis();
+        }
+
+        @Override
+        public void run() {
+            elapsedTime = System.currentTimeMillis() - startTime;
+            gameTime -= elapsedTime;
+            moveTime -= elapsedTime;
+            if(settings.moveTimingEnabled()) {
+                handleMoveTimeChanged(playerIndex, moveTime);
+            }
+            if(settings.gameTimingEnabled()) {
+                handleGameTimeChanged(playerIndex, gameTime);
+            }
+            startTime = System.currentTimeMillis();
+        }
+    }
+
 }

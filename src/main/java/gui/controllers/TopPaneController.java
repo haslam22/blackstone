@@ -1,6 +1,6 @@
 package gui.controllers;
 
-import core.Game;
+import core.GameController;
 import core.GameState;
 import events.GameEventAdapter;
 import gui.Controller;
@@ -31,10 +31,10 @@ public class TopPaneController implements Controller {
     @FXML
     public MenuItem clearPositionMenuItem;
 
-    private Game game;
+    private GameController game;
 
     @Override
-    public void initialise(Game game) {
+    public void initialise(GameController game) {
         this.game = game;
         this.game.addListener(new GameEventAdapter() {
             @Override
@@ -118,7 +118,7 @@ public class TopPaneController implements Controller {
     }
 
     public void clearPosition(ActionEvent actionEvent) {
-        game.clearLoadedState();
+        game.setLoadedState(null);
         clearPositionMenuItem.setDisable(true);
     }
 }

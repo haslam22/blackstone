@@ -1,6 +1,6 @@
 package gui.controllers;
 
-import core.Game;
+import core.GameController;
 import core.GameSettings;
 import gui.Controller;
 import javafx.fxml.FXML;
@@ -26,10 +26,10 @@ public class SettingsPaneController implements Controller {
     @FXML
     public CheckBox gameTimingCheckBox;
 
-    private Game game;
+    private GameController game;
 
     @Override
-    public void initialise(Game game) {
+    public void initialise(GameController game) {
         this.game = game;
         this.loadSettings();
     }
