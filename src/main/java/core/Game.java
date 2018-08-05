@@ -35,21 +35,21 @@ public class Game {
     /**
      * Create a new game instance.
      */
-    protected Game() {
-        this.settings = new GameSettings();
+    public Game(GameSettings settings) {
+        this.settings = settings;
+        this.state = new GameState(settings.getSize());
         this.gameTimes = new long[2];
         this.players = new Player[2];
         this.executor = Executors.newSingleThreadExecutor();
         this.listeners = new ArrayList<>();
         this.gameThread = new Thread(getRunnable());
         this.timer = new Timer();
-        this.state = new GameState(settings.getSize());
         this.settings.addListener(new SettingsListener() {
             @Override
             public void settingsChanged() {
                 // State is no longer valid if settings change
                 // TODO: Only invalidate state if size changes
-                state = new GameState(settings.getSize());
+                Game.this.state = new GameState(settings.getSize());
             }
         });
     }

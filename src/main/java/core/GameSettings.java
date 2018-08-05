@@ -24,16 +24,26 @@ public class GameSettings {
     private List<SettingsListener> listeners;
 
     /**
-     * Create a new GameSettings instance with default values.
+     * Create a new GameSettings instance.
+     * @param player1 Player 1 name
+     * @param player2 Player 2 name
+     * @param gameTimingEnabled Whether or not game timing is enabled
+     * @param moveTimingEnabled Whether or not move timing is enabled
+     * @param gameTimeMillis Maximum game time in milliseconds
+     * @param moveTimeMillis Maximum move time in milliseconds
+     * @param size Size of the board
+     * @see players.PlayerRegistry
      */
-    public GameSettings() {
-        this.player1 = "Human";
-        this.player2 = "Negamax";
-        this.gameTimingEnabled = true;
-        this.moveTimingEnabled = false;
-        this.gameTimeMillis = 1200000;
-        this.moveTimeMillis = 5000;
-        this.size = 15;
+    public GameSettings(String player1, String player2,
+                        boolean gameTimingEnabled, boolean moveTimingEnabled,
+                        long gameTimeMillis, long moveTimeMillis, int size) {
+        this.player1 = player1;
+        this.player2 = player2;
+        this.gameTimingEnabled = gameTimingEnabled;
+        this.moveTimingEnabled = moveTimingEnabled;
+        this.gameTimeMillis = gameTimeMillis;
+        this.moveTimeMillis = moveTimeMillis;
+        this.size = size;
         this.listeners = new ArrayList<>();
     }
 

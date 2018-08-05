@@ -34,7 +34,14 @@ public class Main extends Application {
         Font.loadFont(getClass().getClassLoader().getResource
                 ("FontAwesome.otf").toExternalForm(), 10);
 
-        Game game = new Game();
+        Game game = new Game(new GameSettings(
+                Defaults.PLAYER_1,
+                Defaults.PLAYER_2,
+                Defaults.GAME_TIMING_ENABLED,
+                Defaults.MOVE_TIMING_ENABLED,
+                Defaults.GAME_TIMEOUT_MILLIS,
+                Defaults.MOVE_TIMEOUT_MILLIS,
+                Defaults.SIZE));
 
         Pane boardPane = loadBoardPane(game);
         Pane topPane = loadTopPane(game);
