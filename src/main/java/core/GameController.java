@@ -145,10 +145,18 @@ public class GameController {
         }
     }
 
+    /**
+     * @return Copy of the current game state.
+     */
     public GameState getState() {
         return this.currentState.clone();
     }
 
+    /**
+     * Get the game time remaining for a player.
+     * @param playerIndex Player identifier (1/2)
+     * @return Game time left, in milliseconds
+     */
     public long getGameTime(int playerIndex) {
         return this.gameThread.getGameTime(playerIndex);
     }
