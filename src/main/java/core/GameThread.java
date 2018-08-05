@@ -4,8 +4,11 @@ import events.GameListener;
 import players.Player;
 import players.human.HumanPlayer;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Responsible for running a Gomoku game from start to finish, given a
@@ -15,6 +18,8 @@ import java.util.concurrent.*;
  * @see events.GameListener
  */
 public class GameThread extends Thread {
+
+    private static final Logger LOGGER = Logger.getGlobal();
 
     private final GameSettings settings;
     private final GameState state;
@@ -85,6 +90,11 @@ public class GameThread extends Thread {
                 Move move = requestMove(state.getCurrentIndex());
                 long elapsedTime = System.currentTimeMillis() - startTime;
 
+                LOGGER.log(Level.INFO,
+                        MessageFormat.format(Strings.MOVE_MESSAGE,
+                                state.getCurrentIndex(),
+                                move.getAlgebraicString(state.getSize())));
+
                 times[state.getCurrentIndex() - 1] -= elapsedTime;
                 listeners.forEach(listener -> listener.moveAdded(
                         state.getCurrentIndex(), move));
@@ -105,10 +115,16 @@ public class GameThread extends Thread {
                 if(!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
+                LOGGER.log(Level.INFO, MessageFormat.format(
+                        Strings.TIMEOUT_MESSAGE, state.getCurrentIndex()));
                 break;
             }
         }
         listeners.forEach(listener -> listener.gameFinished());
+        if(state.terminal() != 0) {
+            LOGGER.log(Level.INFO, MessageFormat.format(Strings.WINNER_MESSAGE,
+                            state.terminal()));
+        }
     }
 
     /**
