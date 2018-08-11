@@ -11,12 +11,12 @@ There are two main components in this project:
 
 ## Features
 - Freestyle Gomoku games against the built-in Negamax AI
-- Fully resizable and flexible Gomoku board, supporting high DPI displays, easy stone placement, etc
-- Game settings: time per move, time per game and board size
+- Beautiful, fully resizable and flexible Gomoku board, supporting high DPI displays, easy stone placement, etc
+- Configurable game settings including time per move, time per game and board size
 - Easy saving and loading of positions with move order maintained
 
 ## Install
-Open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) and use `mvn install` from the command line in the root of the project to build the project in one step. The output can be found in the target directory.
+Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn install` from the command line in the root directory to build the project in one step.
 
 ## Adding your own AI
 Follow these [steps](https://github.com/haslam22/gomoku/wiki/Adding-your-own-AI). External engines using the Piskvork protcol are not currently supported (this is coming soon). 
