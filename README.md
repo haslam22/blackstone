@@ -2,6 +2,11 @@
 
 A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) client featuring a powerful AI written in `Java`. Download the latest release [**here**](https://github.com/haslam22/gomoku/releases) (runnable jar).
 
+There are two main components in this project:
+
+* A strong AI player based on Minimax with α-β pruning, alongside many performance optimisations ([players/negamax](src/main/java/players/negamax))
+* An easy to use minimal GUI created using JavaFX (see below for features) ([gui](src/main/java/gui))
+
 <p align="center"><img width="80%" src="http://i.imgur.com/XRh8hDB.png" /></p>
 
 ## Features
