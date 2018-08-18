@@ -45,7 +45,8 @@ public class GameController {
                 listeners.forEach(listener -> listener.positionLoaded(
                         loadedState.getMovesMade()));
             }
-            this.gameThread = new GameThread(currentState, settings, listeners);
+            this.gameThread = new GameThread(currentState, settings,
+                    settings.getPlayer1(), settings.getPlayer2(), listeners);
             this.gameThread.start();
         }
     }
@@ -56,7 +57,7 @@ public class GameController {
      * effect if the game thread is not running.
      */
     public void stop() {
-        if(this.gameThread.isAlive()) {
+        if(this.gameThread != null && this.gameThread.isAlive()) {
             this.gameThread.interrupt();
             try {
                 this.gameThread.join();
@@ -84,6 +85,7 @@ public class GameController {
             // Create a new game thread, but pass in the times from the previous
             // instance to stop resetting of times.
             this.gameThread = new GameThread(currentState, settings,
+                    settings.getPlayer1(), settings.getPlayer2(),
                     listeners, new long[] {
                             gameThread.getGameTime(1),
                             gameThread.getGameTime(2)

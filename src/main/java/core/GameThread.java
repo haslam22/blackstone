@@ -35,15 +35,13 @@ public class GameThread extends Thread {
      * @param listeners Listeners to receive game events
      * @param times Game timeouts for each player
      */
-    public GameThread(GameState state, GameSettings settings,
-                      List<GameListener> listeners, long[] times) {
+    public GameThread(GameState state, GameSettings settings, Player player1,
+                      Player player2, List<GameListener> listeners,
+                      long[] times) {
         this.state = state;
         this.settings = settings;
         this.listeners = listeners;
-        this.players = new Player[]{
-                settings.getPlayer1(),
-                settings.getPlayer2()
-        };
+        this.players = new Player[]{ player1, player2 };
         this.times = times;
     }
 
@@ -54,9 +52,9 @@ public class GameThread extends Thread {
      * @param settings Game settings
      * @param listeners Listeners to receive game events
      */
-    public GameThread(GameState state, GameSettings settings,
-                      List<GameListener> listeners) {
-        this(state, settings, listeners, new long[] {
+    public GameThread(GameState state, GameSettings settings, Player player1,
+                      Player player2, List<GameListener> listeners) {
+        this(state, settings, player1, player2, listeners, new long[] {
                 settings.getGameTimeMillis(),
                 settings.getGameTimeMillis()
         });

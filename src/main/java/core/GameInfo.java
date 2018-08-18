@@ -16,7 +16,7 @@ public class GameInfo {
      * @param playerIndex Index of this player (1/2)
      * @param opponentIndex Index of the opponent (1/2)
      */
-    protected GameInfo(GameSettings settings, int playerIndex, int
+    public GameInfo(GameSettings settings, int playerIndex, int
             opponentIndex) {
         this.settings = settings;
         this.playerIndex = playerIndex;

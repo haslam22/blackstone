@@ -13,12 +13,23 @@ public class Move implements Serializable {
 
     /**
      * Create a new move.
-     * @param row Row identifer
+     * @param row Row identifier
      * @param col Column identifier
      */
     public Move(int row, int col) {
         this.row = row;
         this.col = col;
+    }
+
+    /**
+     * Create a new move from an algebraic move representation e.g. E3
+     * @param columnLetter Column letter
+     * @param rowNumber Row number
+     * @param boardSize Size of the board
+     */
+    public Move(char columnLetter, int rowNumber, int boardSize) {
+        this.row = boardSize - rowNumber;
+        this.col = (char) (columnLetter - 'A');
     }
 
     /**
