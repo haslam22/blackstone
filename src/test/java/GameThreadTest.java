@@ -9,8 +9,8 @@ import static org.junit.Assert.assertEquals;
 public class GameThreadTest {
 
     /**
-     * Run a basic test of the game thread. Creates two players, Black
-     * both creating a 5 in a straight line. Black should win (as it goes
+     * Run a basic test of the game thread. Creates two players, both
+     * creating a 5 in a straight line. Black should win (as it goes
      * first).
      */
     @Test
