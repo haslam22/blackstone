@@ -108,6 +108,8 @@ public class GameThread extends Thread {
                 if(!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
+                LOGGER.log(Level.SEVERE, MessageFormat.format(Strings.FAILED_MOVE,
+                                state.getCurrentIndex()), ex);
                 break;
             } catch (TimeoutException ex) {
                 if(!pendingMove.isDone()) {
