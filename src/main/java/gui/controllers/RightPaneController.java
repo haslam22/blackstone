@@ -104,8 +104,8 @@ public class RightPaneController implements Controller {
             }
         };
         TextBoxHandler.setFormatter(new SimpleFormatter());
-        Logger.getGlobal().addHandler(TextBoxHandler);
-        Logger.getGlobal().setLevel(Level.INFO);
+        Logger.getLogger("").addHandler(TextBoxHandler);
+        Logger.getLogger("").setLevel(Level.INFO);
     }
 
     /**

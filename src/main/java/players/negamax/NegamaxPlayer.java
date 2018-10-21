@@ -14,6 +14,8 @@ import players.Player;
  */
 public class NegamaxPlayer extends Player {
 
+    private static final Logger LOGGER = Logger.getLogger(NegamaxPlayer.class.getName());
+
     private long time;
     private long startTime;
 
@@ -270,10 +272,13 @@ public class NegamaxPlayer extends Player {
             double nodesPerMs = totalNodeCount / (duration > 0 ? duration : 1);
             double avgBranches = (double) branchesExploredSum / (double)
                     nonLeafCount;
-            Logger.getGlobal().log(Level.INFO, "Time: {0}ms", duration);
-            Logger.getGlobal().log(Level.INFO, "Nodes: {0}", totalNodeCount);
-            Logger.getGlobal().log(Level.INFO, "Nodes/ms: {0}", nodesPerMs);
-            Logger.getGlobal().log(Level.INFO, String.format(
+            LOGGER.log(Level.INFO,
+                    "Time: " +
+                            "{0}ms",
+                    duration);
+            LOGGER.log(Level.INFO, "Nodes: {0}", totalNodeCount);
+            LOGGER.log(Level.INFO, "Nodes/ms: {0}", nodesPerMs);
+            LOGGER.log(Level.INFO, String.format(
                     "Branches explored (avg): %.2f ", avgBranches));
         }
     }
@@ -284,7 +289,7 @@ public class NegamaxPlayer extends Player {
      */
     private void printSearchInfo(Move bestMove, int score, int depth) {
         String moveAlgebraic = bestMove.getAlgebraicString(info.getSize());
-        Logger.getGlobal().log(Level.INFO,
+        LOGGER.log(Level.INFO,
                 String.format("Depth: %d, Evaluation: %d, "
                 + "Best move: %s", depth, score, moveAlgebraic));
     }

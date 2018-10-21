@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class GameThread extends Thread {
 
-    private static final Logger LOGGER = Logger.getGlobal();
+    private static final Logger LOGGER = Logger.getLogger(GameThread.class.getName());
 
     private final GameSettings settings;
     private final GameState state;
