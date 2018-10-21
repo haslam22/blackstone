@@ -15,8 +15,6 @@ import java.util.logging.Logger;
  */
 public class GameController {
 
-    private static Logger LOGGER = Logger.getGlobal();
-
     private final List<GameListener> listeners;
     private final GameSettings settings;
     private GameThread gameThread;
@@ -134,7 +132,7 @@ public class GameController {
      * @param state GameState object to use (can be null)
      */
     public void setLoadedState(GameState state) {
-        if(this.gameThread.isAlive()) {
+        if(this.gameThread != null && this.gameThread.isAlive()) {
             this.stop();
         }
         this.loadedState = state;
