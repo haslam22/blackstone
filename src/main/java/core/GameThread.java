@@ -182,7 +182,10 @@ public class GameThread extends Thread {
                     (playerIndex));
         }
 
-        long timeout = calculateTimeoutMillis(playerIndex);
+        // Allow 500ms breathing room on top of the regular timeout.
+        // Temporary workaround - we'll probably need more strict timing
+        // in the future.
+        long timeout = calculateTimeoutMillis(playerIndex) + 500;
 
         if (timeout > 0) {
             try {
