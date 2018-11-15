@@ -1,6 +1,7 @@
 package piskvork;
 
 import core.GameInfo;
+import core.GameSettings;
 import core.GameState;
 import core.Move;
 import players.Player;
@@ -100,4 +101,14 @@ public class PiskvorkPlayer extends Player {
         return this.lastReceivedMove;
     }
 
+    public static void main(String[] args) throws IOException {
+        PiskvorkPlayer piskvorkPlayer =
+                new PiskvorkPlayer(new GameInfo(new GameSettings(null, null,
+                        false, false, 0, 0, 15),
+                1, 2), "C:\\Users\\Hasan\\Downloads\\YIXIN18\\pbrain" +
+                "-Yixin2018.exe");
+
+        piskvorkPlayer.writePiskvorkCommand(new StartCommand(15));
+        piskvorkPlayer.writePiskvorkCommand(new BeginCommand());
+    }
 }
