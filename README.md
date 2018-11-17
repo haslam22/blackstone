@@ -14,7 +14,7 @@ There are two main components in this project:
 - Beautiful, fully resizable and flexible Gomoku board, supporting high DPI displays, easy stone placement, etc
 - Configurable game settings including time per move, time per game and board size
 - Easy saving and loading of positions with move order maintained
-- Loading of external AI's supporting the Piskvork protocol ([Download page](http://gomocup.org/download-gomoku-ai/))
+- Loading of external AI's supporting the [Piskvork protocol](https://github.com/haslam22/gomoku/wiki/Piskvork-Gomocup-Protcol) ([Download page](http://gomocup.org/download-gomoku-ai/))
 
 ## Install
 Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn install` from the command line in the root directory to build the project in one step
