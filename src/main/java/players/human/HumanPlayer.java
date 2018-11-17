@@ -1,29 +1,36 @@
 package players.human;
 
-import core.GameInfo;
-import core.GameState;
 import core.Move;
 import players.Player;
+
+import java.util.List;
 
 /**
  * Class for a non-AI player. Sleeps until the game receives a valid move
  * from the user.
  * @author Hasan
  */
-public class HumanPlayer extends Player {
+public class HumanPlayer implements Player {
 
     private Move move;
 
-    public HumanPlayer(GameInfo info) {
-        super(info);
+    @Override
+    public void setupGame(int index, int boardSize, long moveTimeMillis, long gameTimeMillis) { }
+
+    @Override
+    public void loadBoard(List<Move> orderedMoves) { }
+
+    @Override
+    public Move getMove(Move opponentsMove) {
+        return waitForMove();
     }
 
-    public void setMove(Move move) {
-        this.move = move;
-    }
-    
     @Override
-    public Move getMove(GameState state) {
+    public Move beginGame() {
+        return waitForMove();
+    }
+
+    private Move waitForMove() {
         // Suspend until the user clicks a valid move (handled by the game)
         try {
             synchronized(this) {
@@ -34,5 +41,8 @@ public class HumanPlayer extends Player {
         }
         return move;
     }
-    
+
+    public void setMove(Move move) {
+        this.move = move;
+    }
 }

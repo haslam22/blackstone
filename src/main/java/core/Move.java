@@ -39,7 +39,7 @@ public class Move implements Serializable {
     public String getAlgebraicString(int boardSize) {
         int rowAlgebraic = boardSize - row;
         char colAlgebraic = (char) ('A' + col);
-        return new String(Character.toString(colAlgebraic) + rowAlgebraic);
+        return Character.toString(colAlgebraic) + rowAlgebraic;
     }
 
     public String toString() {

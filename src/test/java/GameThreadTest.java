@@ -26,8 +26,7 @@ public class GameThreadTest {
         player1Moves.add(new Move('F', 9, 19));
         player1Moves.add(new Move('F', 10, 19));
         player1Moves.add(new Move('F', 11, 19));
-        Player player1 = new TestPlayer(new GameInfo(settings, 1, 2),
-                player1Moves);
+        Player player1 = new TestPlayer(player1Moves);
 
         // Player 2 makes a 5 in the G column.
         ArrayList<Move> player2Moves = new ArrayList<>();
@@ -36,8 +35,7 @@ public class GameThreadTest {
         player2Moves.add(new Move('G', 9, 19));
         player2Moves.add(new Move('G', 10, 19));
         player2Moves.add(new Move('G', 11, 19));
-        Player player2 = new TestPlayer(new GameInfo(settings, 1, 2),
-                player2Moves);
+        Player player2 = new TestPlayer(player2Moves);
 
         // Run the game
         GameThread game = new GameThread(state, settings, player1, player2,
@@ -50,6 +48,5 @@ public class GameThreadTest {
         assertEquals("Game thread should die after game finishes", false,
                 game.isAlive());
     }
-
 
 }

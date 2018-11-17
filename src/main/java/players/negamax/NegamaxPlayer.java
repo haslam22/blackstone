@@ -1,7 +1,5 @@
 package players.negamax;
 
-import core.GameInfo;
-import core.GameState;
 import core.Move;
 
 import java.util.*;
@@ -12,11 +10,11 @@ import players.Player;
 /**
  * Negamax player, with alpha-beta pruning and further optimisations
  */
-public class NegamaxPlayer extends Player {
+public class NegamaxPlayer implements Player {
 
     private static final Logger LOGGER = Logger.getLogger(NegamaxPlayer.class.getName());
 
-    private long time;
+    private long timeNanos;
     private long startTime;
 
     private int totalNodeCount;
@@ -24,11 +22,8 @@ public class NegamaxPlayer extends Player {
     private int branchesExploredSum;
 
     private State state;
-
-    public NegamaxPlayer(GameInfo info) {
-        super(info);
-        this.time = (2000 - 100) * 1000000;
-    }
+    private int size;
+    private List<Move> moves;
 
     /**
      * Determines if we need to respond to any threats on the board, if so,
@@ -154,10 +149,10 @@ public class NegamaxPlayer extends Player {
     private int negamax(State state, int depth, int alpha, int beta)
             throws InterruptedException {
         totalNodeCount++;
-        if(Thread.interrupted() || (System.nanoTime() - startTime) > time) {
+        if(Thread.interrupted() || (System.nanoTime() - startTime) > timeNanos) {
             throw new InterruptedException();
         }
-        if(state.terminal() != 0 || depth == 0) {
+        if(depth == 0 || state.terminal() != 0) {
             return Evaluator.evaluateState(state, depth);
         }
         nonLeafCount++;
@@ -241,26 +236,6 @@ public class NegamaxPlayer extends Player {
         }
         return moves.get(0);
     }
-    
-    @Override
-    public Move getMove(GameState gameState) {
-        // Reset performance counts, clear the hash table
-        this.totalNodeCount = 0;
-        this.nonLeafCount = 0;
-        this.branchesExploredSum = 0;
-
-        // Create a new internal state object, sync with the game state
-        this.state = new State(info.getSize());
-        List<Move> moves = gameState.getMovesMade();
-        moves.forEach((move) -> {
-            state.makeMove(move);
-        });
-
-        // Run a depth increasing search
-        Move best = iterativeDeepening(2, 8);
-        printPerformanceInfo();
-        return best;
-    }
 
     /**
      * Print performance information, including the amount of nodes traversed
@@ -288,10 +263,50 @@ public class NegamaxPlayer extends Player {
      * searched, and the evaluation score.
      */
     private void printSearchInfo(Move bestMove, int score, int depth) {
-        String moveAlgebraic = bestMove.getAlgebraicString(info.getSize());
+        String moveAlgebraic = bestMove.getAlgebraicString(size);
         LOGGER.log(Level.INFO,
                 String.format("Depth: %d, Evaluation: %d, "
                 + "Best move: %s", depth, score, moveAlgebraic));
+    }
+
+    @Override
+    public void setupGame(int index, int boardSize, long moveTimeMillis, long gameTimeMillis) {
+        this.size = boardSize;
+        this.timeNanos = (moveTimeMillis) * 1000000;
+        this.moves = new ArrayList<>();
+    }
+
+    @Override
+    public void loadBoard(List<Move> orderedMoves) {
+        this.moves = orderedMoves;
+    }
+
+    @Override
+    public Move getMove(Move opponentsMove) {
+        moves.add(opponentsMove);
+        // Reset performance counts, clear the hash table
+        this.totalNodeCount = 0;
+        this.nonLeafCount = 0;
+        this.branchesExploredSum = 0;
+
+        // Create a new internal state object, sync with the game state
+        this.state = new State(size);
+        moves.forEach((move) -> {
+            state.makeMove(move);
+        });
+
+        // Run a depth increasing search
+        Move best = iterativeDeepening(2, 8);
+        printPerformanceInfo();
+        moves.add(best);
+        return best;
+    }
+
+    @Override
+    public Move beginGame() {
+        Move move = new Move(size / 2, size / 2);
+        moves.add(move);
+        return move;
     }
 
     private class ScoredMove implements Comparable<ScoredMove> {

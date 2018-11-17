@@ -77,16 +77,14 @@ public class GameSettings {
      * Get the player instance for player 1.
      */
     public Player getPlayer1() {
-        GameInfo gameInfo = new GameInfo(this, 1, 2);
-        return PlayerRegistry.getPlayer(gameInfo, player1);
+        return PlayerRegistry.getPlayer(player1);
     }
 
     /**
      * Get the player instance for player 2.
      */
     public Player getPlayer2() {
-        GameInfo gameInfo = new GameInfo(this, 2, 1);
-        return PlayerRegistry.getPlayer(gameInfo, player2);
+        return PlayerRegistry.getPlayer(player2);
     }
 
     /**

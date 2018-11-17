@@ -61,21 +61,6 @@ public class GameState implements Cloneable, Serializable {
     }
 
     /**
-     * @return List of available moves, i.e. spots not occupied on the board
-     */
-    public List<Move> getAvailableMoves() {
-        List<Move> availableMoves = new ArrayList<>();
-        for(int i = 0; i < size; i++) {
-            for(int j = 0; j < size; j++) {
-                if(board[i][j] == 0) {
-                    availableMoves.add(new Move(i, j));
-                }
-            }
-        }
-        return availableMoves;
-    }
-
-    /**
      * Return the last move made on this state.
      * @return Previous move that was made
      */
@@ -129,22 +114,22 @@ public class GameState implements Cloneable, Serializable {
         if(board[row][col] == playerIndex) {
             // Diagonal from the bottom left to the top right
             if(countConsecutiveStones(row, col, 1, -1) +
-                    countConsecutiveStones(row, col, -1, 1) == 4) {
+                    countConsecutiveStones(row, col, -1, 1) >= 4) {
                 return true;
             }
             // Diagonal from the top left to the bottom right
             if(countConsecutiveStones(row, col, -1, -1) +
-                    countConsecutiveStones(row, col, 1, 1) == 4) {
+                    countConsecutiveStones(row, col, 1, 1) >= 4) {
                 return true;
             }
             // Horizontal
             if(countConsecutiveStones(row, col, 0, 1) +
-                    countConsecutiveStones(row, col, 0, -1) == 4) {
+                    countConsecutiveStones(row, col, 0, -1) >= 4) {
                 return true;
             }
             // Vertical
             if(countConsecutiveStones(row, col, 1, 0) +
-                    countConsecutiveStones(row, col, -1, 0) == 4) {
+                    countConsecutiveStones(row, col, -1, 0) >= 4) {
                 return true;
             }
         }

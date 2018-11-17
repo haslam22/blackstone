@@ -1,6 +1,5 @@
 package players;
 
-import core.GameInfo;
 import players.human.HumanPlayer;
 import players.negamax.NegamaxPlayer;
 import players.random.RandomPlayer;
@@ -31,18 +30,17 @@ public class PlayerRegistry {
     }
 
     /**
-     * @param gameInfo Game information
      * @param playerName Player class to get
      * @return Player instance corresponding to the given player name
      */
-    public static Player getPlayer(GameInfo gameInfo, String playerName) {
+    public static Player getPlayer(String playerName) {
         switch(playerName) {
             case "Negamax":
-                return new NegamaxPlayer(gameInfo);
+                return new NegamaxPlayer();
             case "Human":
-                return new HumanPlayer(gameInfo);
+                return new HumanPlayer();
             case "Random":
-                return new RandomPlayer(gameInfo);
+                return new RandomPlayer();
             default:
                 throw new RuntimeException("Could not find player: " +
                         playerName);
