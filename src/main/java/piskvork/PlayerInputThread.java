@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 /**
- * Very simple class which listens for player input and passes it to a
- * function to deal with.
+ * Simple class which listens for player input and passes it to a function to
+ * deal with.
  */
 public class PlayerInputThread implements Runnable {
 
@@ -21,7 +21,7 @@ public class PlayerInputThread implements Runnable {
     @Override
     public void run() {
         // Will block until input is received.
-        while (in.hasNextLine()) {
+        while (in.hasNextLine() && !Thread.interrupted()) {
             processor.processInput(in.nextLine());
         }
     }

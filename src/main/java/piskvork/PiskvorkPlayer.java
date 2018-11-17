@@ -1,8 +1,5 @@
 package piskvork;
 
-import core.GameInfo;
-import core.GameSettings;
-import core.GameState;
 import core.Move;
 import players.Player;
 
@@ -13,38 +10,68 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PiskvorkPlayer extends Player {
+public class PiskvorkPlayer implements Player {
 
     private static final Logger LOGGER =
             Logger.getLogger(PiskvorkPlayer.class.getName());
-
-    private final Thread playerInputThread;
-    private final PrintWriter playerOutputWriter;
-    private PiskvorkCommand lastCommand;
-    private Move lastReceivedMove;
     private static final List<String> MESSAGE_COMMANDS = Arrays.asList(
             "MESSAGE", "ERROR", "DEBUG", "UNKNOWN"
     );
 
-    /**
-     * Create a new player based on an executable program which implements
-     * the Piskvork protocol. This program must communicate via stdin/out.
-     * @param executablePath Path to executable (e.g C:/Windows/gomoku.exe)
-     */
-    public PiskvorkPlayer(GameInfo info, String executablePath) throws IOException {
-        super(info);
+    private final String executablePath;
+    private Thread playerInputThread;
+    private PrintWriter playerOutputWriter;
+    private PiskvorkCommand lastCommand;
+    private Move lastReceivedMove;
+
+    public PiskvorkPlayer(String executablePath) {
+        this.executablePath = executablePath;
+    }
+
+    @Override
+    public void setupGame(int index, int boardSize, long moveTimeMillis, long gameTimeMillis) {
         ProcessBuilder processBuilder = new ProcessBuilder(executablePath);
-        Process playerProcess = processBuilder.start();
+        Process playerProcess;
+        try {
+            playerProcess = processBuilder.start();
+        } catch (IOException ex) {
+            throw new RuntimeException("Could not initialize Piskvork player", ex);
+        }
         this.playerInputThread = new Thread(new PlayerInputThread(
                 playerProcess.getInputStream(),
                 input -> processPiskvorkInput(input)));
         this.playerOutputWriter = new PrintWriter(playerProcess.getOutputStream());
         playerInputThread.start();
-        writePiskvorkCommand(new StartCommand(info.getSize()));
+        writePiskvorkCommand(new StartCommand(boardSize));
         writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIMEOUT_TURN,
-                String.valueOf(info.getMoveTimeMillis())));
+                String.valueOf(moveTimeMillis)));
         writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIMEOUT_MATCH,
-                String.valueOf(info.getGameTimeMillis())));
+                String.valueOf(gameTimeMillis)));
+    }
+
+    @Override
+    public Move loadBoard(List<Move> orderedMoves) {
+        return null;
+    }
+
+    @Override
+    public Move getMove(Move opponentsMove) {
+        writePiskvorkCommand(new TurnCommand(opponentsMove));
+        return this.lastReceivedMove;
+    }
+
+    @Override
+    public Move beginGame() {
+        writePiskvorkCommand(new BeginCommand());
+        return this.lastReceivedMove;
+    }
+
+    @Override
+    public void cleanup() {
+        try {
+            playerInputThread.interrupt();
+            playerInputThread.join();
+        } catch (InterruptedException ignored) {}
     }
 
     /**
@@ -75,7 +102,7 @@ public class PiskvorkPlayer extends Player {
 
     /**
      * Writes a Piskvork command to the players output stream.
-     * @param command
+     * @param command PiskvorkCommand to write
      */
     private void writePiskvorkCommand(PiskvorkCommand command) {
         this.lastCommand = command;
@@ -90,25 +117,5 @@ public class PiskvorkPlayer extends Player {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public Move getMove(GameState state) {
-        if(state.getMovesMade().isEmpty()) {
-            writePiskvorkCommand(new BeginCommand());
-        }
-        writePiskvorkCommand(new TurnCommand(state.getLastMove()));
-        return this.lastReceivedMove;
-    }
-
-    public static void main(String[] args) throws IOException {
-        PiskvorkPlayer piskvorkPlayer =
-                new PiskvorkPlayer(new GameInfo(new GameSettings(null, null,
-                        false, false, 0, 0, 15),
-                1, 2), "C:\\Users\\Hasan\\Downloads\\YIXIN18\\pbrain" +
-                "-Yixin2018.exe");
-
-        piskvorkPlayer.writePiskvorkCommand(new StartCommand(15));
-        piskvorkPlayer.writePiskvorkCommand(new BeginCommand());
     }
 }
