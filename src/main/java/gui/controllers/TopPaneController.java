@@ -121,4 +121,15 @@ public class TopPaneController implements Controller {
         game.setLoadedState(null);
         clearPositionMenuItem.setDisable(true);
     }
+
+    public void loadAI(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Gomoku AI", "*.exe"));
+        Stage stage = (Stage) settingsButton.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            game.addExternalPlayer(file);
+        }
+    }
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +24,8 @@ public class PiskvorkPlayer implements Player {
     private PrintWriter playerOutputWriter;
     private PiskvorkCommand lastCommand;
     private Move lastReceivedMove;
+    private Process playerProcess;
+    private int index;
 
     public PiskvorkPlayer(String executablePath) {
         this.executablePath = executablePath;
@@ -31,12 +34,12 @@ public class PiskvorkPlayer implements Player {
     @Override
     public void setupGame(int index, int boardSize, long moveTimeMillis, long gameTimeMillis) {
         ProcessBuilder processBuilder = new ProcessBuilder(executablePath);
-        Process playerProcess;
         try {
             playerProcess = processBuilder.start();
         } catch (IOException ex) {
             throw new RuntimeException("Could not initialize Piskvork player", ex);
         }
+        this.index = index;
         this.playerInputThread = new Thread(new PlayerInputThread(
                 playerProcess.getInputStream(),
                 input -> processPiskvorkInput(input)));
@@ -51,7 +54,8 @@ public class PiskvorkPlayer implements Player {
 
     @Override
     public Move loadBoard(List<Move> orderedMoves) {
-        return null;
+        writePiskvorkCommand(new BoardCommand(orderedMoves, index));
+        return this.lastReceivedMove;
     }
 
     @Override
@@ -68,9 +72,10 @@ public class PiskvorkPlayer implements Player {
 
     @Override
     public void cleanup() {
+        writePiskvorkCommand(new EndCommand());
+        playerProcess.destroy();
         try {
-            playerInputThread.interrupt();
-            playerInputThread.join();
+            playerProcess.waitFor(1, TimeUnit.SECONDS);
         } catch (InterruptedException ignored) {}
     }
 
@@ -113,9 +118,7 @@ public class PiskvorkPlayer implements Player {
                 synchronized (this) {
                     this.wait();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException ignored) {}
         }
     }
 }

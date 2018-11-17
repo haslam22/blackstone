@@ -21,7 +21,7 @@ public class PlayerInputThread implements Runnable {
     @Override
     public void run() {
         // Will block until input is received.
-        while (in.hasNextLine() && !Thread.interrupted()) {
+        while (in.hasNextLine()) {
             processor.processInput(in.nextLine());
         }
     }

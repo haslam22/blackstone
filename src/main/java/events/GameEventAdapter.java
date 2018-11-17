@@ -46,4 +46,8 @@ public class GameEventAdapter implements GameListener {
     @Override
     public void positionCleared() {
     }
+
+    @Override
+    public void playerAdded() {
+    }
 }

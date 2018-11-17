@@ -55,7 +55,7 @@
                 GridPane.valignment="CENTER" fx:id="player2StatusCircle"
                 visible="false">
         </Circle>
-        <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Computer"
+        <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Negamax"
                   GridPane.rowIndex="0" GridPane.columnIndex="1"
                   GridPane.hgrow="ALWAYS" fx:id="player2Selector"
                   onAction="#updatePlayer2">

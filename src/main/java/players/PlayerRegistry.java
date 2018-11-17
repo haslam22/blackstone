@@ -1,11 +1,11 @@
 package players;
 
+import piskvork.PiskvorkPlayer;
 import players.human.HumanPlayer;
 import players.negamax.NegamaxPlayer;
 import players.random.RandomPlayer;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * A class holding available players. This is used by the GUI to determine which
@@ -18,15 +18,27 @@ import java.util.List;
  */
 public class PlayerRegistry {
 
+    private static final List<String> availablePlayers = Arrays.asList(
+            "Negamax",
+            "Human",
+            "Random"
+    );
+
+    private static Map<String, String> piskvorkPlayers = new HashMap<>();
+
     /**
      * @return List of available player names
      */
     public static List<String> getAvailablePlayers() {
-        return Arrays.asList(
-                "Negamax",
-                "Human",
-                "Random"
-        );
+        List<String> players = new ArrayList<>(availablePlayers);
+        for(Map.Entry<String, String> entry : piskvorkPlayers.entrySet()) {
+            players.add(entry.getKey());
+        }
+        return players;
+    }
+
+    public static void addPiskvorkPlayer(String name, String executablePath) {
+        piskvorkPlayers.put(name, executablePath);
     }
 
     /**
@@ -42,6 +54,9 @@ public class PlayerRegistry {
             case "Random":
                 return new RandomPlayer();
             default:
+                if(piskvorkPlayers.containsKey(playerName)) {
+                    return new PiskvorkPlayer(piskvorkPlayers.get(playerName));
+                }
                 throw new RuntimeException("Could not find player: " +
                         playerName);
         }

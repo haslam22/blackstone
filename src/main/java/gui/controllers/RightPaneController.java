@@ -61,6 +61,10 @@ public class RightPaneController implements Controller {
             public void turnStarted(int playerIndex) {
                 handleTurnStarted(playerIndex);
             }
+            @Override
+            public void playerAdded() {
+                loadPlayers();
+            }
         });
         game.getSettings().addListener(new SettingsListener() {
             @Override
@@ -70,14 +74,29 @@ public class RightPaneController implements Controller {
         });
         loadSettings();
         setupLog();
+        loadPlayers();
+    }
 
+    private void loadPlayers() {
+        // Get currently selected players (may be null if first load)
+        String player1Val = player1Selector.getValue();
+        String player2Val = player2Selector.getValue();
+
+        player1Selector.getItems().clear();
+        player2Selector.getItems().clear();
         // Load in available players
         for(String player : PlayerRegistry.getAvailablePlayers()) {
             player1Selector.getItems().add(player);
             player2Selector.getItems().add(player);
         }
-        player1Selector.setValue(game.getSettings().getPlayer1Name());
-        player2Selector.setValue(game.getSettings().getPlayer2Name());
+        if(player1Val != null) {
+            player1Selector.setValue(player1Val);
+            updatePlayer1();
+        }
+        if(player2Val != null) {
+            player2Selector.setValue(player2Val);
+            updatePlayer2();
+        }
     }
 
     private void handleTurnStarted(int playerIndex) {

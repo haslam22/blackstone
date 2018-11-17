@@ -28,6 +28,12 @@
                     </graphic>
                 </MenuItem>
                 <SeparatorMenuItem  />
+                <MenuItem text="Load external AI..." onAction="#loadAI">
+                    <graphic>
+                        <Label text="%add" styleClass="icon"/>
+                    </graphic>
+                </MenuItem>
+                <SeparatorMenuItem  />
                 <MenuItem text="Exit" onAction="#exit" />
             </items>
         </Menu>

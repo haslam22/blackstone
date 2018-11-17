@@ -59,4 +59,9 @@ public interface GameListener {
      */
     void positionCleared();
 
+    /**
+     * Called when the user adds an external player.
+     */
+    void playerAdded();
+
 }

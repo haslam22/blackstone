@@ -2,10 +2,13 @@ package core;
 
 import events.GameListener;
 import players.Player;
+import players.PlayerRegistry;
 import players.human.HumanPlayer;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -14,6 +17,7 @@ import java.util.logging.Logger;
  * perform certain actions on a game e.g. start/pause/undo.
  */
 public class GameController {
+    private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
 
     private final List<GameListener> listeners;
     private final GameSettings settings;
@@ -47,6 +51,8 @@ public class GameController {
                     settings.getPlayer1(), settings.getPlayer2(), listeners);
             this.gameThread.start();
         }
+        LOGGER.log(Level.WARNING, "Tried to start a game while the previous " +
+                "game thread is still running.");
     }
 
     /**
@@ -150,6 +156,18 @@ public class GameController {
      */
     public GameState getState() {
         return this.currentState.clone();
+    }
+
+    public void addExternalPlayer(File file) {
+        String[] splitFileName = file.getName().split("-", 2);
+        if(!splitFileName[0].equalsIgnoreCase("pbrain")) {
+            LOGGER.log(Level.SEVERE,"Could not load external AI. File name " +
+                    "must follow the format: pbrain-<name>.exe");
+        }
+
+        PlayerRegistry.addPiskvorkPlayer(splitFileName[1].substring(0,
+                splitFileName[1].lastIndexOf('.')), file.getAbsolutePath());
+        listeners.forEach(listener -> listener.playerAdded());
     }
 
     /**
