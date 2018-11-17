@@ -277,8 +277,24 @@ public class NegamaxPlayer implements Player {
     }
 
     @Override
-    public void loadBoard(List<Move> orderedMoves) {
+    public Move loadBoard(List<Move> orderedMoves) {
         this.moves = orderedMoves;
+        // Reset performance counts, clear the hash table
+        this.totalNodeCount = 0;
+        this.nonLeafCount = 0;
+        this.branchesExploredSum = 0;
+
+        // Create a new internal state object, sync with the game state
+        this.state = new State(size);
+        moves.forEach((move) -> {
+            state.makeMove(move);
+        });
+
+        // Run a depth increasing search
+        Move best = iterativeDeepening(2, 8);
+        printPerformanceInfo();
+        moves.add(best);
+        return best;
     }
 
     @Override

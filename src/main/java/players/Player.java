@@ -26,10 +26,12 @@ public interface Player {
                    long gameTimeMillis);
 
     /**
-     * Load in a board to start the game from a non-empty position.
+     * Load in a board to start the game from a non-empty position, and
+     * return a move.
      * @param orderedMoves List of moves made in the game, in order
+     * @return Next move to be played
      */
-    void loadBoard(List<Move> orderedMoves);
+    Move loadBoard(List<Move> orderedMoves);
 
     /**
      * Return a move in the game.

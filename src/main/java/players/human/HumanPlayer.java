@@ -18,7 +18,7 @@ public class HumanPlayer implements Player {
     public void setupGame(int index, int boardSize, long moveTimeMillis, long gameTimeMillis) { }
 
     @Override
-    public void loadBoard(List<Move> orderedMoves) { }
+    public Move loadBoard(List<Move> orderedMoves) { return waitForMove(); }
 
     @Override
     public Move getMove(Move opponentsMove) {

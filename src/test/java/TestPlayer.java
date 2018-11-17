@@ -23,8 +23,10 @@ public class TestPlayer implements Player {
     }
 
     @Override
-    public void loadBoard(List<Move> orderedMoves) {
-
+    public Move loadBoard(List<Move> orderedMoves) {
+        Move move = movesToMake.get(moveCount);
+        moveCount++;
+        return move;
     }
 
     @Override

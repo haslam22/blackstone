@@ -26,6 +26,7 @@ public class GameThread extends Thread {
     private final Player[] players;
     private final long[] times;
     private Future<Move> pendingMove;
+    private boolean[] sendBoard;
 
     /**
      * Initialize a new game thread.
@@ -84,12 +85,9 @@ public class GameThread extends Thread {
         players[1].setupGame(2, settings.getSize(),
                 settings.getMoveTimeMillis(), settings.getGameTimeMillis());
 
-        // We've started this thread from a non-empty state. Tell the players
-        // to load in the board.
-        if(!state.getMovesMade().isEmpty()) {
-            players[0].loadBoard(state.getMovesMade());
-            players[1].loadBoard(state.getMovesMade());
-        }
+        // We've started this thread from a non-empty state. Set this so we
+        // know when to send the board to the players.
+        this.sendBoard = new boolean[] { !state.isEmpty(), !state.isEmpty() };
         while(state.terminal() == 0) {
             try {
                 // Notify listeners that a turn has started.
@@ -173,7 +171,15 @@ public class GameThread extends Thread {
         // Request the move from the player. If no moves exist, ask the
         // player to open the game.
         if(!state.getMovesMade().isEmpty()) {
-            this.pendingMove = executor.submit(() -> player.getMove(state.getLastMove()));
+            if(sendBoard[playerIndex - 1]) {
+                this.pendingMove = executor.submit(() -> player.loadBoard(
+                        state.getMovesMade()));
+                // Don't send the board again.
+                sendBoard[playerIndex - 1] = false;
+            } else {
+                this.pendingMove = executor.submit(() -> player.getMove(
+                        state.getLastMove()));
+            }
         } else {
             this.pendingMove = executor.submit(() -> player.beginGame());
         }
@@ -182,10 +188,8 @@ public class GameThread extends Thread {
                     (playerIndex));
         }
 
-        // Allow 500ms breathing room on top of the regular timeout.
-        // Temporary workaround - we'll probably need more strict timing
-        // in the future.
-        long timeout = calculateTimeoutMillis(playerIndex) + 500;
+        // Allow 100ms breathing room on top of the regular timeout.
+        long timeout = calculateTimeoutMillis(playerIndex) + 100;
 
         if (timeout > 0) {
             try {

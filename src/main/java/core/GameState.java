@@ -69,6 +69,14 @@ public class GameState implements Cloneable, Serializable {
     }
 
     /**
+     * Return whether or not this state is empty.
+     * @return True if no moves made on this state.
+     */
+    public boolean isEmpty() {
+        return getMovesMade().isEmpty();
+    }
+
+    /**
      * Make a move on this state.
      * @param move Move to make
      */
