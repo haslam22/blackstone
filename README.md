@@ -19,4 +19,4 @@ There are two main components in this project:
 Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn install` from the command line in the root directory to build the project in one step.
 
 ## Adding your own AI
-Follow these [steps](https://github.com/haslam22/gomoku/wiki/Adding-your-own-AI). External engines using the Piskvork protcol are not currently supported (this is coming soon). 
+Look at the [Player](src/main/java/players/Player.java) interface. Create a class implementing this interface, and add an entry to [PlayerRegistry](src/main/java/players/PlayerRegistry.java) to make this player available in the GUI.
