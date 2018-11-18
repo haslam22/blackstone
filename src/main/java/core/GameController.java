@@ -177,6 +177,7 @@ public class GameController {
                 + aiName.substring(1);
         PlayerRegistry.addPiskvorkPlayer(aiNameCapitalised, file.getAbsolutePath());
         listeners.forEach(listener -> listener.playerAdded());
+        LOGGER.info("Successfully registered new player: {}", aiNameCapitalised);
     }
 
     /**

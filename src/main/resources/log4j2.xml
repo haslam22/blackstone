@@ -6,8 +6,7 @@
                     pattern="%-5p %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
         </Console>
         <TextAreaAppender name="gui">
-            <PatternLayout
-                    pattern="[%c{1}] - %msg%n"/>
+            <PatternLayout pattern="[%c{1}] - %msg%n"/>
         </TextAreaAppender>
     </Appenders>
     <Loggers>
