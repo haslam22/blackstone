@@ -173,15 +173,15 @@ public class GameThread extends Thread {
         if(!state.getMovesMade().isEmpty()) {
             if(sendBoard[playerIndex - 1]) {
                 this.pendingMove = executor.submit(() -> player.loadBoard(
-                        state.getMovesMade()));
+                        state.getMovesMade(), times[playerIndex - 1]));
                 // Don't send the board again.
                 sendBoard[playerIndex - 1] = false;
             } else {
                 this.pendingMove = executor.submit(() -> player.getMove(
-                        state.getLastMove()));
+                        state.getLastMove(), times[playerIndex - 1]));
             }
         } else {
-            this.pendingMove = executor.submit(() -> player.beginGame());
+            this.pendingMove = executor.submit(() -> player.beginGame(times[playerIndex - 1]));
         }
         if(player instanceof HumanPlayer) {
             listeners.forEach(listener -> listener.userMoveRequested
