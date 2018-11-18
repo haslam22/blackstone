@@ -29,22 +29,25 @@ public interface Player {
      * Load in a board to start the game from a non-empty position, and
      * return a move.
      * @param orderedMoves List of moves made in the game, in order
+     * @param gameTimeRemainingMillis Game time remaining, in milliseconds
      * @return Next move to be played
      */
-    Move loadBoard(List<Move> orderedMoves);
+    Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis);
 
     /**
      * Return a move in the game.
      * @param opponentsMove Opponents move
+     * @param gameTimeRemainingMillis Game time remaining, in milliseconds
      * @return Response to opponents move
      */
-    Move getMove(Move opponentsMove);
+    Move getMove(Move opponentsMove, long gameTimeRemainingMillis);
 
     /**
      * Return an opening move.
+     * @param gameTimeRemainingMillis Game time remaining, in milliseconds
      * @return Opening move
      */
-    Move beginGame();
+    Move beginGame(long gameTimeRemainingMillis);
 
     /**
      * Clean up any resources. Called at the end of a game. Optional.

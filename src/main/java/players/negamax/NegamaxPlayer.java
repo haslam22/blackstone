@@ -277,7 +277,7 @@ public class NegamaxPlayer implements Player {
     }
 
     @Override
-    public Move loadBoard(List<Move> orderedMoves) {
+    public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
         this.moves = orderedMoves;
         // Reset performance counts, clear the hash table
         this.totalNodeCount = 0;
@@ -298,7 +298,7 @@ public class NegamaxPlayer implements Player {
     }
 
     @Override
-    public Move getMove(Move opponentsMove) {
+    public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
         moves.add(opponentsMove);
         // Reset performance counts, clear the hash table
         this.totalNodeCount = 0;
@@ -319,7 +319,7 @@ public class NegamaxPlayer implements Player {
     }
 
     @Override
-    public Move beginGame() {
+    public Move beginGame(long gameTimeRemainingMillis) {
         Move move = new Move(size / 2, size / 2);
         moves.add(move);
         return move;

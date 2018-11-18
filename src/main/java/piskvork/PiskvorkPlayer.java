@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +25,7 @@ public class PiskvorkPlayer implements Player {
     private Move lastReceivedMove;
     private Process playerProcess;
     private int index;
+    private long gameTimeMillis;
 
     public PiskvorkPlayer(String executablePath) {
         this.executablePath = executablePath;
@@ -45,27 +45,34 @@ public class PiskvorkPlayer implements Player {
                 input -> processPiskvorkInput(input)));
         this.playerOutputWriter = new PrintWriter(playerProcess.getOutputStream());
         playerInputThread.start();
-        writePiskvorkCommand(new StartCommand(boardSize));
+        writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.MAX_MEMORY, "0"));
         writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIMEOUT_TURN,
                 String.valueOf(moveTimeMillis)));
         writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIMEOUT_MATCH,
                 String.valueOf(gameTimeMillis)));
+        writePiskvorkCommand(new StartCommand(boardSize));
     }
 
     @Override
-    public Move loadBoard(List<Move> orderedMoves) {
+    public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
+        writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIME_LEFT,
+                String.valueOf(gameTimeRemainingMillis)));
         writePiskvorkCommand(new BoardCommand(orderedMoves, index));
         return this.lastReceivedMove;
     }
 
     @Override
-    public Move getMove(Move opponentsMove) {
+    public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
+        writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIME_LEFT,
+                String.valueOf(gameTimeRemainingMillis)));
         writePiskvorkCommand(new TurnCommand(opponentsMove));
         return this.lastReceivedMove;
     }
 
     @Override
-    public Move beginGame() {
+    public Move beginGame(long gameTimeRemainingMillis) {
+        writePiskvorkCommand(new InfoCommand(InfoCommand.InfoCommandKey.TIME_LEFT,
+                String.valueOf(gameTimeRemainingMillis)));
         writePiskvorkCommand(new BeginCommand());
         return this.lastReceivedMove;
     }
@@ -75,7 +82,7 @@ public class PiskvorkPlayer implements Player {
         writePiskvorkCommand(new EndCommand());
         playerProcess.destroy();
         try {
-            playerProcess.waitFor(1, TimeUnit.SECONDS);
+            playerProcess.waitFor();
         } catch (InterruptedException ignored) {}
     }
 

@@ -23,21 +23,21 @@ public class TestPlayer implements Player {
     }
 
     @Override
-    public Move loadBoard(List<Move> orderedMoves) {
+    public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
         Move move = movesToMake.get(moveCount);
         moveCount++;
         return move;
     }
 
     @Override
-    public Move getMove(Move opponentsMove) {
+    public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
         Move move = movesToMake.get(moveCount);
         moveCount++;
         return move;
     }
 
     @Override
-    public Move beginGame() {
+    public Move beginGame(long gameTimeRemainingMillis) {
         Move move = movesToMake.get(moveCount);
         moveCount++;
         return move;

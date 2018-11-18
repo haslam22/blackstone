@@ -21,7 +21,7 @@ public class RandomPlayer implements Player {
     }
 
     @Override
-    public Move loadBoard(List<Move> orderedMoves) {
+    public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
         this.moves = orderedMoves;
         List<Move> availableMoves = new ArrayList<>();
 
@@ -39,7 +39,7 @@ public class RandomPlayer implements Player {
     }
 
     @Override
-    public Move getMove(Move opponentsMove) {
+    public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
         moves.add(opponentsMove);
         List<Move> availableMoves = new ArrayList<>();
 
@@ -57,7 +57,7 @@ public class RandomPlayer implements Player {
     }
 
     @Override
-    public Move beginGame() {
+    public Move beginGame(long gameTimeRemainingMillis) {
         Move move = new Move(size / 2, size / 2);
         moves.add(move);
         return move;
