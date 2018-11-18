@@ -1,19 +1,19 @@
 package piskvork;
 
 import core.Move;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import players.Player;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PiskvorkPlayer implements Player {
 
     private static final Logger LOGGER =
-            Logger.getLogger(PiskvorkPlayer.class.getName());
+            LogManager.getLogger(PiskvorkPlayer.class.getName());
     private static final List<String> MESSAGE_COMMANDS = Arrays.asList(
             "MESSAGE", "ERROR", "DEBUG", "UNKNOWN"
     );
@@ -25,7 +25,6 @@ public class PiskvorkPlayer implements Player {
     private Move lastReceivedMove;
     private Process playerProcess;
     private int index;
-    private long gameTimeMillis;
 
     public PiskvorkPlayer(String executablePath) {
         this.executablePath = executablePath;
@@ -83,6 +82,7 @@ public class PiskvorkPlayer implements Player {
         playerProcess.destroy();
         try {
             playerProcess.waitFor();
+            LOGGER.debug("Successfully closed Piskvork process.");
         } catch (InterruptedException ignored) {}
     }
 
@@ -91,9 +91,10 @@ public class PiskvorkPlayer implements Player {
      * @param input AI's input stream content
      */
     private void processPiskvorkInput(String input) {
+        LOGGER.debug("Received Piskvork input: {}", input);
         // Checks if the input is a command from the AI to us.
         if(MESSAGE_COMMANDS.contains(input.split(" ", 2)[0])) {
-            LOGGER.log(Level.INFO, input.split(" ", 2)[1]);
+            LOGGER.info(input.split(" ", 2)[1]);
             return;
         }
         // If not, we assume this is a response to the last command we sent.
@@ -105,6 +106,7 @@ public class PiskvorkPlayer implements Player {
         } else {
             if(lastCommand instanceof PiskvorkMoveCommand) {
                 lastReceivedMove = ((PiskvorkMoveCommand) lastCommand).getMove(input);
+                LOGGER.debug("Received Piskvork move: {}", lastReceivedMove);
             }
             synchronized (this) {
                 this.notify();
@@ -117,6 +119,7 @@ public class PiskvorkPlayer implements Player {
      * @param command PiskvorkCommand to write
      */
     private void writePiskvorkCommand(PiskvorkCommand command) {
+        LOGGER.debug("Wrote Piskvork command: {}", command.getCommandString());
         this.lastCommand = command;
         playerOutputWriter.println(command.getCommandString());
         playerOutputWriter.flush();

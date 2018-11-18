@@ -5,11 +5,13 @@ import core.GameSettings;
 import events.GameEventAdapter;
 import events.SettingsListener;
 import gui.Controller;
+import gui.TextAreaAppender;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import players.PlayerRegistry;
 
+import javax.xml.soap.Text;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -113,18 +115,7 @@ public class RightPaneController implements Controller {
      * logs any INFO level messages sent from any class.
      */
     private void setupLog() {
-        Handler TextBoxHandler = new StreamHandler() {
-            @Override
-            public void publish(LogRecord record) {
-                Platform.runLater(() -> {
-                    String message = getFormatter().formatMessage(record);
-                    textBox.appendText(message + "\n");
-                });
-            }
-        };
-        TextBoxHandler.setFormatter(new SimpleFormatter());
-        Logger.getLogger("").addHandler(TextBoxHandler);
-        Logger.getLogger("").setLevel(Level.INFO);
+        TextAreaAppender.addTextArea(textBox);
     }
 
     /**

@@ -4,7 +4,9 @@ import core.Move;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import players.Player;
 
 /**
@@ -12,7 +14,8 @@ import players.Player;
  */
 public class NegamaxPlayer implements Player {
 
-    private static final Logger LOGGER = Logger.getLogger(NegamaxPlayer.class.getName());
+    private static final Logger LOGGER =
+            LogManager.getLogger(NegamaxPlayer.class.getName());
 
     private long timeNanos;
     private long startTime;
@@ -247,14 +250,11 @@ public class NegamaxPlayer implements Player {
             double nodesPerMs = totalNodeCount / (duration > 0 ? duration : 1);
             double avgBranches = (double) branchesExploredSum / (double)
                     nonLeafCount;
-            LOGGER.log(Level.INFO,
-                    "Time: " +
-                            "{0}ms",
-                    duration);
-            LOGGER.log(Level.INFO, "Nodes: {0}", totalNodeCount);
-            LOGGER.log(Level.INFO, "Nodes/ms: {0}", nodesPerMs);
-            LOGGER.log(Level.INFO, String.format(
-                    "Branches explored (avg): %.2f ", avgBranches));
+            LOGGER.info("Time: {}ms", duration);
+            LOGGER.info( "Nodes: {}", totalNodeCount);
+            LOGGER.info("Nodes/ms: {}", nodesPerMs);
+            LOGGER.info("Branches explored (avg): {} ",
+                    String.format("%.2f", avgBranches));
         }
     }
     
@@ -264,9 +264,8 @@ public class NegamaxPlayer implements Player {
      */
     private void printSearchInfo(Move bestMove, int score, int depth) {
         String moveAlgebraic = bestMove.getAlgebraicString(size);
-        LOGGER.log(Level.INFO,
-                String.format("Depth: %d, Evaluation: %d, "
-                + "Best move: %s", depth, score, moveAlgebraic));
+        LOGGER.info("Depth: {}, Evaluation: {}, Best move: {}", depth, score,
+                moveAlgebraic);
     }
 
     @Override

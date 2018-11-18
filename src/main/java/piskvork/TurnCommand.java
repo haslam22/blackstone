@@ -21,7 +21,6 @@ public class TurnCommand implements PiskvorkMoveCommand {
 
     @Override
     public String getCommandString() {
-        System.out.println(move.row);
         return String.format("TURN %d,%d", move.col, move.row);
     }
 

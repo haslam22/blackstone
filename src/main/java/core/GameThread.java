@@ -1,6 +1,8 @@
 package core;
 
 import events.GameListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import players.Player;
 import players.human.HumanPlayer;
 
@@ -8,7 +10,6 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Responsible for running a Gomoku game from start to finish.
@@ -18,7 +19,8 @@ import java.util.logging.Logger;
  */
 public class GameThread extends Thread {
 
-    private static final Logger LOGGER = Logger.getLogger(GameThread.class.getName());
+    private static final Logger LOGGER =
+            LogManager.getLogger(GameThread.class.getName());
 
     private final GameSettings settings;
     private final GameState state;
@@ -101,14 +103,14 @@ public class GameThread extends Thread {
 
                 // Check for an invalid move.
                 if(state.getMovesMade().contains(move)) {
-                    LOGGER.log(Level.SEVERE,
+                    LOGGER.error(
                             MessageFormat.format(Strings.INVALID_MOVE,
                             state.getCurrentIndex(),
                             move.getAlgebraicString(state.getSize())));
                     return;
                 }
 
-                LOGGER.log(Level.INFO,
+                LOGGER.info(
                         MessageFormat.format(Strings.MOVE_MESSAGE,
                                 state.getCurrentIndex(),
                                 move.getAlgebraicString(state.getSize()),
@@ -135,7 +137,7 @@ public class GameThread extends Thread {
                 if(!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
-                LOGGER.log(Level.SEVERE, MessageFormat.format(Strings.FAILED_MOVE,
+                LOGGER.error(MessageFormat.format(Strings.FAILED_MOVE,
                                 state.getCurrentIndex()), ex);
                 break;
             } catch (TimeoutException ex) {
@@ -143,14 +145,14 @@ public class GameThread extends Thread {
                 if(!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
-                LOGGER.log(Level.INFO, MessageFormat.format(
+                LOGGER.error(MessageFormat.format(
                         Strings.TIMEOUT_MESSAGE, state.getCurrentIndex()));
                 break;
             }
         }
         listeners.forEach(listener -> listener.gameFinished());
         if(state.terminal() != 0) {
-            LOGGER.log(Level.INFO, MessageFormat.format(Strings.WINNER_MESSAGE,
+            LOGGER.error(MessageFormat.format(Strings.WINNER_MESSAGE,
                             state.terminal()));
         }
         players[0].cleanup();
