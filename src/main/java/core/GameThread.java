@@ -111,7 +111,10 @@ public class GameThread extends Thread {
                 LOGGER.log(Level.INFO,
                         MessageFormat.format(Strings.MOVE_MESSAGE,
                                 state.getCurrentIndex(),
-                                move.getAlgebraicString(state.getSize())));
+                                move.getAlgebraicString(state.getSize()),
+                                move.row,
+                                move.col,
+                                elapsedTime));
 
                 // Subtract elapsed time from the current player.
                 times[state.getCurrentIndex() - 1] -= elapsedTime;
