@@ -167,17 +167,18 @@ public class GameController {
         if(!splitFileName[0].equalsIgnoreCase("pbrain")) {
             LOGGER.error("Could not load external AI. File name " +
                     "must follow the format: pbrain-<name>.exe");
+        } else {
+            // We've removed "pbrain", so now strip the extension and return the
+            // string remaining to identify the AI
+            // e.g. pbrain-name.exe -> pbrain | name.exe -> name
+            String aiName = splitFileName[1].substring(0,
+                    splitFileName[1].lastIndexOf('.'));
+            String aiNameCapitalised = aiName.substring(0, 1).toUpperCase()
+                    + aiName.substring(1);
+            PlayerRegistry.addPiskvorkPlayer(aiNameCapitalised, file.getAbsolutePath());
+            listeners.forEach(listener -> listener.playerAdded());
+            LOGGER.info("Successfully registered new player: {}", aiNameCapitalised);
         }
-        // We've removed "pbrain", so now strip the extension and return the
-        // string remaining to identify the AI
-        // e.g. pbrain-name.exe -> pbrain | name.exe -> name
-        String aiName = splitFileName[1].substring(0,
-                splitFileName[1].lastIndexOf('.'));
-        String aiNameCapitalised = aiName.substring(0, 1).toUpperCase()
-                + aiName.substring(1);
-        PlayerRegistry.addPiskvorkPlayer(aiNameCapitalised, file.getAbsolutePath());
-        listeners.forEach(listener -> listener.playerAdded());
-        LOGGER.info("Successfully registered new player: {}", aiNameCapitalised);
     }
 
     /**
