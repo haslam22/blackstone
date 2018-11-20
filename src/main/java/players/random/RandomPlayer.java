@@ -23,17 +23,7 @@ public class RandomPlayer implements Player {
     @Override
     public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
         this.moves = orderedMoves;
-        List<Move> availableMoves = new ArrayList<>();
-
-        for(int row = 0; row < size; row++) {
-            for(int col = 0; col < size; col++) {
-                Move move = new Move(row, col);
-                if(!moves.contains(move)) {
-                    availableMoves.add(move);
-                }
-            }
-        }
-        Move move = availableMoves.get(random.nextInt(availableMoves.size()));
+        Move move = getRandomMove();
         moves.add(move);
         return move;
     }
@@ -41,6 +31,12 @@ public class RandomPlayer implements Player {
     @Override
     public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
         moves.add(opponentsMove);
+        Move move = getRandomMove();
+        moves.add(move);
+        return move;
+    }
+
+    private Move getRandomMove() {
         List<Move> availableMoves = new ArrayList<>();
 
         for(int row = 0; row < size; row++) {
@@ -51,9 +47,7 @@ public class RandomPlayer implements Player {
                 }
             }
         }
-        Move move = availableMoves.get(random.nextInt(availableMoves.size()));
-        moves.add(move);
-        return move;
+        return availableMoves.get(random.nextInt(availableMoves.size()));
     }
 
     @Override

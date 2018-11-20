@@ -278,27 +278,20 @@ public class NegamaxPlayer implements Player {
     @Override
     public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
         this.moves = orderedMoves;
-        // Reset performance counts, clear the hash table
-        this.totalNodeCount = 0;
-        this.nonLeafCount = 0;
-        this.branchesExploredSum = 0;
-
-        // Create a new internal state object, sync with the game state
-        this.state = new State(size);
-        moves.forEach((move) -> {
-            state.makeMove(move);
-        });
-
-        // Run a depth increasing search
-        Move best = iterativeDeepening(2, 8);
-        printPerformanceInfo();
-        moves.add(best);
-        return best;
+        Move bestMove = getBestMove();
+        moves.add(bestMove);
+        return bestMove;
     }
 
     @Override
     public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
         moves.add(opponentsMove);
+        Move bestMove = getBestMove();
+        moves.add(bestMove);
+        return bestMove;
+    }
+
+    private Move getBestMove() {
         // Reset performance counts, clear the hash table
         this.totalNodeCount = 0;
         this.nonLeafCount = 0;
@@ -313,7 +306,6 @@ public class NegamaxPlayer implements Player {
         // Run a depth increasing search
         Move best = iterativeDeepening(2, 8);
         printPerformanceInfo();
-        moves.add(best);
         return best;
     }
 
