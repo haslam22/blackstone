@@ -93,8 +93,16 @@ public class PiskvorkPlayer implements Player {
     private void processPiskvorkInput(String input) {
         LOGGER.debug("Received Piskvork input: {}", input);
         // Checks if the input is a command from the AI to us.
-        if(MESSAGE_COMMANDS.contains(input.split(" ", 2)[0])) {
-            LOGGER.info(input.split(" ", 2)[1]);
+        String[] inputSplit = input.split(" ", 2);
+        if(MESSAGE_COMMANDS.contains(inputSplit[0].toUpperCase())) {
+            // Wake up thread in case AI errors and we're still waiting for a
+            // move. Ensures we don't crash.
+            if(inputSplit[0].toUpperCase().trim().equals("ERROR")) {
+                synchronized (this) {
+                    this.notify();
+                }
+            }
+            LOGGER.info(inputSplit[1]);
             return;
         }
         // If not, we assume this is a response to the last command we sent.
