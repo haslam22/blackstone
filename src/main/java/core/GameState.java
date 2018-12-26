@@ -100,6 +100,17 @@ public class GameState implements Cloneable, Serializable {
         return move;
     }
 
+    /**
+     * Checks the given move is valid on this state.
+     * @param move Input move
+     * @return True if the move is valid
+     */
+    public boolean validateMove(Move move) {
+        return (move.row < this.board.length && move.row >= 0)
+                && (move.col < this.board.length && move.col >= 0)
+                && !this.getMovesMade().contains(move);
+    }
+
     @Override
     public GameState clone() {
         GameState newState = new GameState(this.size);
@@ -183,4 +194,5 @@ public class GameState implements Cloneable, Serializable {
         }
         return count;
     }
+
 }

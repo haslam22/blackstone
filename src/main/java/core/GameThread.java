@@ -102,7 +102,7 @@ public class GameThread extends Thread {
                 long elapsedTime = System.currentTimeMillis() - startTime;
 
                 // Check for an invalid move.
-                if(state.getMovesMade().contains(move)) {
+                if(!state.validateMove(move)) {
                     LOGGER.error(
                             MessageFormat.format(Strings.INVALID_MOVE,
                             state.getCurrentIndex(),
@@ -231,4 +231,5 @@ public class GameThread extends Thread {
             return 0;
         }
     }
+
 }
