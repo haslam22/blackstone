@@ -106,7 +106,7 @@ public class GameThread extends Thread {
                             MessageFormat.format(Strings.INVALID_MOVE,
                             state.getCurrentIndex(),
                             move.getAlgebraicString(state.getSize())));
-                    return;
+                    break;
                 }
 
                 LOGGER.info(
