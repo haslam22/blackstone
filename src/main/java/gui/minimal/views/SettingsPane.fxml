@@ -9,7 +9,7 @@
 <?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="gui.controllers.SettingsPaneController"
+      fx:controller="gui.minimal.controllers.SettingsPaneController"
       prefHeight="300.0" prefWidth="300.0" styleClass="outer">
 
     <GridPane hgap="5" vgap="5">

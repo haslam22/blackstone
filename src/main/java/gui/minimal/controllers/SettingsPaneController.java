@@ -1,8 +1,8 @@
-package gui.controllers;
+package gui.minimal.controllers;
 
 import core.GameController;
 import core.GameSettings;
-import gui.Controller;
+import gui.minimal.Controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;

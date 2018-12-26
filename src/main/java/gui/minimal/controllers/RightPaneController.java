@@ -1,21 +1,19 @@
-package gui.controllers;
+package gui.minimal.controllers;
 
 import core.GameController;
 import core.GameSettings;
 import events.GameEventAdapter;
 import events.SettingsListener;
-import gui.Controller;
-import gui.TextAreaAppender;
+import gui.minimal.Controller;
+import gui.minimal.TextAreaAppender;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import players.PlayerRegistry;
 
-import javax.xml.soap.Text;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.*;
 
 /**
  * Controller for the right pane of the GUI.

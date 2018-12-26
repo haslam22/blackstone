@@ -6,7 +6,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import java.lang.String?>
 <?import java.net.URL?>
-<VBox fx:controller="gui.controllers.RightPaneController"
+<VBox fx:controller="gui.minimal.controllers.RightPaneController"
       xmlns:fx="http://javafx.com/fxml" styleClass="outer" maxWidth="250"
       spacing="10">
     <padding>

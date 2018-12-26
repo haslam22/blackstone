@@ -1,4 +1,4 @@
-package gui.views;
+package gui.minimal.views;
 
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;

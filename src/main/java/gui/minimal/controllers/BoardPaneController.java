@@ -1,11 +1,11 @@
-package gui.controllers;
+package gui.minimal.controllers;
 
 import core.GameController;
 import core.Move;
 import events.GameEventAdapter;
 import events.SettingsListener;
-import gui.Controller;
-import gui.views.BoardPane;
+import gui.minimal.Controller;
+import gui.minimal.views.BoardPane;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;

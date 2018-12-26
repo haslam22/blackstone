@@ -1,9 +1,9 @@
-package gui.controllers;
+package gui.minimal.controllers;
 
 import core.GameController;
 import core.GameState;
 import events.GameEventAdapter;
-import gui.Controller;
+import gui.minimal.Controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -72,7 +72,7 @@ public class TopPaneController implements Controller {
 
     public void openSettings() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-                .getResource("gui/views/SettingsPane.fxml"));
+                .getResource("gui/minimal/views/SettingsPane.fxml"));
         Pane settingsPane = loader.load();
         Controller controller = loader.getController();
         controller.initialise(game);

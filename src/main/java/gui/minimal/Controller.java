@@ -1,4 +1,4 @@
-package gui;
+package gui.minimal;
 
 import core.GameController;
 
