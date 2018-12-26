@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>gomoku</groupId>
-    <artifactId>gomoku</artifactId>
+    <groupId>haslam</groupId>
+    <artifactId>blackstone</artifactId>
     <version>2.1-a5</version>
     <packaging>jar</packaging>
     <properties>
@@ -28,7 +28,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>core.Main</mainClass>
+                                    <mainClass>haslam.blackstone.core.Launcher</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>
@@ -51,7 +51,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>core.Main</mainClass>
+                            <mainClass>haslam.blackstone.core.Launcher</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

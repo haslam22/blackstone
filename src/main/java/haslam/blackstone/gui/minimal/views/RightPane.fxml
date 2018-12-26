@@ -1,0 +1,79 @@
+<?import haslam.blackstone.core.*?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import java.lang.String?>
+<?import java.net.URL?>
+<VBox fx:controller="haslam.blackstone.gui.minimal.controllers.RightPaneController"
+      xmlns:fx="http://javafx.com/fxml" styleClass="outer" maxWidth="250"
+      spacing="10">
+    <padding>
+        <Insets bottom="10.0" left="10.0" right ="10.0" top="10.0"/>
+    </padding>
+    <GridPane alignment="center" hgap="5" vgap="5"
+              styleClass="player-box">
+        <padding>
+            <Insets top="10" left="10" right="10" bottom="10"/>
+        </padding>
+        <Circle styleClass="black-stone" radius="15" GridPane.rowIndex="0"
+                GridPane.columnIndex="0" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER" GridPane.rowSpan="2">
+            <GridPane.margin>
+                <Insets top="5" left="5" right="5" bottom="5"/>
+            </GridPane.margin>
+        </Circle>
+        <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Human"
+                  GridPane.rowIndex="0" GridPane.columnIndex="1"
+                  GridPane.hgrow="ALWAYS" fx:id="player1Selector"
+                  onAction="#updatePlayer1">
+        </ComboBox>
+        <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label text="Time/game: "/>
+            <Label fx:id="player1GameTimeLabel" text="20:00"/>
+        </HBox>
+        <HBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Label text="Time/move: "/>
+            <Label fx:id="player1MoveTimeLabel" text="00:05"/>
+        </HBox>
+    </GridPane>
+    <GridPane alignment="center" hgap="5" vgap="5"
+              styleClass="player-box">
+        <padding>
+            <Insets top="10" left="10" right="10" bottom="10"/>
+        </padding>
+        <Circle styleClass="white-stone" radius="15" GridPane.rowIndex="0"
+                GridPane.columnIndex="0" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER" GridPane.rowSpan="2">
+            <GridPane.margin>
+                <Insets top="5" left="5" right="5" bottom="5"/>
+            </GridPane.margin>
+        </Circle>
+        <Circle radius="4" styleClass="green-circle" GridPane.rowIndex="2"
+                GridPane.columnIndex="0" GridPane.halignment="CENTER"
+                GridPane.valignment="CENTER" fx:id="player2StatusCircle"
+                visible="false">
+        </Circle>
+        <ComboBox maxWidth="Infinity" HBox.hgrow="ALWAYS" value="Negamax"
+                  GridPane.rowIndex="0" GridPane.columnIndex="1"
+                  GridPane.hgrow="ALWAYS" fx:id="player2Selector"
+                  onAction="#updatePlayer2">
+        </ComboBox>
+        <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label text="Time/game: "/>
+            <Label fx:id="player2GameTimeLabel" text="20:00"/>
+        </HBox>
+        <HBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Label text="Time/move: "/>
+            <Label fx:id="player2MoveTimeLabel" text="00:05"/>
+        </HBox>
+    </GridPane>
+    <TextArea fx:id="textBox" editable="false" wrapText="true"
+              VBox.vgrow="ALWAYS">
+    </TextArea>
+    <stylesheets>
+        <URL value="@../css/Global.css" />
+        <URL value="@../css/RightPane.css" />
+    </stylesheets>
+</VBox>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.collections.FXCollections?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="haslam.blackstone.gui.minimal.controllers.SettingsPaneController"
+      prefHeight="300.0" prefWidth="300.0" styleClass="outer">
+
+    <GridPane hgap="5" vgap="5">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50.0" />
+            <ColumnConstraints percentWidth="50.0" />
+        </columnConstraints>
+        <padding>
+            <Insets top="10" bottom="10" left="10" right="10"/>
+        </padding>
+        <Label styleClass="heading" GridPane.rowIndex="0"
+               GridPane.columnSpan="2" text="Timing">
+        </Label>
+        <Separator GridPane.rowIndex="1" GridPane.columnSpan="2"/>
+        <CheckBox text="Game timing enabled" GridPane.rowIndex="3"
+                  GridPane.columnSpan="2" fx:id="gameTimingCheckBox"
+                  onAction="#gameTimingEnabled"/>
+        <Label text="Time/game (minutes):" GridPane.rowIndex="4"
+               GridPane.columnIndex="0"/>
+        <ComboBox GridPane.rowIndex="4" GridPane.columnIndex="1"
+                  maxWidth="Infinity" value="20" fx:id="gameTimeComboBox"
+                  disable="true">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <Integer fx:value="40" />
+                    <Integer fx:value="35" />
+                    <Integer fx:value="30" />
+                    <Integer fx:value="25" />
+                    <Integer fx:value="20" />
+                    <Integer fx:value="15" />
+                    <Integer fx:value="10" />
+                    <Integer fx:value="5" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+        <CheckBox text="Move timing enabled" GridPane.rowIndex="5"
+                  GridPane.columnSpan="2" fx:id="moveTimingCheckBox"
+                  onAction="#moveTimingEnabled"/>
+        <Label text="Time/move (seconds):" GridPane.rowIndex="6"
+               GridPane.columnIndex="0"/>
+        <ComboBox GridPane.rowIndex="6" GridPane.columnIndex="1"
+                  maxWidth="Infinity" fx:id="moveTimeComboBox" disable="true">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <Integer fx:value="40" />
+                    <Integer fx:value="35" />
+                    <Integer fx:value="30" />
+                    <Integer fx:value="25" />
+                    <Integer fx:value="20" />
+                    <Integer fx:value="15" />
+                    <Integer fx:value="10" />
+                    <Integer fx:value="5" />
+                    <Integer fx:value="2" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+        <Label styleClass="heading" GridPane.rowIndex="7"
+               GridPane.columnSpan="2" text="Board">
+        </Label>
+        <Separator GridPane.rowIndex="8" GridPane.columnSpan="2"/>
+        <Label text="Board Size (n*n):" GridPane.rowIndex="9"
+               GridPane.columnIndex="0"/>
+        <ComboBox GridPane.rowIndex="9" GridPane.columnIndex="1"
+                  maxWidth="Infinity" fx:id="sizeComboBox">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <Integer fx:value="15" />
+                    <Integer fx:value="19" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+    </GridPane>
+    <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS" spacing="5">
+        <VBox.margin>
+            <Insets top="10" left="10" right="10" bottom="10"/>
+        </VBox.margin>
+        <Button text="OK" onAction="#updateSettings"/>
+        <Button text="Cancel" onAction="#closeSettings"/>
+    </HBox>
+
+    <stylesheets>
+        <URL value="@../css/Global.css" />
+    </stylesheets>
+</VBox>

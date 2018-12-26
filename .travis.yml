@@ -8,5 +8,5 @@ deploy:
   file_glob: true
   file: target/*.jar
   on:
-    repo: haslam22/gomoku
+    repo: haslam22/blackstone
     tags: true
