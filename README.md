@@ -1,3 +1,5 @@
+# Blackstone
+
 [![Build Status](https://travis-ci.org/haslam22/gomoku.svg?branch=master)](https://travis-ci.org/haslam22/gomoku)
 
 A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) game manager featuring a powerful AI written in `Java`. Download the latest release [**here**](https://github.com/haslam22/gomoku/releases) (runnable jar).
@@ -10,11 +12,11 @@ There are two main components in this project:
 <p align="center"><img width="80%" src="http://i.imgur.com/XRh8hDB.png" /></p>
 
 ## Features
+- Loading of external AI's supporting the [Piskvork protocol](https://github.com/haslam22/gomoku/wiki/Piskvork-Gomocup-Protcol) ([Download page](http://gomocup.org/download-gomoku-ai/))
 - Freestyle Gomoku games against the built-in Negamax AI
-- Beautiful, fully resizable and flexible Gomoku board, supporting high DPI displays, easy stone placement, etc
+- Beautiful, fully resizable and flexible Gomoku board, supporting high DPI displays
 - Configurable game settings including time per move, time per game and board size
 - Easy saving and loading of positions with move order maintained
-- Loading of external AI's supporting the [Piskvork protocol](https://github.com/haslam22/gomoku/wiki/Piskvork-Gomocup-Protcol) ([Download page](http://gomocup.org/download-gomoku-ai/))
 
 ## Install
-Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn install` from the command line in the root directory to build the project in one step
+Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn clean install` from the command line in the root directory to build the project in one step.
