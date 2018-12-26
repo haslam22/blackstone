@@ -28,7 +28,7 @@ public class InfoCommand implements PiskvorkCommand {
 
     @Override
     public String getCommandString() {
-        return String.format("INFO %s %s", key.name(), value);
+        return String.format("INFO %s %s", key.name().toLowerCase(), value);
     }
 
     @Override
