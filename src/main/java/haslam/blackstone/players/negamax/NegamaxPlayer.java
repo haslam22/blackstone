@@ -82,7 +82,7 @@ public class NegamaxPlayer implements Player {
         // that leads to their win. So we only consider our three and the
         // opponents refutations.
         if(!threes.isEmpty()) {
-            opponentRefutations.addAll(threes);
+            threes.addAll(opponentRefutations);
             return new ArrayList<>(threes);
         }
 
