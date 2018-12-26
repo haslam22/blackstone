@@ -6,7 +6,7 @@
 
     <groupId>haslam</groupId>
     <artifactId>blackstone</artifactId>
-    <version>2.1-a5</version>
+    <version>2.1-a6</version>
     <packaging>jar</packaging>
     <properties>
     	<maven.compiler.source>1.8</maven.compiler.source>
