@@ -1,6 +1,6 @@
 # blackstone [![Build Status](https://travis-ci.org/haslam22/blackstone.svg?branch=master)](https://travis-ci.org/haslam22/blackstone)
 
-A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) game manager featuring a powerful AI written in `Java`. Download the latest release [**here**](https://github.com/haslam22/gomoku/releases) (runnable jar) - requires Java 8 + to be installed.
+A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) game manager featuring a powerful AI written in `Java`. Download the latest release [**here**](https://github.com/haslam22/gomoku/releases) (runnable jar). **Compatible with Java 12 +**.
 
 There are two main components in this project:
 
