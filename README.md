@@ -18,3 +18,9 @@ There are two main components in this project:
 
 ## Install
 Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn clean install` from the command line in the root directory to build the project in one step.
+
+## Known limitations of AI performance
+- Position evaluation is slow. The evaluation is computed in real time, when it could be computed using a lookup table. This lookup table also has the potential to be very small (around 256x256 entries). Similarly, threat calculation can be achieved via the lookup table. This would decrease the amount of computation performed per position - leading to a much higher number of positions evaluated per second. There's a branch in progress for improving both position evaluation and threat calculation [here](https://github.com/haslam22/blackstone/tree/feature/fast-pattern-lookup).
+- No detection of double threats. Double threats are basically a win, and this would reduce the prevalence of a [Horizon effect](https://en.wikipedia.org/wiki/Horizon_effect) where we can't see a win/loss just over our depth limit.
+- No transposition table. This could be used to cut off large subtrees in the alpha-beta search.
+- No VCT (Victory by Continuous Threats) search. See academic paper [here](https://pdfs.semanticscholar.org/f476/00662cadb0975f9cfd7867389efedda6f873.pdf) describing this search algorithm that works in the space of threats. Can be very powerful in determining a win/loss in a given scenario.
