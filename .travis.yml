@@ -10,12 +10,13 @@ matrix:
       jdk: oraclejdk11
       env:
         - _JAVA_OPTIONS="-Dtestfx.robot=awt"
-    # Ubuntu Linux (trusty) / Oracle JDK 8 / Headed (Glass Robot) / HiDPI
-    - os: linux
-      dist: trusty
-      jdk: oraclejdk11
-      env:
-        - _JAVA_OPTIONS="-Dtestfx.robot=glass -Dglass.gtk.uiScale=2.0"
+    # Ubuntu Linux (trusty) / Oracle JDK 8 / Headed (Glass Robot) / HiDPI -
+    # - disabled for now, not working
+#    - os: linux
+#      dist: trusty
+#      jdk: oraclejdk11
+#      env:
+#        - _JAVA_OPTIONS="-Dtestfx.robot=glass -Dglass.gtk.uiScale=2.0"
     # Ubuntu Linux (trusty) / Oracle JDK 8 / Headless
     - os: linux
       dist: trusty
