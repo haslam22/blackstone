@@ -1,6 +1,5 @@
 package haslam.blackstone.core;
 
-import haslam.blackstone.core.*;
 import org.junit.Test;
 import haslam.blackstone.players.Player;
 

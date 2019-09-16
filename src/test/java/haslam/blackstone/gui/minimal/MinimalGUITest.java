@@ -2,14 +2,14 @@ package haslam.blackstone.gui.minimal;
 
 import haslam.blackstone.core.GameController;
 import haslam.blackstone.core.GameSettings;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.junit.Test;
 import org.testfx.api.FxAssert;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.matcher.control.LabeledMatchers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testfx.util.DebugUtils.saveScreenshot;
 
 /**
  * A very basic test to ensure the GUI boots and responds to clicks.
@@ -31,19 +31,14 @@ public class MinimalGUITest extends ApplicationTest {
         FxAssert.verifyThat("#playButton", LabeledMatchers.hasText("New Game"));
         FxAssert.verifyThat("#stopButton", LabeledMatchers.hasText("Stop Game"));
         FxAssert.verifyThat("#undoButton", LabeledMatchers.hasText("Undo"));
-        FxAssert.verifyThat("#settingsButton", LabeledMatchers.hasText(
-                "Settings"));
+        FxAssert.verifyThat("#settingsButton", LabeledMatchers.hasText("Settings"));
     }
 
     @Test
     public void shouldStartGame() {
         clickOn("#playButton");
-        boolean stopButtonVisible = lookup("#stopButton").query().isVisible();
-        boolean startButtonVisible = lookup("#playButton").query().isVisible();
-        boolean settingsButtonDisabled =
-                lookup("#settingsButton").query().isDisable();
-        assertTrue(stopButtonVisible);
-        assertFalse(startButtonVisible);
-        assertTrue(settingsButtonDisabled);
+        FxAssert.verifyThat("#playButton", (Button b) -> !b.isVisible());
+        FxAssert.verifyThat("#stopButton", (Button b) -> b.isVisible());
+        FxAssert.verifyThat("#settingsButton", (Button b) -> b.isDisabled());
     }
 }
