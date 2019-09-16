@@ -60,7 +60,7 @@
             </graphic>
         </Button>
     </StackPane>
-    <Button text="Undo" onAction="#undo">
+    <Button text="Undo" fx:id="undoButton" onAction="#undo">
         <graphic>
             <Label text="%undo" styleClass="icon"/>
         </graphic>

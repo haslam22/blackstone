@@ -1,4 +1,4 @@
-package haslam.blackstone;
+package haslam.blackstone.players.negamax;
 
 import haslam.blackstone.core.Move;
 import org.junit.Test;

@@ -72,12 +72,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.11.1</version>
@@ -97,23 +91,49 @@
             <artifactId>javafx-fxml</artifactId>
             <version>12</version>
         </dependency>
+        <!-- Cross platform JavaFX graphics libraries -->
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
+            <artifactId>javafx-graphics</artifactId>
             <version>12</version>
             <classifier>win</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
+            <artifactId>javafx-graphics</artifactId>
             <version>12</version>
             <classifier>linux</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
+            <artifactId>javafx-graphics</artifactId>
             <version>12</version>
             <classifier>mac</classifier>
+        </dependency>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-core</artifactId>
+            <version>4.0.16-alpha</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-junit</artifactId>
+            <version>4.0.15-alpha</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

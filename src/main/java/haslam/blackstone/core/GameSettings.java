@@ -181,4 +181,10 @@ public class GameSettings {
         listeners.forEach(listener -> listener.settingsChanged());
     }
 
+    public static GameSettings withDefaults() {
+        return new GameSettings(Defaults.PLAYER_1, Defaults.PLAYER_2,
+                Defaults.GAME_TIMING_ENABLED, Defaults.MOVE_TIMING_ENABLED,
+                Defaults.GAME_TIMEOUT_MILLIS, Defaults.MOVE_TIMEOUT_MILLIS,
+                Defaults.SIZE);
+    }
 }

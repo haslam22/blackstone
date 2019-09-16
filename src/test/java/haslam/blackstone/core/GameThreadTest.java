@@ -1,4 +1,4 @@
-package haslam.blackstone;
+package haslam.blackstone.core;
 
 import haslam.blackstone.core.*;
 import org.junit.Test;

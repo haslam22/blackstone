@@ -1,6 +1,5 @@
-package haslam.blackstone;
+package haslam.blackstone.core;
 
-import haslam.blackstone.core.Move;
 import haslam.blackstone.players.Player;
 
 import java.util.List;
