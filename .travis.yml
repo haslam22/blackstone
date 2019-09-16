@@ -35,9 +35,6 @@ before_install:
 
 install: true
 
-before_script:
-  - if [[ "${TRAVIS_OS_NAME}" == osx ]]; then brew update; brew cask reinstall caskroom/versions/java8; fi
-
 deploy:
   skip_cleanup: true
   provider: releases
