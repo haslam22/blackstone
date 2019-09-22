@@ -85,6 +85,19 @@ public class TopPaneController implements Controller {
         stage.show();
     }
 
+    public void savePositionAsText(ActionEvent actionEvent) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Gomoku State File", "*.txt"));
+        Stage stage = (Stage) settingsButton.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+        if(file != null) {
+            try(PrintWriter out = new PrintWriter(new FileOutputStream(file))){
+                out.print(game.getState().toString());
+            }
+        }
+    }
+
     public void savePosition(ActionEvent actionEvent) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
@@ -92,9 +105,10 @@ public class TopPaneController implements Controller {
         Stage stage = (Stage) settingsButton.getScene().getWindow();
         File file = fileChooser.showSaveDialog(stage);
         if(file != null) {
-            ObjectOutputStream out =
-                    new ObjectOutputStream(new FileOutputStream(file));
-            out.writeObject(game.getState());
+            try(ObjectOutputStream out =
+                    new ObjectOutputStream(new FileOutputStream(file))) {
+                out.writeObject(game.getState());
+            }
         }
     }
 
@@ -106,10 +120,11 @@ public class TopPaneController implements Controller {
         Stage stage = (Stage) settingsButton.getScene().getWindow();
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            ObjectInputStream in =
-                    new ObjectInputStream(new FileInputStream(file));
-            game.setLoadedState((GameState) in.readObject());
-            clearPositionMenuItem.setDisable(false);
+            try(ObjectInputStream in =
+                    new ObjectInputStream(new FileInputStream(file))) {
+                game.setLoadedState((GameState) in.readObject());
+                clearPositionMenuItem.setDisable(false);
+            }
         }
     }
 

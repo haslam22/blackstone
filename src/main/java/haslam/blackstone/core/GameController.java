@@ -151,10 +151,10 @@ public class GameController {
     }
 
     /**
-     * @return Copy of the current game state.
+     * @return Copy of the current game state, or a new state if no state is loaded.
      */
     public GameState getState() {
-        return this.currentState.clone();
+        return this.currentState != null ? this.currentState.clone() : new GameState(settings.getSize());
     }
 
     /**

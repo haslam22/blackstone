@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * Simple state object for a Gomoku game.
@@ -193,6 +194,13 @@ public class GameState implements Cloneable, Serializable {
             }
         }
         return count;
+    }
+
+    @Override
+    public String toString() {
+        List<String> moveStrings = moves.stream().map(move -> move.getAlgebraicString(this.board.length))
+                .collect(Collectors.toList());
+        return this.board.length + "\n" + String.join(",", moveStrings);
     }
 
 }
