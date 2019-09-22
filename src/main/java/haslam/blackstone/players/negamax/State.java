@@ -32,10 +32,10 @@ public class State {
      * To get the neighbouring fields, we index as follows:
      * [row][col][direction][field #]
      *
-     * [0][0-9] -> Diagonal from top left to bottom right
-     * [1][0-9] -> Diagonal from top right to bottom left
-     * [2][0-9] -> Vertical from top to bottom
-     * [3][0-9] -> Horizontal from left to right
+     * [0][0-9] Diagonal from top left to bottom right
+     * [1][0-9] Diagonal from top right to bottom left
+     * [2][0-9] Vertical from top to bottom
+     * [3][0-9] Horizontal from left to right
      */
     protected final Field[][] board;
     protected final Field[][][][] directions;

@@ -66,7 +66,7 @@ public class BoardPane extends Pane {
      * @param index Index of the stone (1 if black, 2 if white)
      * @param row Row (0 to n)
      * @param col Col (0 to n)
-     * @param transparent
+     * @param transparent Apply transparency (true/false), used for stone picker
      */
     public void addStone(int index, int row, int col, boolean transparent) {
         this.board[row][col] = new BoardStone(index, transparent);
@@ -217,7 +217,7 @@ public class BoardPane extends Pane {
      * Given a mouse coordinate y axis value, return the closest row (0-n) on
      * the board
      * @param mouseY Mouse y axis position
-     * @return
+     * @return Closest row number to mouse y axis
      */
     public int getClosestRow(double mouseY) {
         int closest = (int) Math.round((mouseY - paddingY) / cellSize);
@@ -230,7 +230,7 @@ public class BoardPane extends Pane {
      * Given a mouse coordinate x axis value, return the closest column (0-n) on
      * the board
      * @param mouseX Mouse x axis position
-     * @return
+     * @return Closest column number to mouse x axis
      */
     public int getClosestCol(double mouseX) {
         int closest = (int) Math.round((mouseX - paddingX) / cellSize);
@@ -313,11 +313,11 @@ public class BoardPane extends Pane {
     /**
      * Represents a stone on the board.
      */
-    private class BoardStone {
+    private static class BoardStone {
         private int index;
         private boolean transparent;
 
-        public BoardStone(int index, boolean transparent) {
+        BoardStone(int index, boolean transparent) {
             this.index = index;
             this.transparent = transparent;
         }

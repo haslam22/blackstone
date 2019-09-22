@@ -34,7 +34,7 @@ public class Move implements Serializable {
 
     /**
      * @param boardSize Size of the board (15, 19..)
-     * @return Algebraic representation of this move (e.g. 0,0 -> A15)
+     * @return Algebraic representation of this move (e.g. 0,0 = A15)
      */
     public String getAlgebraicString(int boardSize) {
         int rowAlgebraic = boardSize - row;

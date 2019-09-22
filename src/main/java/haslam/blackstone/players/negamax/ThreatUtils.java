@@ -14,7 +14,7 @@ import java.util.List;
  * some redundant computations, will need to be improved in the future to
  * provide better AI performance
  */
-public class ThreatUtils {
+class ThreatUtils {
 
     private static final List<ThreatPattern> REFUTATIONS;
     private static final List<ThreatPattern> THREES;
@@ -57,7 +57,7 @@ public class ThreatUtils {
      * @return List of moves corresponding to the offensive squares of the
      * threat
      */
-    public static List<Move> getThrees(State state, Field field, int
+    static List<Move> getThrees(State state, Field field, int
             playerIndex) {
         return getThreatMoves(THREES, state, field, playerIndex);
     }
@@ -69,17 +69,18 @@ public class ThreatUtils {
      * @return List of moves corresponding to the offensive/defensive squares of
      * the threat
      */
-    public static List<Move> getFours(State state, Field field, int
+    static List<Move> getFours(State state, Field field, int
             playerIndex) {
         return getThreatMoves(FOURS, state, field, playerIndex);
     }
+
     /**
      * Check a field for a pattern which can turn into a four, e.g. 00XXX
      * @param playerIndex Player index
      * @return List of moves corresponding to the offensive/defensive squares of
      * the refutation
      */
-    public static List<Move> getRefutations(State state, Field field, int
+    static List<Move> getRefutations(State state, Field field, int
             playerIndex) {
         return getThreatMoves(REFUTATIONS, state, field, playerIndex);
     }
@@ -91,7 +92,7 @@ public class ThreatUtils {
      * @param state State to search
      * @param field Field to search around
      * @param playerIndex Player index to search for
-     * @return
+     * @return Moves that create threats for the current player
      */
     private static List<Move> getThreatMoves(
             List<ThreatPattern> patternList,

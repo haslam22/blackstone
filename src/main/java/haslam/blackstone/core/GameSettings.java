@@ -32,9 +32,9 @@ public class GameSettings {
      * @param size Size of the board
      * @see haslam.blackstone.players.PlayerRegistry
      */
-    public GameSettings(String player1, String player2,
-                        boolean gameTimingEnabled, boolean moveTimingEnabled,
-                        long gameTimeMillis, long moveTimeMillis, int size) {
+    GameSettings(String player1, String player2,
+                 boolean gameTimingEnabled, boolean moveTimingEnabled,
+                 long gameTimeMillis, long moveTimeMillis, int size) {
         this.player1 = player1;
         this.player2 = player2;
         this.gameTimingEnabled = gameTimingEnabled;
@@ -59,7 +59,7 @@ public class GameSettings {
      */
     public void setPlayer1(String playerName) {
         this.player1 = playerName;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     /**
@@ -68,20 +68,20 @@ public class GameSettings {
      */
     public void setPlayer2(String playerName) {
         this.player2 = playerName;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     /**
      * Get the player instance for player 1.
      */
-    public Player getPlayer1() {
+    Player getPlayer1() {
         return PlayerRegistry.getPlayer(player1);
     }
 
     /**
      * Get the player instance for player 2.
      */
-    public Player getPlayer2() {
+    Player getPlayer2() {
         return PlayerRegistry.getPlayer(player2);
     }
 
@@ -91,6 +91,7 @@ public class GameSettings {
     public String getPlayer1Name() {
         return player1;
     }
+
     /**
      * @return Player name for player 2
      */
@@ -112,11 +113,12 @@ public class GameSettings {
      */
     public void setSize(int size) {
         this.size = size;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     /**
      * Check if game timing is enabled for this game.
+     * @return True if game timing is enabled
      */
     public boolean gameTimingEnabled() {
         return this.gameTimingEnabled;
@@ -124,6 +126,7 @@ public class GameSettings {
 
     /**
      * Check if move timing is enabled for this game.
+     * @return True if move timing is enabled
      */
     public boolean moveTimingEnabled() {
         return this.moveTimingEnabled;
@@ -131,10 +134,11 @@ public class GameSettings {
 
     /**
      * Enable or disable game timing.
+     * @param enabled Enabled value
      */
     public void setGameTimingEnabled(boolean enabled) {
         this.gameTimingEnabled = enabled;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     /**
@@ -142,7 +146,7 @@ public class GameSettings {
      */
     public void setMoveTimingEnabled(boolean enabled) {
         this.moveTimingEnabled = enabled;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     /**
@@ -169,7 +173,7 @@ public class GameSettings {
      */
     public void setGameTimeMillis(long millis) {
         this.gameTimeMillis = millis;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     /**
@@ -178,7 +182,7 @@ public class GameSettings {
      */
     public void setMoveTimeMillis(long millis) {
         this.moveTimeMillis = millis;
-        listeners.forEach(listener -> listener.settingsChanged());
+        listeners.forEach(SettingsListener::settingsChanged);
     }
 
     public static GameSettings withDefaults() {
