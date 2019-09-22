@@ -38,9 +38,9 @@ public class FastState {
         for(int x = 0; x < size + 8; x++) {
             for(int y = 0; y < size + 8; y++) {
                 if(x < 4 || y < 4 || x >= size + 4 || y >= size + 4) {
-                    board[x][y] = new Field(3);
+                    board[x][y] = new Field(x, y, 3);
                 } else {
-                    board[x][y] = new Field(0);
+                    board[x][y] = new Field(x, y, 0);
                 }
             }
         }
