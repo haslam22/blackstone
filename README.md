@@ -1,6 +1,6 @@
-# blackstone ![Build](https://github.com/haslam22/gomoku/actions/workflows/maven.yml/badge.svg)
+# blackstone ![Build](https://github.com/haslam22/blackstone/actions/workflows/maven.yml/badge.svg)
 
-A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) game manager featuring a powerful AI written in `Java`. Download the latest release [**here**](https://github.com/haslam22/gomoku/releases) (runnable jar). **Compatible with Java 12 +**.
+A [**Gomoku**](https://en.wikipedia.org/wiki/Gomoku) (Five in a Row) game manager featuring a powerful AI written in `Java`. Download the latest release [**here**](https://github.com/haslam22/blackstone/releases) (runnable jar). **Requires Java 11 +**.
 
 There are two main components in this project:
 
@@ -10,14 +10,27 @@ There are two main components in this project:
 <p align="center"><img width="80%" src="http://i.imgur.com/XRh8hDB.png" /></p>
 
 ## Features
-- Loading of external AI's supporting the [Piskvork protocol](https://github.com/haslam22/gomoku/wiki/Piskvork-Gomocup-Protcol) ([Download page](http://gomocup.org/download-gomoku-ai/))
+- Loading of external AI's supporting the [Piskvork protocol](https://github.com/haslam22/blackstone/wiki/Piskvork-Gomocup-Protcol) ([Download page](http://gomocup.org/download-gomoku-ai/))
 - Freestyle Gomoku games against the built-in Negamax AI
 - Beautiful, fully resizable and flexible Gomoku board, supporting high DPI displays
 - Configurable game settings including time per move, time per game and board size
 - Easy saving and loading of positions with move order maintained
 
+## Requirements
+- Java 11 +
+
 ## Install
-Clone the project and open in any IDE that supports Maven projects or install [Maven](https://maven.apache.org/download.cgi) directly and use `mvn clean install` from the command line in the root directory to build the project in one step.
+### Regular use
+1. Download and install a Java 11 distribution, e.g. [Eclipse Temurin 11](https://adoptium.net/en-GB/temurin/releases?version=11)
+2. Download the latest Blackstone release from the [releases](https://github.com/haslam22/blackstone/releases) page
+3. Run `java -jar blackstone-<version>.jar` to start the GUI
+
+### Development setup
+Requires Java 11 and Maven 3.8+
+
+1. Clone the project and open in any IDE that supports Maven projects (IntelliJ recommended)
+2. Run the Maven `install` goal to build the project and run the tests
+3. Run the main method in ``Launcher.java`` to start the GUI
 
 ## Known limitations of AI performance
 - Position evaluation is slow. The evaluation is computed in real time, when it could be computed using a lookup table. This lookup table also has the potential to be very small (around 256x256 entries). Similarly, threat calculation can be achieved via the lookup table. This would decrease the amount of computation performed per position - leading to a much higher number of positions evaluated per second. There's a branch in progress for improving both position evaluation and threat calculation [here](https://github.com/haslam22/blackstone/tree/feature/fast-pattern-lookup).
