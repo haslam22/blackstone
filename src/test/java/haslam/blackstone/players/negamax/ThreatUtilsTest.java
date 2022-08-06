@@ -1,15 +1,13 @@
 package haslam.blackstone.players.negamax;
 
 import haslam.blackstone.core.Move;
-import org.junit.Test;
-import haslam.blackstone.players.negamax.State;
-import haslam.blackstone.players.negamax.ThreatUtils;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThreatUtilsTest {
 
@@ -23,8 +21,7 @@ public class ThreatUtilsTest {
         state.makeMove(new Move(0, 1));
         state.makeMove(new Move(7, 9));
 
-        ThreatUtils reducer = new ThreatUtils();
-        List<Move> threeMoves = reducer.getThrees(state, state.getField(7, 7),
+        List<Move> threeMoves = ThreatUtils.getThrees(state, state.getField(7, 7),
                 1);
 
         // Expected moves - we can block it on the right/left
@@ -46,8 +43,7 @@ public class ThreatUtilsTest {
         state.makeMove(new Move(0, 1));
         state.makeMove(new Move(7, 10));
 
-        ThreatUtils reducer = new ThreatUtils();
-        List<Move> threeMoves = reducer.getThrees(state, state.getField(7, 7),
+        List<Move> threeMoves = ThreatUtils.getThrees(state, state.getField(7, 7),
                 1);
 
         // Expected moves - we can block it in the middle, and right/left

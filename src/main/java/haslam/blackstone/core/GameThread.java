@@ -149,9 +149,9 @@ public class GameThread extends Thread {
                 break;
             }
         }
-        listeners.forEach(listener -> listener.gameFinished());
+        listeners.forEach(GameListener::gameFinished);
         if(state.terminal() != 0) {
-            LOGGER.error(MessageFormat.format(Strings.WINNER_MESSAGE,
+            LOGGER.info(MessageFormat.format(Strings.WINNER_MESSAGE,
                             state.terminal()));
         }
         players[0].cleanup();
