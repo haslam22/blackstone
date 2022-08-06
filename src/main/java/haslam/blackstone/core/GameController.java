@@ -41,7 +41,7 @@ public class GameController {
      */
     public void start() {
         if(this.gameThread == null || !this.gameThread.isAlive()) {
-            listeners.forEach(listener -> listener.gameStarted());
+            listeners.forEach(GameListener::gameStarted);
             this.currentState = loadedState != null ? loadedState.clone() :
                     new GameState(settings.getSize());
             if(this.loadedState != null) {
@@ -84,7 +84,7 @@ public class GameController {
                     listeners.forEach(listener -> listener.moveRemoved(move));
                 }
             }
-            listeners.forEach(listener -> listener.gameResumed());
+            listeners.forEach(GameListener::gameResumed);
             // Create a new game thread, but pass in the times from the previous
             // instance to stop resetting of times.
             this.gameThread = new GameThread(currentState, settings,
@@ -146,7 +146,7 @@ public class GameController {
             listeners.forEach(listener -> listener.positionLoaded(
                     state.getMovesMade()));
         } else {
-            listeners.forEach(listener -> listener.positionCleared());
+            listeners.forEach(GameListener::positionCleared);
         }
     }
 
@@ -175,7 +175,7 @@ public class GameController {
             String aiNameCapitalised = aiName.substring(0, 1).toUpperCase()
                     + aiName.substring(1);
             PlayerRegistry.addPiskvorkPlayer(aiNameCapitalised, file.getAbsolutePath());
-            listeners.forEach(listener -> listener.playerAdded());
+            listeners.forEach(GameListener::playerAdded);
             LOGGER.info("Successfully registered new player: {}", aiNameCapitalised);
         }
     }

@@ -4,16 +4,16 @@ import haslam.blackstone.core.GameController;
 import haslam.blackstone.core.GameSettings;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.testfx.api.FxAssert;
-import org.testfx.framework.junit.ApplicationTest;
+import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.matcher.control.LabeledMatchers;
-
-import static org.testfx.util.DebugUtils.saveScreenshot;
 
 /**
  * A very basic test to ensure the GUI boots and responds to clicks.
  */
+@Tag("GUI")
 public class MinimalGUITest extends ApplicationTest {
 
     /**

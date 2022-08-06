@@ -1,11 +1,12 @@
 package haslam.blackstone.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import haslam.blackstone.players.Player;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class GameThreadTest {
 
@@ -45,9 +46,8 @@ public class GameThreadTest {
 
         // Wait here until it finishes.
         game.join();
-        assertEquals("Game should be won by player 1", 1, state.terminal());
-        assertEquals("Game thread should die after game finishes", false,
-                game.isAlive());
+        assertEquals(1, state.terminal(), "Game should be won by player 1");
+        assertFalse(game.isAlive(), "Game thread should die after game finishes");
     }
 
 }

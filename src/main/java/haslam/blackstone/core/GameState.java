@@ -58,7 +58,7 @@ public class GameState implements Cloneable, Serializable {
      * @return ArrayList of moves, ordered from first move to last move made
      */
     public List<Move> getMovesMade() {
-        return new ArrayList(moves);
+        return new ArrayList<>(moves);
     }
 
     /**
