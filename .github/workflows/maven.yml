@@ -28,7 +28,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn install
+      run: mvn install -DexcludedGroups=GUI
     - name: Export display for headless tests
       if: ${{ contains(matrix.os, 'ubuntu') || contains(matrix.os, 'macos') }}
       run: export DISPLAY=:99.0;
