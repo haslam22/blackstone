@@ -39,8 +39,7 @@ jobs:
         run: mvn test -Dgroups=GUI
     - name: Run JavaFX tests (non-headless)
       if: ${{ contains(matrix.os, 'windows')}}
-      with:
-        run: mvn test -Dgroups=GUI
+      run: mvn test -Dgroups=GUI
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
