@@ -25,37 +25,41 @@ public class GameThread extends Thread {
     private final GameState state;
     private final List<GameListener> listeners;
     private final Player[] players;
-    private final long[] times;
+    private final long[] gameTimesMs;
     private Future<Move> pendingMove;
     private boolean[] sendBoard;
+    private boolean[] timedOut;
 
     /**
      * Initialize a new game thread.
-     * @param state State to use
-     * @param settings Game settings
-     * @param listeners Listeners to receive game haslam.blackstone.events
-     * @param times Game timeouts for each player
+     *
+     * @param state       State to use
+     * @param settings    Game settings
+     * @param listeners   Listeners to receive game haslam.blackstone.events
+     * @param gameTimesMs Total game times allocated to each player
      */
     public GameThread(GameState state, GameSettings settings, Player player1,
                       Player player2, List<GameListener> listeners,
-                      long[] times) {
+                      long[] gameTimesMs) {
         this.state = state;
         this.settings = settings;
         this.listeners = listeners;
-        this.players = new Player[]{ player1, player2 };
-        this.times = times;
+        this.players = new Player[]{player1, player2};
+        this.gameTimesMs = gameTimesMs;
+        this.timedOut = new boolean[2];
     }
 
     /**
      * Initialize a new game thread, setting game timeouts to the values
      * specified in settings.
-     * @param state State to use
-     * @param settings Game settings
+     *
+     * @param state     State to use
+     * @param settings  Game settings
      * @param listeners Listeners to receive game haslam.blackstone.events
      */
     public GameThread(GameState state, GameSettings settings, Player player1,
                       Player player2, List<GameListener> listeners) {
-        this(state, settings, player1, player2, listeners, new long[] {
+        this(state, settings, player1, player2, listeners, new long[]{
                 settings.getGameTimeMillis(),
                 settings.getGameTimeMillis()
         });
@@ -63,6 +67,7 @@ public class GameThread extends Thread {
 
     /**
      * Get the current player instance making a move.
+     *
      * @return Player instance
      */
     public Player getCurrentPlayer() {
@@ -71,11 +76,12 @@ public class GameThread extends Thread {
 
     /**
      * Get the up to date game time for a player.
+     *
      * @param playerIndex Player identifier (1/2)
      * @return Game time in milliseconds
      */
     public long getGameTime(int playerIndex) {
-        return times[playerIndex - 1];
+        return gameTimesMs[playerIndex - 1];
     }
 
     @Override
@@ -88,8 +94,8 @@ public class GameThread extends Thread {
 
         // We've started this thread from a non-empty state. Set this so we
         // know when to send the board to the haslam.blackstone.players.
-        this.sendBoard = new boolean[] { !state.isEmpty(), !state.isEmpty() };
-        while(state.terminal() == 0) {
+        this.sendBoard = new boolean[]{!state.isEmpty(), !state.isEmpty()};
+        while (state.terminal() == 0) {
             try {
                 // Notify listeners that a turn has started.
                 listeners.forEach(listener -> listener.turnStarted(
@@ -101,11 +107,11 @@ public class GameThread extends Thread {
                 long elapsedTime = System.currentTimeMillis() - startTime;
 
                 // Check for an invalid move.
-                if(!state.validateMove(move)) {
+                if (!state.validateMove(move)) {
                     LOGGER.error(
                             MessageFormat.format(Strings.INVALID_MOVE,
-                            state.getCurrentIndex(),
-                            move.getAlgebraicString(state.getSize())));
+                                    state.getCurrentIndex(),
+                                    move.getAlgebraicString(state.getSize())));
                     break;
                 }
 
@@ -118,7 +124,7 @@ public class GameThread extends Thread {
                                 elapsedTime));
 
                 // Subtract elapsed time from the current player.
-                times[state.getCurrentIndex() - 1] -= elapsedTime;
+                gameTimesMs[state.getCurrentIndex() - 1] -= elapsedTime;
                 // Notify listeners of the new move.
                 listeners.forEach(listener -> listener.moveAdded(
                         state.getCurrentIndex(), move));
@@ -127,32 +133,33 @@ public class GameThread extends Thread {
 
             } catch (InterruptedException ex) {
                 // An interrupt from the user.
-                if(!pendingMove.isDone()) {
+                if (!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
                 break;
             } catch (ExecutionException ex) {
                 // Failed execution from the player.
-                if(!pendingMove.isDone()) {
+                if (!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
                 LOGGER.error(MessageFormat.format(Strings.FAILED_MOVE,
-                                state.getCurrentIndex()), ex);
+                        state.getCurrentIndex()), ex);
                 break;
             } catch (TimeoutException ex) {
                 // Player ran out of time.
-                if(!pendingMove.isDone()) {
+                if (!pendingMove.isDone()) {
                     pendingMove.cancel(true);
                 }
+                timedOut[state.getCurrentIndex() - 1] = true;
                 LOGGER.error(MessageFormat.format(
                         Strings.TIMEOUT_MESSAGE, state.getCurrentIndex()));
                 break;
             }
         }
         listeners.forEach(GameListener::gameFinished);
-        if(state.terminal() != 0) {
+        if (state.terminal() != 0) {
             LOGGER.info(MessageFormat.format(Strings.WINNER_MESSAGE,
-                            state.terminal()));
+                    state.terminal()));
         }
         players[0].cleanup();
         players[1].cleanup();
@@ -160,10 +167,11 @@ public class GameThread extends Thread {
 
     /**
      * Request a move from a player.
+     *
      * @return Players move
-     * @throws ExecutionException Player execution failed.
+     * @throws ExecutionException   Player execution failed.
      * @throws InterruptedException Game interrupted by the user.
-     * @throws TimeoutException Player timed out.
+     * @throws TimeoutException     Player timed out.
      */
     private Move requestMove(int playerIndex) throws
             InterruptedException, ExecutionException, TimeoutException {
@@ -174,34 +182,35 @@ public class GameThread extends Thread {
 
         // Request the move from the player. If no moves exist, ask the
         // player to open the game.
-        if(!state.getMovesMade().isEmpty()) {
-            if(sendBoard[playerIndex - 1]) {
+        if (!state.getMovesMade().isEmpty()) {
+            if (sendBoard[playerIndex - 1]) {
                 this.pendingMove = executor.submit(() -> player.loadBoard(
-                        state.getMovesMade(), times[playerIndex - 1]));
+                        state.getMovesMade(), gameTimesMs[playerIndex - 1]));
                 // Don't send the board again.
                 sendBoard[playerIndex - 1] = false;
             } else {
                 this.pendingMove = executor.submit(() -> player.getMove(
-                        state.getLastMove(), times[playerIndex - 1]));
+                        state.getLastMove(), gameTimesMs[playerIndex - 1]));
             }
         } else {
-            this.pendingMove = executor.submit(() -> player.beginGame(times[playerIndex - 1]));
+            this.pendingMove = executor.submit(() -> player.beginGame(gameTimesMs[playerIndex - 1]));
         }
-        if(player instanceof HumanPlayer) {
+        if (player instanceof HumanPlayer) {
             listeners.forEach(listener -> listener.userMoveRequested
                     (playerIndex));
         }
 
         // Allow 100ms breathing room on top of the regular timeout.
-        long timeout = calculateTimeoutMillis(playerIndex) + 100;
+        long timeout = calculateTimeoutMillis(playerIndex);
 
         if (timeout > 0) {
             try {
                 // We've submitted the job, now get the result with a timeout.
-                return pendingMove.get(timeout, TimeUnit.MILLISECONDS);
-            } catch(TimeoutException ex) {
+                // Add 100ms breathing room.
+                return pendingMove.get(timeout + 100, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException ex) {
                 pendingMove.cancel(true);
-                throw(ex);
+                throw (ex);
             }
         } else {
             // No timing enabled.
@@ -210,24 +219,25 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Calculate the timeout value for a player or return 0 if timing is not
+     * Calculate the timeout value for a player or return -1 if timing is not
      * enabled for this game.
+     *
      * @param player Player index
      * @return Timeout value in milliseconds
      */
     private long calculateTimeoutMillis(int player) {
-        if(settings.moveTimingEnabled() && settings.gameTimingEnabled()) {
+        if (settings.moveTimingEnabled() && settings.gameTimingEnabled()) {
             // Both move timing and game timing are enabled
-            return Math.min(settings.getMoveTimeMillis(), times[player - 1]);
-        } else if(settings.gameTimingEnabled()) {
+            return Math.min(settings.getMoveTimeMillis(), gameTimesMs[player - 1]);
+        } else if (settings.gameTimingEnabled()) {
             // Only game timing is enabled
-            return times[player - 1];
-        } else if(settings.moveTimingEnabled()) {
+            return gameTimesMs[player - 1];
+        } else if (settings.moveTimingEnabled()) {
             // Only move timing is enabled
             return settings.getMoveTimeMillis();
         } else {
             // No timing is enabled
-            return 0;
+            return -1;
         }
     }
 

@@ -12,10 +12,12 @@ import java.util.List;
 public class TestPlayer implements Player {
 
     private final List<Move> movesToMake;
+    private final long delayMs;
     private int moveCount = 0;
 
-    public TestPlayer(List<Move> movesToMake) {
+    public TestPlayer(List<Move> movesToMake, long delayMs) {
         this.movesToMake = movesToMake;
+        this.delayMs = delayMs;
     }
 
     @Override
@@ -27,6 +29,11 @@ public class TestPlayer implements Player {
     public Move loadBoard(List<Move> orderedMoves, long gameTimeRemainingMillis) {
         Move move = movesToMake.get(moveCount);
         moveCount++;
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            return null;
+        }
         return move;
     }
 
@@ -34,6 +41,11 @@ public class TestPlayer implements Player {
     public Move getMove(Move opponentsMove, long gameTimeRemainingMillis) {
         Move move = movesToMake.get(moveCount);
         moveCount++;
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            return null;
+        }
         return move;
     }
 
@@ -41,6 +53,11 @@ public class TestPlayer implements Player {
     public Move beginGame(long gameTimeRemainingMillis) {
         Move move = movesToMake.get(moveCount);
         moveCount++;
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            return null;
+        }
         return move;
     }
 }
