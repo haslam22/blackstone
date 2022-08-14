@@ -14,8 +14,11 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.*;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the top pane of the GUI.
@@ -71,18 +74,28 @@ public class TopPaneController implements Controller {
     }
 
     public void openSettings() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-                .getResource("haslam/blackstone/gui/minimal/views/SettingsPane.fxml"));
-        Pane settingsPane = loader.load();
-        Controller controller = loader.getController();
-        controller.initialise(game);
-        Stage stage = new Stage();
-        stage.setTitle("Settings");
-        stage.setScene(new Scene(settingsPane));
-        stage.getIcons().add(new Image(getClass().getClassLoader()
-                .getResource("AppIcon.png").toExternalForm()));
-        stage.setResizable(false);
-        stage.show();
+        Set<Stage> activeStages = Stage.getWindows().stream()
+                .filter(Window::isShowing)
+                .filter(window -> window instanceof Stage)
+                .map(window -> (Stage) window)
+                .filter(stage -> stage.getTitle().contains("Settings"))
+                .collect(Collectors.toSet());
+
+        if(activeStages.isEmpty()) {
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
+                    .getResource("haslam/blackstone/gui/minimal/views/SettingsPane.fxml"));
+            Pane settingsPane = loader.load();
+            Controller controller = loader.getController();
+            controller.initialise(game);
+            Stage stage = new Stage();
+            stage.initOwner(settingsButton.getScene().getWindow());
+            stage.setTitle("Settings");
+            stage.setScene(new Scene(settingsPane));
+            stage.getIcons().add(new Image(getClass().getClassLoader()
+                    .getResource("AppIcon.png").toExternalForm()));
+            stage.setResizable(false);
+            stage.show();
+        }
     }
 
     public void savePositionAsText(ActionEvent actionEvent) throws IOException {

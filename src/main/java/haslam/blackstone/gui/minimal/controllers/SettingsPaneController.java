@@ -4,11 +4,11 @@ import haslam.blackstone.core.GameController;
 import haslam.blackstone.core.GameSettings;
 import haslam.blackstone.gui.minimal.Controller;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.UnaryOperator;
 
 /**
  * Controller for the settings dialog.
@@ -18,13 +18,14 @@ public class SettingsPaneController implements Controller {
     @FXML
     public ComboBox<Integer> sizeComboBox;
     @FXML
-    public ComboBox<Integer> moveTimeComboBox;
+    public Spinner<Integer> moveTimeSpinner;
     @FXML
-    public ComboBox<Integer> gameTimeComboBox;
+    public Spinner<Integer> gameTimeSpinner;
     @FXML
     public CheckBox moveTimingCheckBox;
     @FXML
     public CheckBox gameTimingCheckBox;
+    public Label validationErrorsLabel;
 
     private GameController game;
 
@@ -32,6 +33,10 @@ public class SettingsPaneController implements Controller {
     public void initialise(GameController game) {
         this.game = game;
         this.loadSettings();
+        UnaryOperator<TextFormatter.Change> digitsOnlyFilter = change -> change.getText()
+                .matches("\\d*") ? change : null;
+        gameTimeSpinner.getEditor().setTextFormatter(new TextFormatter<>(digitsOnlyFilter));
+        moveTimeSpinner.getEditor().setTextFormatter(new TextFormatter<>(digitsOnlyFilter));
     }
 
     /**
@@ -42,17 +47,17 @@ public class SettingsPaneController implements Controller {
         GameSettings settings = game.getSettings();
         this.sizeComboBox.setValue(settings.getSize());
         // Avoid showing millisecond values to the user
-        this.gameTimeComboBox.setValue((int) TimeUnit.MINUTES.convert
+        this.gameTimeSpinner.getValueFactory().setValue((int) TimeUnit.MINUTES.convert
                 (settings.getGameTimeMillis(), TimeUnit.MILLISECONDS));
-        this.moveTimeComboBox.setValue((int) TimeUnit.SECONDS.convert
+        this.moveTimeSpinner.getValueFactory().setValue((int) TimeUnit.SECONDS.convert
                 (settings.getMoveTimeMillis(), TimeUnit.MILLISECONDS));
         if(settings.gameTimingEnabled()) {
             gameTimingCheckBox.setSelected(true);
-            gameTimeComboBox.setDisable(false);
+            gameTimeSpinner.setDisable(false);
         }
         if(settings.moveTimingEnabled()) {
             moveTimingCheckBox.setSelected(true);
-            moveTimeComboBox.setDisable(false);
+            moveTimeSpinner.setDisable(false);
         }
     }
 
@@ -61,9 +66,9 @@ public class SettingsPaneController implements Controller {
      */
     public void gameTimingEnabled() {
         if(gameTimingCheckBox.isSelected()) {
-            gameTimeComboBox.setDisable(false);
+            gameTimeSpinner.setDisable(false);
         } else {
-            gameTimeComboBox.setDisable(true);
+            gameTimeSpinner.setDisable(true);
         }
     }
 
@@ -72,9 +77,9 @@ public class SettingsPaneController implements Controller {
      */
     public void moveTimingEnabled() {
         if(moveTimingCheckBox.isSelected()) {
-            moveTimeComboBox.setDisable(false);
+            moveTimeSpinner.setDisable(false);
         } else {
-            moveTimeComboBox.setDisable(true);
+            moveTimeSpinner.setDisable(true);
         }
     }
 
@@ -83,10 +88,10 @@ public class SettingsPaneController implements Controller {
      */
     public void updateSettings() {
         game.getSettings().setMoveTimeMillis(TimeUnit.MILLISECONDS
-                .convert(moveTimeComboBox.getValue(), TimeUnit.SECONDS));
+                .convert(moveTimeSpinner.getValue(), TimeUnit.SECONDS));
         game.getSettings().setMoveTimingEnabled(moveTimingCheckBox.isSelected());
         game.getSettings().setGameTimeMillis(TimeUnit.MILLISECONDS.convert
-                (gameTimeComboBox.getValue(), TimeUnit.MINUTES));
+                (gameTimeSpinner.getValue(), TimeUnit.MINUTES));
         game.getSettings().setGameTimingEnabled(gameTimingCheckBox.isSelected());
         game.getSettings().setSize(sizeComboBox.getValue());
 
