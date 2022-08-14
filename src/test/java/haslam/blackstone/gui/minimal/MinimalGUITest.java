@@ -87,7 +87,7 @@ public class MinimalGUITest extends ApplicationTest {
         type(KeyCode.BACK_SPACE, KeyCode.BACK_SPACE, KeyCode.DIGIT2, KeyCode.DIGIT3);
 
         // Have to click something else to get the value to update after typing. Probably a more elegant way to do this.
-        clickOn("#settingsButton");
+        clickOn("#gameTimeSpinner");
 
         FxAssert.verifyThat("#gameTimeSpinner", (Spinner<Integer> b) -> b.getValue() == 10);
         FxAssert.verifyThat("#moveTimeSpinner", (Spinner<Integer> b) -> b.getValue() == 23);
